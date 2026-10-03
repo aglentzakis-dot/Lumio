@@ -856,6 +856,24 @@ body.on-tm .main{padding-bottom:0}
 .avd.off,.avd.past{opacity:.45}.avd.on{outline:2px solid var(--ink);outline-offset:-1px}
 .avslots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:118px;overflow-y:auto}
 .chipt.on{background:var(--ink);color:var(--on-ink);border-color:var(--ink)}
+/* φάκελος προσωπικού */
+button.chip{border:0;cursor:pointer;font:inherit;font-size:.75rem;display:inline-flex;align-items:center;gap:4px}
+.chip.warn{background:#FBF1D9;color:#9A7417}
+.doclist{display:flex;flex-direction:column;gap:6px}
+.docrow{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+.docrow small{display:block;color:var(--ink3);font-size:.76rem}.docrow .grow{min-width:0}
+.docic{width:34px;height:34px;border-radius:10px;background:var(--line2);display:flex;align-items:center;justify-content:center;flex:none;color:var(--ink2)}
+.docrow.bad{border-color:var(--cxbd);background:var(--cxbg)}.docrow.bad .dexp{color:var(--cxtx);font-weight:600}
+.docrow.warn{border-color:#EED9A6;background:#FDF8EC}.docrow.warn .dexp{color:#9A7417;font-weight:600}
+.docmiss{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.docinfo{display:flex;flex-direction:column;gap:12px}.docinfo .chip{font-size:.66rem;margin-left:4px}
+/* πιο αχνά χρώματα για αργίες και κλειστές μέρες */
+:root{--cxbg:#FDF1EF;--cxbd:#F2D3CE;--cxtx:#C0766D}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--cxbg:#33242A;--cxbd:#5A3A3C;--cxtx:#E3A49C}}
+:root[data-theme="dark"]{--cxbg:#33242A;--cxbd:#5A3A3C;--cxtx:#E3A49C}
+.holrow input,.holrow input[type=checkbox]{accent-color:#A9D3BD;width:18px;height:18px;opacity:.9}
+.holrow .grow{color:var(--ink2)}
+.mday.closed{background:var(--cxbg)!important}
 
 /* ===== games ===== */
 .gwrap{position:fixed;inset:0;z-index:80;overflow:auto;display:flex;flex-direction:column;font-family:"Comfortaa","Commissioner",sans-serif}
@@ -1029,7 +1047,7 @@ body.on-tm .main{padding-bottom:0}
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.12.0';
+const APP_VERSION='2.12.1';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -1871,7 +1889,7 @@ function sidebarHTML(sec,r){const cOpen=sec==='create'||localStorage.getItem('lu
    <div class="sub ${cOpen?'':'hidden'}" id="cSub"><a href="#/create" class="${sec==='create'&&!r.id?'on':''}">Όλες οι επιλογές</a>${createOrder().map(k=>CT[k]).map(([k,,, t])=>`<a href="#/create/${k}" class="${sec==='create'&&r.id===k?'on':''}">${t}</a>`).join('')}</div>
    <div class="nav-h">Βιβλιοθήκη</div>${a('games','game','Τα παιχνίδια μου')}${a('worksheets','file','Φύλλα εργασίας')}${a('materials','clip','Υλικό')}
    <div class="nav-h">Παρακολούθηση</div>${a('reports','chart','Πρόοδος & Αναφορές')}${a('calendar','calendar','Ημερολόγιο')}
-   <div class="nav-h">Διαχείριση</div>${a('earnings','wallet','Ταμείο')}${a('profile','user','Το προφίλ μου')}${a('settings','settings','Ρυθμίσεις')}</nav>
+   <div class="nav-h">Διαχείριση</div>${a('earnings','wallet','Ταμείο')}${a('settings','settings','Ρυθμίσεις')}</nav>
   <div class="side-foot"><a href="#/profile" class="sfme">${meAvatar(34)}<div><b>${esc(S.user.name)}</b><span>${esc(S.data.profile.title||(S.user.role==='admin'?'Διαχειριστής':'Παιδαγωγός'))}</span></div></a><button class="iconbtn" id="logoutBtn" title="Αποσύνδεση" aria-label="Αποσύνδεση">${ic('logout',18)}</button></div></aside><div class="drawer-ov" id="drawerOv"></div>`;}
 
 function render(){
@@ -2440,19 +2458,21 @@ const card=(t,body)=>`<div class="card"><div class="card-h"><h3>${t}</h3></div>$
 const SET={
  async business(el){const B=biz();const adm=isAdmin();
   if(adm){let ch=0;S.meta.users.filter(u=>u.id!==S.user.id&&!B.staff.some(x=>x.uid===u.id)).forEach(u=>{B.staff.push({id:uid(),uid:u.id,name:u.name,role:'teacher',appts:true,color:STAFF_COLORS[(B.staff.length+1)%STAFF_COLORS.length],email:u.email||'',phone:'',created:new Date().toISOString()});ch=1;});if(ch)save();}const c=agCfg();const PV=providers();const hrs=Math.max(0,tmin(c.to)-tmin(c.from))/60;
-  const row=(x,me)=>{const p=me?provById('me'):x;return`<div class="staffrow"><i class="pvb" style="background:${p.color}">${provIni(me?{id:'me'}:x)}</i><div class="grow"><b>${esc(me?(S.user.name||'Εγώ')+' (εγώ)':x.name)}</b><div class="small muted">${esc(roleName(me?B.meRole:x.role,me?B.meCustom:x.custom))}${!me&&x.phone?' · '+esc(x.phone):''}</div><div class="row" style="margin-top:4px;gap:4px">${(me?B.meTeaches:x.appts)?`<span class="chip ok">${ic('calendar',13)} Κάνει ραντεβού</span>`:`<span class="chip">Χωρίς ραντεβού</span>`}${me?`<span class="chip">${ic('shield',13)} Διαχειριστής</span>`:(()=>{const u=x.uid&&S.meta.users.find(y=>y.id===x.uid);return u?`<span class="chip">${ic('key',13)} Σύνδεση: ${esc(u.username)}${u.role==='admin'?' · διαχειριστής':''}</span>`:'';})()}</div></div>${adm||me?`<button class="iconbtn" data-stf="${me?'me':x.id}" aria-label="Αλλαγή">${ic('edit',16)}</button>`:''}</div>`;};
+  const row=(x,me)=>{const p=me?provById('me'):x;return`<div class="staffrow"><i class="pvb" style="background:${p.color}">${provIni(me?{id:'me'}:x)}</i><div class="grow"><b>${esc(me?(S.user.name||'Εγώ')+' (εγώ)':x.name)}</b><div class="small muted">${esc(roleName(me?B.meRole:x.role,me?B.meCustom:x.custom))}${!me&&x.phone?' · '+esc(x.phone):''}</div><div class="row" style="margin-top:4px;gap:4px">${(me?B.meTeaches:x.appts)?`<span class="chip ok">${ic('calendar',13)} Κάνει ραντεβού</span>`:`<span class="chip">Χωρίς ραντεβού</span>`}${adm||me?docsChip(me?'me':x.id):''}${me?`<span class="chip">${ic('shield',13)} Διαχειριστής</span>`:(()=>{const u=x.uid&&S.meta.users.find(y=>y.id===x.uid);return u?`<span class="chip">${ic('key',13)} Σύνδεση: ${esc(u.username)}${u.role==='admin'?' · διαχειριστής':''}</span>`:'';})()}</div></div>${adm||me?`<button class="iconbtn" data-stf="${me?'me':x.id}" aria-label="Αλλαγή">${ic('edit',16)}</button>`:''}</div>`;};
   el.innerHTML=card('Στοιχεία επιχείρησης',`<div class="field"><label class="f" for="bz-n">Επωνυμία</label><div class="row" style="flex-wrap:nowrap"><input class="in" id="bz-n" value="${esc(B.name)}" placeholder="π.χ. Κέντρο Μελέτης Αλφάβητο"><button class="btn" id="bz-s">Αποθήκευση</button></div><div class="tiny muted" style="margin-top:6px">Μπαίνει στις υπενθυμίσεις προς τους γονείς.</div></div>`)
+   +card('Προσωπικό',`<p class="small muted" style="margin-top:0">Όσοι «κάνουν ραντεβού» μετράνε στη χωρητικότητα: με 2 καθηγητές, 10 ώρες λειτουργίας γίνονται 20 ώρες ραντεβού. Η γραμματεία δεν μετράει.</p>${row(null,1)}${B.staff.map(x=>row(x)).join('')}${adm?`<button class="btn pri" id="bz-a" style="margin-top:12px">${ic('plus',16)} Προσθήκη προσωπικού</button><p class="tiny muted" style="margin:10px 0 0">Όποιος χρειάζεται να μπαίνει ο ίδιος στο LUMIO σε αυτή τη συσκευή, παίρνει «Δική του σύνδεση» μέσα από την καρτέλα του — με δικό του όνομα χρήστη, κωδικό και μόνο τους δικούς του μαθητές.</p>`:''}`)
    +card('Ωράριο λειτουργίας',`<dl class="kv"><dt>Ώρες</dt><dd>${c.from}–${c.to} (${hN(hrs*60)} ώρες)</dd><dt>Μέρες</dt><dd>${DAY_ORDER.filter(d=>c.days.includes(d)).map(d=>WDAYS_S[d]).join(', ')||'—'}</dd><dt>Διάστημα ραντεβού</dt><dd>${c.step} λεπτά</dd></dl><button class="btn" id="bz-h">${ic('clock',16)} Αλλαγή ωραρίου</button>
      <div class="capbox">${ic('users',18)}<div><b>Χωρητικότητα: ${hN(hrs*60)} ώρες × ${PV.length} ${PV.length===1?'άτομο':'άτομα'} = ${hN(hrs*60*PV.length)} ώρες ραντεβού τη μέρα</b><div class="small">Από αυτό γεμίζουν τα χρωματιστά κουτάκια των ημερών στα Ραντεβού.</div></div></div>`)
-   +card('Αργίες',(()=>{const y=+todayISO().slice(0,4);const yy=B.holYear||y;const L=holList(yy);const t=todayISO();
+   +card('Αργίες',(()=>{const y=+todayISO().slice(0,4);const yy=y;const L=holList(yy);const t=todayISO();
       return`<label class="switch"><span><b>Κλειστά στις επίσημες αργίες</b><small>Οι μέρες αυτές βγαίνουν αυτόματα κόκκινες και κλειστές κάθε χρόνο — και οι κινητές (Καθαρά Δευτέρα, Πάσχα, Αγίου Πνεύματος) υπολογίζονται μόνες τους.</small></span><input type="checkbox" id="hl-on" ${B.holOff?'':'checked'}></label>
-       <div class="row" style="justify-content:space-between;margin:12px 0 4px"><b>Αργίες ${yy}</b><span class="seg"><button type="button" data-hy="${yy-1}">${ic('left',14)}</button><button type="button" data-hy="${yy+1}">${ic('right',14)}</button></span></div>
+       <div style="margin:14px 0 4px"><b>Αργίες ${yy}</b> <span class="tiny muted">· την επόμενη χρονιά υπολογίζονται μόνες τους</span></div>
        <div style="${B.holOff?'opacity:.5;pointer-events:none':''}">${L.map(h=>`<label class="holrow ${h.date<t?'past':''}"><span class="hd">${WDAYS_S[wdOf(h.date)]} ${fmtShort(h.date)}</span><span class="grow">${esc(h.name)}</span><input type="checkbox" data-hol="${h.id}" ${holOn(h)?'checked':''}></label>`).join('')}</div>
-       <p class="tiny muted" style="margin:8px 0 0">Για άλλη μέρα (π.χ. άδεια ή τοπική γιορτή) πάτα «Κλειστά αυτή τη μέρα» στα Ραντεβού. Σε μια αργία που δουλεύετε, πάτα «Άνοιγμα ημέρας».</p>`;})())
-   +card('Προσωπικό',`<p class="small muted" style="margin-top:0">Όσοι «κάνουν ραντεβού» μετράνε στη χωρητικότητα: με 2 καθηγητές, 10 ώρες λειτουργίας γίνονται 20 ώρες ραντεβού. Η γραμματεία δεν μετράει.</p>${row(null,1)}${B.staff.map(x=>row(x)).join('')}${adm?`<button class="btn pri" id="bz-a" style="margin-top:12px">${ic('plus',16)} Προσθήκη προσωπικού</button><p class="tiny muted" style="margin:10px 0 0">Όποιος χρειάζεται να μπαίνει ο ίδιος στο LUMIO σε αυτή τη συσκευή, παίρνει «Δική του σύνδεση» μέσα από την καρτέλα του — με δικό του όνομα χρήστη, κωδικό και μόνο τους δικούς του μαθητές.</p>`:''}`);
+       <p class="tiny muted" style="margin:8px 0 0">Για άλλη μέρα (π.χ. άδεια ή τοπική γιορτή) πάτα «Κλειστά αυτή τη μέρα» στα Ραντεβού. Σε μια αργία που δουλεύετε, πάτα «Άνοιγμα ημέρας».</p>`;})());
+
   $('#bz-s',el).onclick=()=>{B.name=$('#bz-n',el).value.trim();save();toast('Αποθηκεύτηκε.','ok');};$('#bz-h',el).onclick=agendaCfgDialog;const ba=$('#bz-a',el);if(ba)ba.onclick=()=>staffDialog();
   $$('[data-stf]',el).forEach(b=>b.onclick=()=>staffDialog(b.dataset.stf));
-  $('#hl-on',el).onchange=e=>{B.holOff=!e.target.checked;save();render();};$$('[data-hol]',el).forEach(x=>x.onchange=()=>{B.hol=B.hol||{};B.hol[x.dataset.hol]=x.checked;save();});$$('[data-hy]',el).forEach(b=>b.onclick=()=>{B.holYear=+b.dataset.hy;render();});},
+  $$('[data-docs]',el).forEach(b=>b.onclick=()=>staffDocsDialog(b.dataset.docs));
+  $('#hl-on',el).onchange=e=>{B.holOff=!e.target.checked;save();render();};$$('[data-hol]',el).forEach(x=>x.onchange=()=>{B.hol=B.hol||{};B.hol[x.dataset.hol]=x.checked;save();});},
  async account(el){const u=S.user;el.innerHTML=card('Στοιχεία λογαριασμού',`<dl class="kv"><dt>Όνομα χρήστη</dt><dd>${esc(u.username)}</dd><dt>Email</dt><dd>${esc(u.email||'—')} <button class="btn sm" id="chem" style="margin-left:6px">Αλλαγή</button></dd><dt>Ρόλος</dt><dd>${u.role==='admin'?'Διαχειριστής':'Παιδαγωγός'}</dd><dt>Χώρος εργασίας</dt><dd>${esc(S.meta.org||'—')}</dd><dt>Δημιουργήθηκε</dt><dd>${fmtDate(u.created)}</dd></dl>${isAdmin()?`<div class="field" style="margin-top:16px"><label class="f" for="on">Όνομα χώρου εργασίας</label><div class="row" style="flex-wrap:nowrap"><input class="in" id="on" value="${esc(S.meta.org||'')}"><button class="btn" id="os">Αποθήκευση</button></div></div>`:''}`)
   +card('Κωδικός πρόσβασης',`<p class="small muted">Ο κωδικός ξεκλειδώνει τα κρυπτογραφημένα δεδομένα σου.</p><button class="btn" id="cp">${ic('key',16)} Αλλαγή κωδικού</button>`)
   +card('Κωδικός ανάκτησης',`<p class="small muted">${u.recSentAt?'Στάλθηκε τελευταία φορά στο email σου στις '+fmtDate(u.recSentAt)+'. ':''}${u.recWrap?'Αν χάθηκε, φτιάξε νέο — στέλνεται αυτόματα στο email σου και ο παλιός παύει να ισχύει.':'Δεν έχεις ακόμη κωδικό ανάκτησης. Χωρίς αυτόν, αν ξεχάσεις τον κωδικό σου δεν γίνεται επαναφορά.'}</p><button class="btn ${u.recWrap?'':'pri'}" id="rc">${ic('shield',16)} ${u.recWrap?'Νέος κωδικός ανάκτησης':'Δημιουργία κωδικού ανάκτησης'}</button>`);
@@ -2645,6 +2665,61 @@ async function removeAccount(id,silent){const u=S.meta.users.find(x=>x.id===id);
   S.data.students.forEach(s=>{if(s.ownerId===u.id)s.ownerId=S.user.id;});(S.data.materials||[]).forEach(m=>{if(m.ownerId===u.id)m.ownerId=S.user.id;});S.meta.users=S.meta.users.filter(x=>x.id!==u.id);
   try{await IDB.del('earn:'+u.id);}catch(e){}try{TM.lsKeys().forEach(k=>{if(k.includes(u.id))try{localStorage.removeItem(k);}catch(e){}});}catch(e){}await saveMeta();save();toast('Η σύνδεση αφαιρέθηκε.','ok');return true;}
 function greekToLatin(t){const M={α:'a',β:'v',γ:'g',δ:'d',ε:'e',ζ:'z',η:'i',θ:'th',ι:'i',κ:'k',λ:'l',μ:'m',ν:'n',ξ:'x',ο:'o',π:'p',ρ:'r',σ:'s',ς:'s',τ:'t',υ:'y',φ:'f',χ:'ch',ψ:'ps',ω:'o',ά:'a',έ:'e',ή:'i',ί:'i',ό:'o',ύ:'y',ώ:'o',ϊ:'i',ϋ:'y',ΐ:'i',ΰ:'y'};return[...String(t||'').toLowerCase()].map(c=>M[c]??c).join('').replace(/[^a-z0-9._-]/g,'');}
+
+/* ===== Φάκελος προσωπικού: πιστοποιητικά, διπλώματα, έγγραφα ===== */
+/* r: σε ποιες ειδικότητες είναι απαραίτητο (T=διδάσκοντες, H=θεραπευτές, A=όλοι οι εργαζόμενοι), exp: προτεινόμενη ανανέωση σε μήνες */
+const DOC_TYPES=[
+ ['degree','Πτυχίο / δίπλωμα σπουδών','TH',0,'Αντίγραφο πτυχίου. Αν είναι από το εξωτερικό, και η αναγνώριση ΔΟΑΤΑΠ.'],
+ ['teachlic','Άδεια διδασκαλίας (αναγγελία στη Διεύθυνση Εκπαίδευσης)','T',0,'Για διδασκαλία σε φροντιστήριο, κέντρο ξένων γλωσσών ή κατ’ οίκον. Από τον Μάρτιο 2026 η αναγγελία γίνεται ψηφιακά (teachinglicense.it.minedu.gov.gr).'],
+ ['medgp','Γνωμάτευση παθολόγου ή γενικού ιατρού','T',0,'Δικαιολογητικό της άδειας διδασκαλίας: ότι μπορεί να ασκήσει διδακτικό έργο.'],
+ ['medpsy','Γνωμάτευση ψυχιάτρου','T',0,'Δικαιολογητικό της άδειας διδασκαλίας.'],
+ ['lang','Επάρκεια διδασκαλίας ξένης γλώσσας / πιστοποιητικό γλωσσομάθειας','',0,'Μόνο για όσους διδάσκουν ξένη γλώσσα.'],
+ ['proflic','Άδεια άσκησης επαγγέλματος','H',0,'Για λογοθεραπευτή, εργοθεραπευτή, ψυχολόγο κ.λπ. — από την αρμόδια υπηρεσία.'],
+ ['assoc','Εγγραφή σε επαγγελματικό σύλλογο','',12,'Όπου προβλέπεται για την ειδικότητα (π.χ. λογοθεραπευτές).'],
+ ['crim','Απόσπασμα ποινικού μητρώου','TH',12,'Συνιστάται για όποιον δουλεύει με παιδιά· καλό είναι να ανανεώνεται κάθε χρόνο.'],
+ ['contract','Σύμβαση εργασίας / αναγγελία πρόσληψης (ΕΡΓΑΝΗ)','A',0,'Για κάθε εργαζόμενο — τη φροντίζει συνήθως ο λογιστής.'],
+ ['firstaid','Πιστοποίηση πρώτων βοηθειών','',36,'Προαιρετικό αλλά πολύ χρήσιμο με παιδιά· ανανέωση συνήθως κάθε 2–3 χρόνια.'],
+ ['health','Πιστοποιητικό υγείας (πρώην βιβλιάριο υγείας)','',60,'Χρειάζεται μόνο για όσους χειρίζονται τρόφιμα (π.χ. κυλικείο, κέντρο με γεύματα).'],
+ ['postgrad','Μεταπτυχιακό / διδακτορικό','',0,''],
+ ['seminar','Σεμινάριο / επιμόρφωση','',0,''],
+ ['cv','Βιογραφικό','',0,''],
+ ['other','Άλλο έγγραφο','',0,'']];
+const TEACH_ROLES=['teacher','assistant','tutor','music','special','other'],THER_ROLES=['speech','ot','psych'];
+function docReq(role,emp){return DOC_TYPES.filter(([k,,r])=>(r.includes('T')&&TEACH_ROLES.includes(role))||(r.includes('H')&&THER_ROLES.includes(role))||(r.includes('A')&&emp)).map(x=>x[0]);}
+function staffDocs(id){const B=biz();if(id==='me')return B.meDocs=B.meDocs||[];const x=B.staff.find(y=>y.id===id);return x?(x.docs=x.docs||[]):[];}
+function docState(d){if(!d.exp)return'ok';const t=todayISO();if(d.exp<t)return'bad';return d.exp<=addDays(t,30)?'warn':'ok';}
+function docsSummary(id){const B=biz();const me=id==='me';const x=me?{role:B.meRole}:B.staff.find(y=>y.id===id);const D=staffDocs(id);const req=docReq(x.role,!me);
+  const miss=req.filter(k=>!D.some(d=>d.type===k));const bad=D.filter(d=>docState(d)==='bad').length,warn=D.filter(d=>docState(d)==='warn').length;return{miss,bad,warn,n:D.length};}
+function docsChip(id){const s=docsSummary(id);const t=s.bad?`${s.bad} έληξ${s.bad>1?'αν':'ε'}`:s.miss.length?`${s.miss.length} λείπ${s.miss.length>1?'ουν':'ει'}`:s.warn?`${s.warn} λήγ${s.warn>1?'ουν':'ει'} σύντομα`:s.n?'πλήρης':'κενός';
+  return`<button type="button" class="chip ${s.bad||s.miss.length?'bad':s.warn?'warn':s.n?'ok':''}" data-docs="${id}">${ic('folder',13)} Φάκελος: ${t}</button>`;}
+function staffDocsDialog(id){const B=biz();const me=id==='me';const x=me?{name:S.user.name,role:B.meRole,custom:B.meCustom}:B.staff.find(y=>y.id===id);if(!x)return;
+  const md=modal(`<div class="spread" style="margin-bottom:6px"><h3 style="margin:0">Φάκελος · ${esc(x.name)}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div><p class="small muted" style="margin-top:0">${esc(roleName(x.role,x.custom))} — πιστοποιητικά, διπλώματα και έγγραφα με ημερομηνία λήξης.</p><div id="dl"></div>`,{wide:true,onClose:()=>{if(/settings\/business/.test(location.hash))render();}});
+  const draw=()=>{const D=staffDocs(id);const req=docReq(x.role,!me);const miss=req.filter(k=>!D.some(d=>d.type===k));const tn=k=>(DOC_TYPES.find(y=>y[0]===k)||[0,'Έγγραφο'])[1];
+    $('#dl',md.el).innerHTML=`${miss.length?`<div class="stbox bad" style="margin-top:0">${ic('alert',18)}<div><b>Λείπουν απαραίτητα για την ειδικότητα «${esc(roleName(x.role,x.custom))}»:</b><div class="docmiss">${miss.map(k=>`<button type="button" class="chipt" data-add="${k}">${ic('plus',13)} ${esc(tn(k))}</button>`).join('')}</div></div></div>`:req.length?`<div class="stbox ok" style="margin-top:0">${ic('check',18)} <b>Υπάρχουν όλα τα απαραίτητα για την ειδικότητα.</b></div>`:''}
+     ${D.length?`<div class="doclist">${D.slice().sort((a,b)=>(a.exp||'9')<(b.exp||'9')?-1:1).map(d=>{const st=docState(d);return`<div class="docrow ${st}"><span class="docic">${ic(d.file?'file':'folder',18)}</span><div class="grow"><b>${esc(d.title||tn(d.type))}</b><small>${d.title&&d.title!==tn(d.type)?esc(tn(d.type))+' · ':''}${d.issued?'Έκδοση '+fmtShort(d.issued)+(d.issued.slice(0,4)!==todayISO().slice(0,4)?'/'+d.issued.slice(2,4):''):''}${d.exp?` · <span class="dexp">${st==='bad'?'Έληξε':'Λήγει'} ${fmtShort(d.exp)}/${d.exp.slice(2,4)}</span>`:''}${d.no?' · Αρ. '+esc(d.no):''}</small></div>${d.file?`<button type="button" class="iconbtn" data-view="${d.id}" aria-label="Προβολή">${ic('eye',16)}</button>`:''}<button type="button" class="iconbtn" data-ed="${d.id}" aria-label="Αλλαγή">${ic('edit',16)}</button></div>`;}).join('')}</div>`:'<p class="small muted">Δεν έχει καταχωριστεί κανένα έγγραφο ακόμα.</p>'}
+     <div class="row" style="justify-content:space-between;margin-top:14px"><button type="button" class="btn ghost sm" id="dinfo">${ic('info',15)} Τι χρειάζεται;</button><button type="button" class="btn pri" data-add="">${ic('plus',16)} Νέο έγγραφο</button></div>`;};
+  draw();
+  md.el.addEventListener('click',async e=>{const a=e.target.closest('[data-add]');if(a){await docEdit(id,null,a.dataset.add);return draw();}const ed=e.target.closest('[data-ed]');if(ed){await docEdit(id,ed.dataset.ed);return draw();}
+    const v=e.target.closest('[data-view]');if(v){const d=staffDocs(id).find(y=>y.id===v.dataset.view);if(d&&d.file)openDataURL(d.file.data,d.file.name);}
+    if(e.target.closest('#dinfo'))docInfoDialog();});}
+function openDataURL(data,name){try{const[h,b]=data.split(',');const mime=h.match(/:(.*?);/)[1];const bin=atob(b);const u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);const url=URL.createObjectURL(new Blob([u8],{type:mime}));const w=window.open(url,'_blank');if(!w){const a=document.createElement('a');a.href=url;a.download=name||'egrafo';a.click();}setTimeout(()=>URL.revokeObjectURL(url),60000);}catch(e){toast('Δεν άνοιξε το αρχείο.','bad');}}
+function docInfoDialog(){modal(`<div class="spread" style="margin-bottom:6px"><h3 style="margin:0">Τι χρειάζεται ο φάκελος</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
+  <p class="small muted" style="margin-top:0">Ενδεικτικός οδηγός — οι απαιτήσεις αλλάζουν, γι’ αυτό επιβεβαίωσέ τες με τη Διεύθυνση Εκπαίδευσης και τον λογιστή σου.</p>
+  <div class="docinfo">${DOC_TYPES.filter(d=>d[4]).map(([k,n,r,exp,h])=>`<div><b>${esc(n)}</b> ${r.includes('T')?'<span class="chip">καθηγητές</span>':''}${r.includes('H')?'<span class="chip">θεραπευτές</span>':''}${r.includes('A')?'<span class="chip">όλοι οι εργαζόμενοι</span>':''}${!r?'<span class="chip">όπου χρειάζεται</span>':''}<div class="small muted">${esc(h)}${exp?` Προτεινόμενη ανανέωση: κάθε ${exp>=12?exp/12+(exp===12?' χρόνο':' χρόνια'):exp+' μήνες'}.`:''}</div></div>`).join('')}</div>`,{wide:true});}
+function docEdit(id,docId,type){return new Promise(res=>{const D=staffDocs(id);const d=docId?D.find(y=>y.id===docId):{type:type||'degree'};let file=d.file||null;
+  const md=modal(`<h3 style="margin-top:0">${docId?'Αλλαγή εγγράφου':'Νέο έγγραφο'}</h3><form id="df">
+   <div class="field"><label class="f" for="d-t">Είδος</label><select class="in" id="d-t" name="type">${DOC_TYPES.map(([k,n])=>opt(k,n,d.type)).join('')}</select><div class="tiny muted" id="d-h" style="margin-top:4px"></div></div>
+   <div class="field"><label class="f" for="d-n">Τίτλος (προαιρετικό)</label><input class="in" id="d-n" name="title" value="${esc(d.title||'')}" placeholder="π.χ. Πτυχίο Φιλολογίας ΕΚΠΑ, Proficiency"></div>
+   <div class="grid g2" style="gap:10px"><div class="field"><label class="f" for="d-i">Ημερομηνία έκδοσης</label><input class="in" type="date" id="d-i" name="issued" value="${d.issued||''}"></div><div class="field"><label class="f" for="d-x">Λήξη / ανανέωση</label><input class="in" type="date" id="d-x" name="exp" value="${d.exp||''}"><div class="tiny muted" style="margin-top:4px">Κενό = δεν λήγει.</div></div></div>
+   <div class="field"><label class="f" for="d-no">Αριθμός πρωτοκόλλου / βεβαίωσης (προαιρετικό)</label><input class="in" id="d-no" name="no" value="${esc(d.no||'')}"></div>
+   <div class="field"><label class="f">Αρχείο (φωτογραφία ή PDF)</label><div class="row" style="gap:8px"><label class="btn sm">${ic('upload',15)} ${file?'Αλλαγή αρχείου':'Επισύναψη'}<input type="file" id="d-f" accept="image/*,application/pdf" style="display:none"></label><span class="small muted" id="d-fn">${file?esc(file.name):'Κανένα'}</span></div><div class="tiny muted" style="margin-top:4px">Μένει κρυπτογραφημένο σε αυτή τη συσκευή. Έως 2 MB για PDF.</div></div>
+   <div class="field"><label class="f" for="d-nt">Σημείωση</label><input class="in" id="d-nt" name="note" value="${esc(d.note||'')}"></div>
+   <div class="row" style="justify-content:space-between">${docId?`<button type="button" class="btn danger" id="d-del">${ic('trash',16)} Διαγραφή</button>`:'<span></span>'}<span class="row"><button type="button" class="btn" data-close>Άκυρο</button><button class="btn pri">${ic('check',16)} Αποθήκευση</button></span></div></form>`,{onClose:()=>res()});
+  const f=$('#df',md.el);const hint=()=>{const T=DOC_TYPES.find(y=>y[0]===f.type.value);$('#d-h',md.el).textContent=T?T[4]:'';if(!docId&&T&&T[3]&&f.issued.value&&!f.exp.value){const x=new Date(f.issued.value+'T12:00');x.setMonth(x.getMonth()+T[3]);f.exp.value=isoDate(x);}};hint();f.type.onchange=hint;f.issued.onchange=hint;
+  $('#d-f',md.el).onchange=async e=>{const fl=e.target.files[0];if(!fl)return;try{if(fl.type==='application/pdf'){if(fl.size>2e6)return toast('Το PDF είναι πάνω από 2 MB.','bad');const data=await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(fl);});file={name:fl.name,data};}
+    else file={name:fl.name.replace(/\.\w+$/,'')+'.jpg',data:await imageToDataURL(fl,1600)};$('#d-fn',md.el).textContent=file.name;}catch(err){toast('Δεν διαβάστηκε το αρχείο.','bad');}};
+  const del=$('#d-del',md.el);if(del)del.onclick=async()=>{if(!await confirmDlg('Διαγραφή εγγράφου;',{danger:true,ok:'Διαγραφή'}))return;D.splice(D.indexOf(d),1);save();md.close();};
+  f.onsubmit=e=>{e.preventDefault();const o=fd(f);Object.assign(d,{type:o.type,title:(o.title||'').trim(),issued:o.issued||'',exp:o.exp||'',no:(o.no||'').trim(),note:(o.note||'').trim(),file});if(!docId){d.id=uid();D.push(d);}save();md.close();toast('Αποθηκεύτηκε.','ok');};});}
 
 /* ===== Ταμείο: ο κώδικας της εφαρμογής «Ταμεία» μέσα στο LUMIO ===== */
 /* Το Ταμείο ανοίγει πάνω από το LUMIO με τον ίδιο τρόπο που το ανοίγει το Δρομολόγιο (embed),
@@ -3279,7 +3354,7 @@ const HELP={
   ['Εξόφληση','Διαλέγεις ποιες απλήρωτες εξοφλούνται και στέλνεις απόδειξη.'],
   ['Ιστορικό','Όλες οι συνεδρίες του μαθητή.'],
   ['PDF / Excel','Η καρτέλα του πελάτη για μια περίοδο: PDF, Excel, email στον γονέα ή κοινοποίηση.']]],
- 'settings:business':['Η επιχείρησή μου','Επωνυμία, ωράριο λειτουργίας και προσωπικό.',[['Επωνυμία','Μπαίνει στις υπενθυμίσεις προς τους γονείς.'],['Ωράριο λειτουργίας','Ώρες και μέρες που δέχεστε ραντεβού.'],['Χωρητικότητα','Ώρες λειτουργίας × άτομα που κάνουν ραντεβού. Με 10 ώρες και 2 καθηγητές = 20 ώρες ραντεβού τη μέρα.'],['Προσωπικό','Πρόσθεσε άτομα με ειδικότητα (καθηγητής, βοηθός καθηγητή, γραμματέας, λογοθεραπευτής κ.ά.). Ο διακόπτης «Κάνει ραντεβού» ορίζει αν μετράει στη χωρητικότητα· η γραμματεία συνήθως όχι.'],['Χρώμα','Το χρώμα του ατόμου στο ημερολόγιο.'],['Δική του σύνδεση','Μέσα στην καρτέλα ενός μέλους: του δίνεις όνομα χρήστη και κωδικό για να μπαίνει ο ίδιος σε αυτή τη συσκευή. Ως παιδαγωγός βλέπει μόνο τους δικούς του μαθητές· ως διαχειριστής βλέπει όλους. Από εκεί και νέος κωδικός ή αφαίρεση σύνδεσης.'],['Αργίες','Οι επίσημες αργίες κάθε χρόνου (και οι κινητές από το Πάσχα) κλείνουν αυτόματα. Βγάζεις ή προσθέτεις όποια θέλεις· τα βελάκια αλλάζουν χρονιά.'],['Διαγραφή','Τα ραντεβού του περνούν σε εσένα· αν είχε σύνδεση, καταργείται και οι μαθητές του περνούν σε εσένα.']]],
+ 'settings:business':['Η επιχείρησή μου','Επωνυμία, ωράριο λειτουργίας και προσωπικό.',[['Επωνυμία','Μπαίνει στις υπενθυμίσεις προς τους γονείς.'],['Ωράριο λειτουργίας','Ώρες και μέρες που δέχεστε ραντεβού.'],['Χωρητικότητα','Ώρες λειτουργίας × άτομα που κάνουν ραντεβού. Με 10 ώρες και 2 καθηγητές = 20 ώρες ραντεβού τη μέρα.'],['Προσωπικό','Πρόσθεσε άτομα με ειδικότητα (καθηγητής, βοηθός καθηγητή, γραμματέας, λογοθεραπευτής κ.ά.). Ο διακόπτης «Κάνει ραντεβού» ορίζει αν μετράει στη χωρητικότητα· η γραμματεία συνήθως όχι.'],['Χρώμα','Το χρώμα του ατόμου στο ημερολόγιο.'],['Δική του σύνδεση','Μέσα στην καρτέλα ενός μέλους: του δίνεις όνομα χρήστη και κωδικό για να μπαίνει ο ίδιος σε αυτή τη συσκευή. Ως παιδαγωγός βλέπει μόνο τους δικούς του μαθητές· ως διαχειριστής βλέπει όλους. Από εκεί και νέος κωδικός ή αφαίρεση σύνδεσης.'],['Αργίες','Οι επίσημες αργίες κάθε χρόνου (και οι κινητές από το Πάσχα) κλείνουν αυτόματα. Βγάζεις ή προσθέτεις όποια θέλεις με το τικ.'],['Φάκελος','Το κουμπί «Φάκελος» σε κάθε μέλος: πτυχία, άδεια διδασκαλίας, γνωματεύσεις, ποινικό μητρώο, σύμβαση, πρώτες βοήθειες κ.ά., με ημερομηνία λήξης και αρχείο (φωτογραφία ή PDF). Δείχνει τι λείπει για την ειδικότητα και τι λήγει μέσα στον μήνα. «Τι χρειάζεται;» = σύντομος οδηγός.'],['Διαγραφή','Τα ραντεβού του περνούν σε εσένα· αν είχε σύνδεση, καταργείται και οι μαθητές του περνούν σε εσένα.']]],
  settings:['Ρυθμίσεις','Χωρισμένες σε κατηγορίες. Πάτα μία για να ανοίξει.',[['Ο λογαριασμός μου','Προφίλ, λογαριασμός, ασφάλεια.'],['Εφαρμογή','Εμφάνιση, ειδοποιήσεις, γλώσσα.'],['Έγγραφα','Υδατογράφημα στα PDF.'],['Δεδομένα & απόρρητο','Ιδιωτικότητα, αντίγραφα ασφαλείας.'],['Υπηρεσίες','Τεχνητή νοημοσύνη, αποστολή email.']]],
  'settings:account':['Λογαριασμός','Όνομα χρήστη, email, κωδικός και κωδικός ανάκτησης.',[['Αλλαγή κωδικού','Χρειάζεται ο τρέχων κωδικός.'],['Κωδικός ανάκτησης','Σε σώζει αν ξεχάσεις τον κωδικό· στέλνεται στο email σου.']]],
  'settings:security':['Ασφάλεια','Πώς προστατεύεται η εφαρμογή.',[['Να με θυμάσαι','Ανοίγεις χωρίς κωδικό σε αυτή τη συσκευή.'],['Αυτόματη αποσύνδεση','Για κοινόχρηστες συσκευές.'],['Κλείδωμα μαθητών','Απλός κωδικός για να ανοίξουν οι «Μαθητές».'],['PIN Ταμείου','Ξεχωριστός κωδικός για τα οικονομικά.'],['Λειτουργία μαθητή','Δίνεις τη συσκευή στο παιδί με ασφάλεια.']]],
