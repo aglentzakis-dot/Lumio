@@ -899,6 +899,18 @@ button.preset{font:inherit;cursor:pointer;text-align:center}
 .lessrow small{display:block;color:var(--ink3);font-size:.74rem}.lessrow .grow{min-width:0}
 .lse{font-size:1.4rem;width:36px;height:36px;border-radius:10px;background:var(--line2);display:flex;align-items:center;justify-content:center;flex:none}
 .aisteps{padding-left:22px;margin:0 0 14px;font-size:.9rem;line-height:1.55}.aisteps li{margin-bottom:8px}.aisteps li::marker{font-weight:700;color:var(--lilac-d)}
+/* δεσμεύσεις */
+.tl-ev.tl-blk{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--bc) 22%,var(--paper)) 0 8px,color-mix(in srgb,var(--bc) 12%,var(--paper)) 8px 16px)!important;border-color:color-mix(in srgb,var(--bc) 55%,transparent)!important;box-shadow:inset 4px 0 0 var(--bc)!important;color:var(--ink)}
+.tl-ev.tl-blk small{color:var(--ink2)}
+.appt.blk{background:color-mix(in srgb,var(--bc) 14%,var(--paper));border-color:color-mix(in srgb,var(--bc) 45%,transparent);box-shadow:inset 4px 0 0 var(--bc)}
+.hbar i.hb{opacity:.75}
+.aglegend i.blk{background:repeating-linear-gradient(135deg,#C9D8EE 0 3px,#E6EEF8 3px 6px);border-color:#5A8DC8}
+.bcats{display:flex;flex-wrap:wrap;gap:6px}
+.bcat{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 12px;font:inherit;font-size:.85rem;cursor:pointer;color:var(--ink)}
+.bcat.on{background:color-mix(in srgb,var(--bc) 18%,var(--paper));border-color:var(--bc);font-weight:600;box-shadow:inset 0 0 0 1px var(--bc)}
+button.tile-rn{cursor:pointer;font-family:inherit;z-index:1}button.tile-rn:hover{filter:brightness(.97);box-shadow:0 0 0 2px var(--tcd,var(--ink)) inset}
+.tool-pre.dim{opacity:.4;filter:grayscale(.4)}
+.tl-col{overflow:hidden}
 
 /* ===== games ===== */
 .gwrap{position:fixed;inset:0;z-index:80;overflow:auto;display:flex;flex-direction:column;font-family:"Comfortaa","Commissioner",sans-serif}
@@ -1103,7 +1115,7 @@ button.preset{font:inherit;cursor:pointer;text-align:center}
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.15.1';
+const APP_VERSION='2.16.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -1847,9 +1859,9 @@ function readyGamesSheet(cat,ct='game'){const L=readyOf(ct);const W=READY_WORD[c
   const T0=CT[ct]||CT.game;const list=L.filter(g=>cat==='*'||g.cat===cat);
   const md=modal(`<div class="spread" style="margin-bottom:6px"><h3 style="margin:0">${cat&&!flat?`<button class="iconbtn" data-rcb aria-label="Πίσω" style="margin-right:4px">${ic('left',18)}</button>`:''}${cat&&cat!=='*'?esc(READY_CATS.find(c=>c[0]===cat)[1])+' · ':''}Έτοιμα · ${esc(T0[3])}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
    ${cat?`<p class="small muted" style="margin-top:0">Χρησιμοποιούνται αμέσως, χωρίς τεχνητή νοημοσύνη. «${W[2]}» για δοκιμή· «Άνοιγμα» για ανάθεση σε μαθητή.</p><div class="rglist">${list.map(g=>{const T=GAME_TYPES[g.gt]||{};const mine=S.data.materials.some(x=>x.readyId===g.id&&x.ownerId===S.user.id);return`<div class="rgrow"><span class="rge">${T.e||'🎮'}</span><div class="grow"><b>${esc(g.t)}</b><small>${esc((READY_CATS.find(c=>c[0]===g.cat)||[])[1]||'')} · ${esc(T.n||'')} · ${g.band==='young'?'μικρά παιδιά':g.band==='teen'?'έφηβοι':'δημοτικό'}${mine?' · στο υλικό μου':''}</small><div class="small" style="margin-top:3px">${esc(g.d)}</div></div><div class="rgact"><button class="btn sm pri" data-rplay="${g.id}">${ic('play',14)} ${W[2]}</button><button class="btn sm" data-ropen="${g.id}">Άνοιγμα</button></div></div>`;}).join('')}</div>`
-   :`<p class="small muted" style="margin-top:0">Διάλεξε κατηγορία.</p><div class="presets t-yel">${cats.map(({c,n})=>`<button type="button" class="preset" data-rcat="${c[0]}"><span class="pic">${ic(c[2],24)}</span><b>${esc(c[1])}</b><small>${n} ${n===1?W[0]:W[1]}</small></button>`).join('')}</div>`}`,{wide:true});
-  md.el.addEventListener('click',e=>{const c=e.target.closest('[data-rcat]');if(c){md.close();return readyGamesSheet(c.dataset.rcat,ct);}if(e.target.closest('[data-rcb]')){md.close();return readyGamesSheet(null,ct);}
-    const p=e.target.closest('[data-rplay]');if(p){md.close();return readyOpen(p.dataset.rplay,true);}const o=e.target.closest('[data-ropen]');if(o){md.close();return readyOpen(o.dataset.ropen,false);}});}
+   :`<p class="small muted" style="margin-top:0">Διάλεξε κατηγορία.</p><div class="presets t-yel">${cats.map(({c,n})=>`<button type="button" class="preset" data-rcat="${c[0]}"><span class="pic">${ic(c[2],24)}</span><b>${esc(c[1])}</b><small>${n} ${n===1?W[0]:W[1]}</small></button>`).join('')}</div>`}<div class="row" style="justify-content:center;margin-top:14px"><button type="button" class="btn ghost sm" data-aipre>${ic('sparkles',15)} Ή φτιάξε νέο με τεχνητή νοημοσύνη</button></div>`,{wide:true});
+  md.el.addEventListener('click',e=>{if(e.target.closest('[data-aipre]')){md.close();return presetSheet(ct,{noReady:true});}const c=e.target.closest('[data-rcat]');if(c){md.close();return readyGamesSheet(c.dataset.rcat,ct);}if(e.target.closest('[data-rcb]')){md.close();return readyGamesSheet(null,ct);}
+    const p=e.target.closest('[data-rplay]');if(p){md.close();const m=readyEnsure(p.dataset.rplay);save();return playWithPicker(m);}const o=e.target.closest('[data-ropen]');if(o){md.close();return readyOpen(o.dataset.ropen,false);}});}
 /* ενότητα «Έτοιμα» μέσα στις έτοιμες επιλογές κάθε είδους */
 function readySectionHTML(ct){const L=readyOf(ct);if(!L.length)return'';const W=READY_WORD[ct]||READY_WORD.game;const cats=READY_CATS.map(c=>({c,n:L.filter(g=>g.cat===c[0]).length})).filter(x=>x.n);
   return`<div class="prehd">${ic('play',16)} <b>Έτοιμα — χρησιμοποιούνται αμέσως</b><span class="tiny muted">${L.length} ${L.length===1?W[0]:W[1]}</span></div><div class="presets t-yel" style="margin-bottom:16px">${cats.map(({c,n})=>`<button type="button" class="preset" data-rcat="${c[0]}" data-rct="${ct}"><span class="pic">${ic(c[2],24)}</span><b>${esc(c[1])}</b><small>${n} ${n===1?W[0]:W[1]}</small></button>`).join('')}</div><div class="prehd">${ic('sparkles',16)} <b>Ή φτιάξε νέο με τεχνητή νοημοσύνη</b></div>`;}
@@ -2349,16 +2361,16 @@ function createPresets(type){const L=[];
   else if(type==='material')OUTS.forEach(([k,i,l])=>L.push({ic:i,t:l,d:'Από σελίδα, PDF ή φωτογραφία',h:`create/material?out=${k}`}));
   else(GOAL_PRESETS[type]||[]).forEach(([i,t,g])=>L.push({ic:i,t,d:g,h:`create/${type}?g=${encodeURIComponent(g)}`}));
   return L;}
-function presetSheet(type){const L=createPresets(type);const T0=CT[type];const md=modal(`<div class="spread" style="margin-bottom:6px"><h3 style="margin:0">Έτοιμες επιλογές · ${T0[3]}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div><p class="small muted" style="margin-top:0">Διάλεξε ένα και συνέχισε από εκεί — όλα αλλάζουν στα επόμενα βήματα.</p>
-  ${readySectionHTML(type)}
+function presetSheet(type,{noReady}={}){const L=createPresets(type);const T0=CT[type];const md=modal(`<div class="spread" style="margin-bottom:6px"><h3 style="margin:0">Έτοιμες επιλογές · ${T0[3]}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div><p class="small muted" style="margin-top:0">Διάλεξε ένα και συνέχισε από εκεί — όλα αλλάζουν στα επόμενα βήματα.</p>
+  ${noReady?'':readySectionHTML(type)}
   <div class="presets t-${T0[2]}">${L.map(p=>`<a class="preset" href="#/${p.h}" data-close><span class="pic">${ic(p.ic,24)}</span><b>${esc(p.t)}</b>${p.d?`<small>${esc(p.d)}</small>`:''}</a>`).join('')}</div>`,{wide:true});
   md.el.addEventListener('click',e=>{const c=e.target.closest('[data-rcat]');if(c){md.close();readyGamesSheet(c.dataset.rcat,c.dataset.rct||type);}});}
 function createOrder(){const o=(S.data.settings.createOrder||[]).filter(k=>CT[k]);for(const t of CREATE_TYPES)if(!o.includes(t[0]))o.push(t[0]);return o;}
 function viewCreateHub(r){const mats=myMaterials();const ro=r&&r.q&&r.q.order==='1';const ord=createOrder();
   M().innerHTML=`${pageHead('Δημιουργία',ro?'Πάτα τα βελάκια για να μετακινήσεις κάθε επιλογή.':'Τι θέλεις να φτιάξεις σήμερα;',ro?`<button class="btn" id="ordReset">${ic('undo',16)} Αρχική σειρά</button><a class="btn pri" href="#/create">${ic('check',16)} Τέλος</a>`:`<a class="btn" href="#/create?order=1">${ic('repeat',16)} Αλλαγή σειράς</a>`)}
-  <div class="tools two section ${ro?'reorder':''}" id="cgrid">${ord.map((k,i)=>{const[,ico,c]=CT[k];const[t,d]=CREATE_LONG[k];return ro?`<div class="tool t-${c}" data-k="${k}"><span class="ordn">${i+1}</span><span class="tool-ic">${ic(ico,26)}</span><b>${t}</b><span class="tool-d">${d}</span><div class="ordbar"><button data-mv="-1" aria-label="Μετακίνηση νωρίτερα" ${i===0?'disabled':''}>${ic('left',18)}</button><button data-mv="1" aria-label="Μετακίνηση αργότερα" ${i===ord.length-1?'disabled':''}>${ic('right',18)}</button></div></div>`:`<div class="tool t-${c}" data-go="${k}">${readyOf(k).length?`<span class="tile-rn" title="Έτοιμα για άμεση χρήση">${readyOf(k).length} έτοιμ${readyOf(k).length===1?'ο':'α'}</span>`:''}<span class="tool-ic">${ic(ico,26)}</span><b>${t}</b><span class="tool-d">${d}</span><span class="tool-acts"><a class="tool-go2" href="#/create/${k}">Δημιουργία ${ic('right',14)}</a><button type="button" class="tool-pre" data-pre="${k}" aria-label="Έτοιμες επιλογές για ${t}">${ic('l-grid-2x2',14)} Έτοιμες</button></span></div>`;}).join('')}</div>
+  <div class="tools two section ${ro?'reorder':''}" id="cgrid">${ord.map((k,i)=>{const[,ico,c]=CT[k];const[t,d]=CREATE_LONG[k];return ro?`<div class="tool t-${c}" data-k="${k}"><span class="ordn">${i+1}</span><span class="tool-ic">${ic(ico,26)}</span><b>${t}</b><span class="tool-d">${d}</span><div class="ordbar"><button data-mv="-1" aria-label="Μετακίνηση νωρίτερα" ${i===0?'disabled':''}>${ic('left',18)}</button><button data-mv="1" aria-label="Μετακίνηση αργότερα" ${i===ord.length-1?'disabled':''}>${ic('right',18)}</button></div></div>`:`<div class="tool t-${c}" data-go="${k}">${readyOf(k).length?`<button type="button" class="tile-rn" data-pre="${k}" title="Άνοιγμα των έτοιμων">${readyOf(k).length} έτοιμ${readyOf(k).length===1?'ο':'α'}</button>`:''}<span class="tool-ic">${ic(ico,26)}</span><b>${t}</b><span class="tool-d">${d}</span><span class="tool-acts"><a class="tool-go2" href="#/create/${k}">Δημιουργία ${ic('right',14)}</a><button type="button" class="tool-pre ${readyOf(k).length?'':'dim'}" data-pre="${k}" aria-label="Έτοιμες επιλογές για ${t}">${ic('l-grid-2x2',14)} Έτοιμες</button></span></div>`;}).join('')}</div>
   ${ro?'':`<section class="section"><div class="section-h"><h2>Πρόσφατα</h2><a href="#/games">Όλα</a></div>${mats.length?`<div class="list">${mats.sort((a,b)=>b.updated.localeCompare(a.updated)).slice(0,5).map(matRow).join('')}</div>`:emptyHTML('sparkles','Δεν έχεις δημιουργήσει ακόμη υλικό','Διάλεξε ένα είδος παραπάνω για να ξεκινήσεις.')}</section>`}`;
-  if(!ro){$('#cgrid').onclick=e=>{const p=e.target.closest('[data-pre]');if(p){e.preventDefault();return presetSheet(p.dataset.pre);}if(e.target.closest('a'))return;const g=e.target.closest('[data-go]');if(g)go('create/'+g.dataset.go);};return;}
+  if(!ro){$('#cgrid').onclick=e=>{const p=e.target.closest('[data-pre]');if(p){e.preventDefault();const k=p.dataset.pre;return readyOf(k).length?readyGamesSheet(null,k):presetSheet(k);}if(e.target.closest('a'))return;const g=e.target.closest('[data-go]');if(g)go('create/'+g.dataset.go);};return;}
   $('#cgrid').onclick=e=>{const b=e.target.closest('[data-mv]');if(!b)return;const k=b.closest('[data-k]').dataset.k;const o=createOrder();const i=o.indexOf(k),j=i+ +b.dataset.mv;if(j<0||j>=o.length)return;[o[i],o[j]]=[o[j],o[i]];S.data.settings.createOrder=o;save();viewCreateHub(r);const el=$(`[data-k="${k}"]`);if(el){el.classList.add('moved');const btn=$(`[data-mv="${b.dataset.mv}"]`,el);if(btn&&!btn.disabled)btn.focus();}};
   $('#ordReset').onclick=()=>{S.data.settings.createOrder=[];save();viewCreateHub(r);toast('Επανήλθε η αρχική σειρά.','ok');};}
 const matIcon=m=>({worksheet:'file',quiz:'question',flashcards:'cards',story:'book',activity:'puzzle'}[catOf(m)]||'game');
@@ -2457,7 +2469,7 @@ function viewPreview(r){const m=S.data.materials.find(x=>x.id===r.id);if(!m||!ca
    ${previewHTML(m)}</div>
    <aside class="stack"><div class="card"><div class="card-h"><h3>Λεπτομέρειες</h3></div><dl class="kv" style="grid-template-columns:110px 1fr;font-size:.86rem"><dt>Είδος</dt><dd>${CAT_LABEL[cat]}</dd><dt>Μαθητής</dt><dd>${st?esc(stuName(st)):'—'}</dd><dt>Μάθημα</dt><dd>${esc(m.subject||'—')}</dd><dt>Δυσκολία</dt><dd>${m.level}/5 · ${LEVEL_N(m.level)}</dd><dt>Δημιουργία</dt><dd>${fmtDate(m.created)}</dd><dt>Παίχτηκε</dt><dd>${plays.length} ${plays.length===1?'φορά':'φορές'}${plays.length?' · μέσος όρος '+Math.round(avg(plays.map(p=>p.pct)))+'%':''}</dd><dt>Εκδόσεις</dt><dd>${(m.versions||[]).length} προηγούμενες</dd>${m.source?`<dt>Πηγή</dt><dd>${esc(m.source.name)}</dd>`:''}<dt>Δημιουργός</dt><dd>${esc(m.model||'—')}</dd></dl></div>
     <div class="card"><div class="card-h"><h3>Αναθέσεις</h3><button class="btn sm" id="asg2">${ic('plus',14)} Νέα</button></div>${asg.length?`<div class="list">${asg.map(a=>{const s2=getStudent(a.studentId);return s2?`<div class="rw static"><span class="av" style="width:32px;height:32px;font-size:1rem">${s2.avatar||'🙂'}</span><span class="grow"><b>${esc(stuName(s2))}</b><small>${a.status==='done'?'Ολοκληρώθηκε':'Σε αναμονή'}</small></span>${a.status!=='done'?`<button class="iconbtn" data-link="${a.id}" aria-label="Σύνδεσμος">${ic('link',16)}</button>`:ic('check',16)}</div>`:'';}).join('')}</div>`:'<p class="small muted" style="margin:0">Δεν έχει ανατεθεί ακόμη.</p>'}</div></aside></div>`;
-  const pl=$('#play');if(pl)pl.onclick=()=>playGame(m,{student:st,support:m.support,preview:true,band:m.ageBand});
+  const pl=$('#play');if(pl)pl.onclick=()=>playWithPicker(m,{pre:st&&st.id});
   $('#asg').onclick=$('#asg2').onclick=()=>assignChecked(m);
   const ap=$('#approve');if(ap)ap.onclick=()=>{m.reviewed=new Date().toISOString();save();toast('Εγκρίθηκε.','ok');render();};
   if($('#chk'))$('#chk').onclick=()=>aiCheckNow(m);
@@ -3282,8 +3294,8 @@ function occ(from,to,{sid,withCancel,by}={}){const out=[];const cl=closedDays();
     for(;d<=to;d=addDays(d,7)){if(a.until&&d>a.until)break;if(a.kind==='biweekly'){const wk=Math.round((new Date(mondayOf(d))-new Date(mondayOf(a.date)))/6048e5);if(wk%2)continue;}push(d);}}
   return(B?out.filter(o=>provOcc(o)===B):out).sort((x,y)=>(x.date+x.s).localeCompare(y.date+y.s));}
 function weeklySlots(sid){return appts().filter(a=>a.sid===sid&&a.kind!=='once'&&(!a.until||a.until>=todayISO())).map(a=>({id:a.id,d:+a.d,s:a.s,e:a.e,kind:a.kind}));}
-function conflicts(date,s,e,skipId,by){return occ(date,date,{by:by||''}).filter(o=>o.a.id!==skipId&&(!by||provOcc(o)===by)&&tmin(o.s)<tmin(e)&&tmin(s)<tmin(o.e));}
-function freeSlots(date){const c=agCfg();if(!c.days.includes(wdOf(date))||isClosed(date))return[];const L=occ(date,date);const P=AGF?[AGF]:providers().map(p=>p.id);const out=[];for(let t=tmin(c.from);t+c.step<=tmin(c.to);t+=c.step){const s=tstr(t);if(P.some(pid=>!L.some(o=>provOcc(o)===pid&&tmin(o.s)<t+c.step&&t<tmin(o.e))))out.push(s);}return out;}
+function conflicts(date,s,e,skipId,by){return occ(date,date,{by:by||''}).concat(blockOcc(date,date,{by:by||''})).filter(o=>o.a.id!==skipId&&(!by||provOcc(o)===by)&&tmin(o.s)<tmin(e)&&tmin(s)<tmin(o.e));}
+function freeSlots(date){const c=agCfg();if(!c.days.includes(wdOf(date))||isClosed(date))return[];const L=occ(date,date).concat(blockOcc(date,date));const P=AGF?[AGF]:providers().map(p=>p.id);const out=[];for(let t=tmin(c.from);t+c.step<=tmin(c.to);t+=c.step){const s=tstr(t);if(P.some(pid=>!L.some(o=>provOcc(o)===pid&&tmin(o.s)<t+c.step&&t<tmin(o.e))))out.push(s);}return out;}
 function nextFree(){const now=new Date();let d=todayISO();for(let i=0;i<21;i++,d=addDays(d,1)){const F=freeSlots(d).filter(s=>i>0||tmin(s)>now.getHours()*60+now.getMinutes());if(F.length)return{date:d,s:F[0]};}return null;}
 const stOf=id=>S.data.students.find(s=>s.id===id);
 function pvBadge(a,full){const pid=a&&a.a?provOcc(a):provOf(a);if(providers().length<2&&pid==='me')return'';const p=provById(pid);return full?`<span class="pvtag"><i style="background:${p.color}">${provIni(p)}</i>${esc(p.short)}</span>`:`<i class="pvb" style="background:${p.color}" title="${esc(p.name)}">${provIni(p)}</i>`;}
@@ -3306,16 +3318,18 @@ function timelineHTML(days,L){const c=agCfg();const f=tmin(c.from),t=Math.max(tm
   const hours=[];for(let m=Math.ceil(f/60)*60;m<=t;m+=60)hours.push(m);
   return`<div class="tl" style="--cols:${days.length}"><div class="tl-head"><div></div>${days.map(d=>{const la=loadAttr(d);return`<a href="#/agenda?view=day&d=${d}" class="tl-dh ${la.cls} ${isClosed(d)?'closed':''} ${d===today?'today':''} ${c.days.includes(wdOf(d))&&!isClosed(d)?'':'off'}" style="${la.sty}" title="${la.tip}"><span>${WDAYS_S[wdOf(d)]}</span><b>${+d.slice(8)}</b>${la.txt?`<small class="ldt">${la.txt}</small>`:''}</a>`;}).join('')}</div>
    <div class="tl-body" style="height:${H}px"><div class="tl-times">${hours.map(m=>`<span style="top:${Math.round((m-f)*PPM)}px">${tstr(m)}</span>`).join('')}</div>
-   ${days.map(d=>{const off=!c.days.includes(wdOf(d))||isClosed(d);const X=laneLayout(L.filter(o=>o.date===d));
+   ${days.map(d=>{const off=!c.days.includes(wdOf(d))||isClosed(d);const X=laneLayout(L.filter(o=>o.date===d).concat(blockOcc(d,d)));
      return`<div class="tl-col ${off?'off':''} ${isClosed(d)?'closed':''} ${d===today?'today':''}" data-col="${d}">${hours.map(m=>`<i class="tl-line" style="top:${Math.round((m-f)*PPM)}px"></i>`).join('')}
-      ${X.map(o=>{const st=getStudent(o.a.sid)||stOf(o.a.sid)||{};const top=Math.round((tmin(o.s)-f)*PPM),h=Math.max(22,Math.round((tmin(o.e)-tmin(o.s))*PPM)-2);const w=100/o.lanes;
+      ${X.map(o=>{const top=Math.round((tmin(o.s)-f)*PPM),h=Math.max(22,Math.round((tmin(o.e)-tmin(o.s))*PPM)-2);const w=100/o.lanes;
+        if(o.blk){const b=o.blk;return`<button type="button" class="tl-ev tl-blk" data-blk="${o.key}" style="top:${top}px;height:${h}px;left:calc(${o.lane*w}% + 2px);width:calc(${w*o.span}% - 4px);--bc:${blkColor(b)}" title="${esc(blkTitle(b))} ${o.s}–${o.e}">${pvBadge(o)}<b>${blkCat(b)[2]} ${esc(blkTitle(b))}</b><small>${o.s}–${o.e}</small></button>`;}
+        const st=getStudent(o.a.sid)||stOf(o.a.sid)||{};
         return`<button type="button" class="tl-ev ${apStateCls(o)} k-${o.a.kind}" data-ap="${o.key}" style="top:${top}px;height:${h}px;left:calc(${o.lane*w}% + 2px);width:calc(${w*o.span}% - 4px)" title="${esc(stuName(st))} ${o.s}–${o.e}">${pvBadge(o)}<b>${st.avatar||''} ${esc(stuName(st))}</b><small>${o.s}–${o.e}${isLive(o)?' · τώρα':''}</small></button>`;}).join('')}
       ${d===today&&nm>=f&&nm<=t?`<i class="tl-now" style="top:${Math.round((nm-f)*PPM)}px"></i>`:''}</div>`;}).join('')}</div></div>`;}
 
 
 /* ---- πληρότητα ημέρας με βάση το ωράριο λειτουργίας ---- */
 function dayLoad(d){const c=agCfg();const f=tmin(c.from),t=Math.max(tmin(c.to),f+30);const cap=t-f;if(!c.days.includes(wdOf(d))||isClosed(d))return{off:true,busy:0,cap,frac:0};
-  const P=AGF?[AGF]:providers().map(p=>p.id);const O=occ(d,d);let busy=0;
+  const P=AGF?[AGF]:providers().map(p=>p.id);const O=occ(d,d).concat(blockOcc(d,d));let busy=0;
   for(const pid of P){const iv=O.filter(o=>provOcc(o)===pid).map(o=>[Math.max(f,tmin(o.s)),Math.min(t,tmin(o.e))]).filter(x=>x[1]>x[0]).sort((a,b)=>a[0]-b[0]);let cs=-1,ce=-1;
     for(const[a,b]of iv){if(a>ce){busy+=Math.max(0,ce-cs);cs=a;ce=b;}else ce=Math.max(ce,b);}busy+=Math.max(0,ce-cs);}
   const capT=cap*P.length;return{off:false,busy,cap:capT,frac:Math.min(1,busy/capT),n:P.length};}
@@ -3324,10 +3338,10 @@ function loadAttr(d){const L=dayLoad(d);if(L.off)return{cls:'',sty:'',txt:'',tip
   return{cls:`ld ${fr>=1?'ld-full':''}`,sty:`--ld:${Math.round(fr*100)}%;--lc:hsl(${hue} 68% 55%)`,txt:`${hN(L.busy)}/${hN(L.cap)}`,tip:`Πληρότητα: ${hN(L.busy)} από ${hN(L.cap)} ώρες ραντεβού${L.n>1?` (${L.n} άτομα × ${hN(L.cap/L.n)} ώρες)`:''} — ${Math.round(fr*100)}%`};}
 /* ---- μήνας: κάθε μέρα με λωρίδα ωρών (πιασμένες/ελεύθερες) και τα ραντεβού της ---- */
 function monthHTML(ym,sel){const c=agCfg();const[Y,Mo]=ym.split('-').map(Number);const first=`${ym}-01`;const start=mondayOf(first);const last=isoDate(new Date(Y,Mo,0));const end=addDays(mondayOf(last),6);
-  const L=occ(start,end,{withCancel:true});const today=todayISO();const f=tmin(c.from),t=tmin(c.to);const slots=[];for(let m=f;m<t;m+=60)slots.push(m);const cells=[];for(let d=start;d<=end;d=addDays(d,1))cells.push(d);
+  const L=occ(start,end,{withCancel:true});const LB=blockOcc(start,end);const today=todayISO();const f=tmin(c.from),t=tmin(c.to);const slots=[];for(let m=f;m<t;m+=60)slots.push(m);const cells=[];for(let d=start;d<=end;d=addDays(d,1))cells.push(d);
   return`<div class="mgrid"><div class="mwd">${DAY_ORDER.map(d=>`<span>${WDAYS_S[d]}</span>`).join('')}</div><div class="mdays">${cells.map(d=>{const X=L.filter(o=>o.date===d);const off=!c.days.includes(wdOf(d))||isClosed(d);const out=d.slice(0,7)!==ym;
     const act=X.filter(o=>isLive(o)||isActive(o)).length;
-    const bar=off?'':`<div class="hbar" title="Ώρες εργασίας: πιασμένες και ελεύθερες">${slots.map(m=>{const n=X.filter(o=>o.st!=='cancel'&&tmin(o.s)<m+60&&m<tmin(o.e)).length;return`<i class="h${Math.min(n,3)}"></i>`;}).join('')}</div>`;
+    const XB=LB.filter(o=>o.date===d);const bar=off?'':`<div class="hbar" title="Ώρες εργασίας: πιασμένες και ελεύθερες">${slots.map(m=>{const n=X.filter(o=>o.st!=='cancel'&&tmin(o.s)<m+60&&m<tmin(o.e)).length;const bk=XB.find(o=>tmin(o.s)<m+60&&m<tmin(o.e));return bk&&!n?`<i class="hb" style="background:${blkColor(bk.blk)}"></i>`:`<i class="h${Math.min(n,3)}"></i>`;}).join('')}</div>`;
     const la=out?{cls:'',sty:'',tip:''}:loadAttr(d);return`<a href="#/agenda?view=month&m=${ym}&d=${d}" style="${la.sty}" title="${la.tip}" class="mday ${la.cls} ${isClosed(d)&&!out?'closed':''} ${d===sel?'sel':''} ${d===today?'today':''} ${out?'out':''} ${off?'off':''}">${isClosed(d)&&!out?`<span class="mhol">${esc(holidayOf(d)||'Κλειστά')}</span>`:''}<div class="mtop"><b>${+d.slice(8)}</b>${X.filter(o=>o.st!=='cancel').length?`<span class="mcount ${act?'act':''}">${X.filter(o=>o.st!=='cancel').length}</span>`:''}</div>${bar}
      <div class="mev">${X.slice().sort((p,q)=>{const r=o=>isLive(o)?0:isActive(o)?1:2;return r(p)-r(q)||p.s.localeCompare(q.s);}).slice(0,3).sort((p,q)=>p.s.localeCompare(q.s)).map(o=>{const st=stOf(o.a.sid)||{};return`<span class="mchip ${apStateCls(o)}">${o.s} ${esc((stuName(st)||'').split(' ')[0])}</span>`;}).join('')}${X.length>3?`<span class="mmore">+${X.length-3} ακόμα</span>`:''}</div></a>`;}).join('')}</div></div>`;}
 
@@ -3339,17 +3353,17 @@ function viewAgenda2(r){const c=agCfg();const t=todayISO();const PV=providers();
     :view==='week'?[`#/agenda?view=week&w=${addDays(w,-7)}`,`#/agenda?view=week`,`#/agenda?view=week&w=${addDays(w,7)}`,`Εβδομάδα ${fmtShort(w)} – ${fmtShort(addDays(w,6))}`]
     :[`#/agenda?view=day&d=${addDays(sel,-1)}`,`#/agenda?view=day`,`#/agenda?view=day&d=${addDays(sel,1)}`,`${WDAYS[wdOf(sel)]} ${fmtDate(sel)}`];
   const days=[...Array(7)].map((_,i)=>addDays(w,i));const LWa=occ(w,addDays(w,6),{withCancel:true});const LW=LWa.filter(o=>o.st!=='cancel');const work=days.filter(d=>c.days.includes(wdOf(d)));const freeN=work.reduce((a,d)=>a+freeSlots(d).length,0);const mins=LW.reduce((a,o)=>a+sessMin(o.s,o.e),0);
-  M().innerHTML=`${pageHead('Ραντεβού',nav[3],`<button class="btn pri" id="agNew">${ic('plus',16)} Ραντεβού</button><button class="iconbtn" id="agCfg" aria-label="Ωράριο" title="Ωράριο">${ic('settings',18)}</button><button class="iconbtn" id="agPdf" aria-label="Εκτύπωση / PDF" title="Εκτύπωση / PDF">${ic('printer',18)}</button><button class="iconbtn" id="agXl" aria-label="Κατέβασμα Excel" title="Κατέβασμα Excel">${ic('file',18)}</button>`)}
+  M().innerHTML=`${pageHead('Ραντεβού',nav[3],`<button class="btn pri" id="agNew">${ic('plus',16)} Ραντεβού</button><button class="btn" id="agBlk" title="Ώρες που δεν είσαι διαθέσιμος: μάθημα σχολής, δεύτερη δουλειά, προσωπικά">${ic('plus',16)} Δέσμευση</button><button class="iconbtn" id="agCfg" aria-label="Ωράριο" title="Ωράριο">${ic('settings',18)}</button><button class="iconbtn" id="agPdf" aria-label="Εκτύπωση / PDF" title="Εκτύπωση / PDF">${ic('printer',18)}</button><button class="iconbtn" id="agXl" aria-label="Κατέβασμα Excel" title="Κατέβασμα Excel">${ic('file',18)}</button>`)}
    <div class="agbar"><div class="seg">${[['month','Μήνας'],['week','Εβδομάδα'],['day','Ημέρα']].map(([k,l])=>`<a href="#/agenda?view=${k}&d=${sel}" class="${view===k?'on':''}">${l}</a>`).join('')}</div>
     <div class="seg" style="align-items:center"><a href="${nav[0]}" aria-label="Προηγούμενο">${ic('left',16)}</a><a href="${nav[1]}">Σήμερα</a><a href="${nav[2]}" aria-label="Επόμενο">${ic('right',16)}</a></div></div>
-   <div class="aglegend"><span><i class="live"></i>Τώρα</span><span><i class="active"></i>Ενεργό</span><span><i class="done"></i>Ολοκληρώθηκε</span><span><i class="cancel"></i>Ακυρώθηκε</span><span><i class="absent"></i>Απουσία</span><span><i class="once"></i>Μία φορά</span></div>
+   <div class="aglegend"><span><i class="live"></i>Τώρα</span><span><i class="active"></i>Ενεργό</span><span><i class="done"></i>Ολοκληρώθηκε</span><span><i class="cancel"></i>Ακυρώθηκε</span><span><i class="absent"></i>Απουσία</span><span><i class="once"></i>Μία φορά</span><span><i class="blk"></i>Δέσμευση</span></div>
    ${PV.length>1?`<div class="pvbar" role="group" aria-label="Προσωπικό"><button type="button" class="pvf ${by?'':'on'}" data-pvf="">${ic('users',14)} Όλοι <small>${PV.length}</small></button>${PV.map(p=>`<button type="button" class="pvf ${by===p.id?'on':''}" data-pvf="${p.id}"><i style="background:${p.color}">${provIni(p)}</i>${esc(p.short)}<small>${esc(roleName(p.role,p.custom))}</small></button>`).join('')}</div>`:''}
-   ${view==='month'?`${monthHTML(ym,sel)}<div class="card section" style="margin-top:14px"><div class="card-h"><h3>${WDAYS[wdOf(sel)]} ${fmtDate(sel)}</h3><a class="btn sm" href="#/agenda?view=day&d=${sel}">Ανάλυση ημέρας ${ic('right',14)}</a></div>${(()=>{const X=occ(sel,sel,{withCancel:true});const F=freeSlots(sel);return(X.length?`<div class="aglist">${X.map(o=>apptCard(o)).join('')}</div>`:'<p class="small muted" style="margin:0">Κανένα ραντεβού.</p>')+(F.length?`<div class="small" style="margin-top:12px"><b>Ελεύθερες ώρες:</b> ${F.map(s=>`<button class="chipt" data-new="${sel}|${s}">${s}</button>`).join(' ')}</div>`:'');})()}</div>`
+   ${view==='month'?`${monthHTML(ym,sel)}<div class="card section" style="margin-top:14px"><div class="card-h"><h3>${WDAYS[wdOf(sel)]} ${fmtDate(sel)}</h3><a class="btn sm" href="#/agenda?view=day&d=${sel}">Ανάλυση ημέρας ${ic('right',14)}</a></div>${(()=>{const X=occ(sel,sel,{withCancel:true});const XB=blockOcc(sel,sel);const F=freeSlots(sel);return(X.length?`<div class="aglist">${X.map(o=>apptCard(o)).join('')}</div>`:'<p class="small muted" style="margin:0">Κανένα ραντεβού.</p>')+(XB.length?`<div class="aglist" style="margin-top:8px">${XB.map(blockChipHTML).join('')}</div>`:'')+(F.length?`<div class="small" style="margin-top:12px"><b>Ελεύθερες ώρες:</b> ${F.map(s=>`<button class="chipt" data-new="${sel}|${s}">${s}</button>`).join(' ')}</div>`:'');})()}</div>`
     :`<div class="kpis section"><div class="kpi"><div class="k">Ραντεβού εβδομάδας</div><div class="v sm">${LW.length}</div></div><div class="kpi"><div class="k">Ώρες μαθημάτων</div><div class="v sm">${hoursNum(mins)}</div></div><div class="kpi"><div class="k">Ελεύθερες ώρες</div><div class="v sm" style="color:var(--ok)">${freeN*c.step/60}</div></div><div class="kpi"><div class="k">Πάγιοι μαθητές</div><div class="v sm">${new Set(appts().filter(a=>a.kind!=='once'&&(!a.until||a.until>=t)).map(a=>a.sid)).size}</div></div></div>
      ${view==='day'?`${daystripHTML(sel,t)}
        <div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="small muted">${isClosed(sel)?`<b style="color:var(--bad)">Κλειστά${holidayOf(sel)?' — '+esc(holidayOf(sel)):''}</b> — τα πάγια αυτής της μέρας δεν εμφανίζονται.`:'Πάτα σε κενό σημείο για νέο ραντεβού εκείνη την ώρα.'}</span><button class="btn sm ghost" data-close-day="${sel}">${isClosed(sel)?'Άνοιγμα ημέρας':'Κλειστά αυτή τη μέρα'}</button></div>`:''}
      ${timelineHTML(view==='week'?days:[sel],LWa.concat(view==='day'&&!days.includes(sel)?occ(sel,sel,{withCancel:true}):[]))}`}`;
-  $('#agNew').onclick=()=>apptDialog({date:sel,by});$$('[data-pvf]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('lumio-agstaff',b.dataset.pvf);}catch(e){}render();});$('#agCfg').onclick=agendaCfgDialog;$('#agPdf').onclick=()=>exportDialog('pdf',{sel,w,ym});$('#agXl').onclick=()=>exportDialog('xl',{sel,w,ym});
+  $('#agNew').onclick=()=>apptDialog({date:sel,by});$('#agBlk').onclick=()=>blockDialog({date:sel,by});$$('[data-pvf]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('lumio-agstaff',b.dataset.pvf);}catch(e){}render();});$('#agCfg').onclick=agendaCfgDialog;$('#agPdf').onclick=()=>exportDialog('pdf',{sel,w,ym});$('#agXl').onclick=()=>exportDialog('xl',{sel,w,ym});
   $$('.tl-col').forEach(col=>col.addEventListener('click',e=>{if(e.target.closest('.tl-ev')||col.classList.contains('off'))return;const y=e.clientY-col.getBoundingClientRect().top;const m=tmin(c.from)+Math.floor(y/PPM/30)*30;apptDialog({date:col.dataset.col,s:tstr(Math.max(tmin(c.from),Math.min(m,tmin(c.to)-30))),by});}));
   clearInterval(viewAgenda.tk);viewAgenda.tk=setInterval(()=>{if(!/^#\/agenda/.test(location.hash))return clearInterval(viewAgenda.tk);const n=$('.tl-now');if(n){const f=tmin(c.from);n.style.top=Math.round((nowMin()-f)*PPM)+'px';}},60000);
   const ds=$('#dstrip');if(ds){const on=$('.dchip.on',ds);if(on)ds.scrollLeft=on.offsetLeft-ds.clientWidth/2+on.clientWidth/2;}
@@ -3382,14 +3396,14 @@ function richPick({title,items,sel=[],multi=false,search=false,hint=''}){return 
   const ok=$('#rp-ok',md.el);if(ok)ok.onclick=()=>{done=true;md.close();res(cur);};});}
 
 /* ελεύθερα κενά για συγκεκριμένο άτομο και διάρκεια, ανά μισή ώρα */
-function slotsFor(date,pv,dur,skipId){const c=agCfg();if(!c.days.includes(wdOf(date))||isClosed(date))return[];const L=occ(date,date,{by:pv}).filter(o=>o.a.id!==skipId);const out=[];const now=date===todayISO()?nowMin():-1;
+function slotsFor(date,pv,dur,skipId){const c=agCfg();if(!c.days.includes(wdOf(date))||isClosed(date))return[];const L=occ(date,date,{by:pv}).concat(blockOcc(date,date,{by:pv})).filter(o=>o.a.id!==skipId);const out=[];const now=date===todayISO()?nowMin():-1;
   for(let t=tmin(c.from);t+dur<=tmin(c.to);t+=30){if(t<=now)continue;if(!L.some(o=>tmin(o.s)<t+dur&&t<tmin(o.e)))out.push(tstr(t));}return out;}
 
 /* ---- νέο / αλλαγή ραντεβού ---- */
 function apptDialog({date,s,a,by}={}){const c=agCfg();const st=myStudents();if(!st.length)return toast('Πρόσθεσε πρώτα μαθητή.','bad');const edit=!!a;const PV=providers();let pv=a?provOf(a):(by||PV[0].id);const multiPV=PV.length>1||(a&&a.by);
   let sel=a?[a.sid]:[];let kind=a?a.kind:'weekly';const st0=a?a.s:(s||'17:00');let wk=mondayOf(a?a.date:date||todayISO());
   const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">${edit?'Αλλαγή ραντεβού':'Νέο ραντεβού'}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
-   <form id="af"><label class="f">Μαθητής</label><button type="button" class="pickbtn field" id="a-st" ${edit?'disabled':''}></button>
+   ${edit?'':`<button type="button" class="btn sm ghost" id="a-blk" style="margin:-4px 0 8px">${ic('l-flag',14)} Δεν είναι μάθημα; Δήλωσε δέσμευση (σχολή, δουλειά…)</button>`}<form id="af"><label class="f">Μαθητής</label><button type="button" class="pickbtn field" id="a-st" ${edit?'disabled':''}></button>
    ${multiPV?`<label class="f">Ποιος κάνει το μάθημα</label><button type="button" class="pickbtn field" id="a-pv"></button>`:''}
    <label class="f">Υλικό του μαθήματος <span class="tiny muted">· προαιρετικό</span></label><button type="button" class="pickbtn field" id="a-mt"></button>
    <div class="seg field" id="ak">${REPEAT.map(([k,l])=>`<button type="button" data-k="${k}" class="${kind===k?'on':''}">${l}</button>`).join('')}</div>
@@ -3424,6 +3438,7 @@ function apptDialog({date,s,a,by}={}){const c=agCfg();const st=myStudents();if(!
     const dd=e.target.closest('[data-avd]');if(dd){f.date.value=dd.dataset.avd;chk();const F=slotsFor(f.date.value,pv,dur(),a&&a.id);if(F.length&&!F.includes(f.s.value)){const du=dur();f.s.value=F[0];f.e.value=tstr(tmin(F[0])+du);chk();}}
     const sb=e.target.closest('[data-avs]');if(sb){const du=dur();f.s.value=sb.dataset.avs;f.e.value=tstr(tmin(sb.dataset.avs)+du);chk();}});
   f.oninput=chk;f.addEventListener('change',chk);chk();
+  const ab=$('#a-blk',md.el);if(ab)ab.onclick=()=>{const d=f.date.value,s0=f.s.value;md.close();blockDialog({date:d,s:s0,by:pv});};
   const del=$('#a-del',md.el);if(del)del.onclick=async()=>{if(!await confirmDlg(a.kind==='once'?'Διαγραφή ραντεβού;':'Διαγραφή όλου του πάγιου ραντεβού (όλες οι εβδομάδες);',{danger:true,ok:'Διαγραφή'}))return;S.data.appts=appts().filter(x=>x.id!==a.id);save();md.close();render();};
   f.onsubmit=e=>{e.preventDefault();const o=fd(f);if(!sel.length){toast('Διάλεξε μαθητή.','bad');return $('#a-st',md.el).click();}if(!sessMin(o.s,o.e)||tmin(o.e)<=tmin(o.s))return toast('Έλεγξε τις ώρες.','bad');
     const base={kind,date:o.date,d:wdOf(o.date),s:o.s,e:o.e,until:kind==='once'?null:(o.until||null),note:o.note||'',by:pv==='me'?undefined:pv,mats:mats.length?mats:undefined};
@@ -3541,6 +3556,56 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-ts]');if(!
   el.value=tstr(nv);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));});
 new MutationObserver(()=>enhanceTimes(document.body)).observe(document.documentElement,{childList:true,subtree:true});
 
+/* ===== Δεσμεύσεις στο ημερολόγιο: ώρες που δεν είσαι διαθέσιμος (μάθημα σχολής, δεύτερη δουλειά, προσωπικά) ===== */
+const BLOCK_CATS=[['study','Μάθημα σχολής','🎓','#5A8DC8'],['job','Δεύτερη δουλειά','💼','#C98A3A'],['personal','Προσωπικό','🏠','#8A8F98'],['break','Διάλειμμα / φαγητό','☕','#5FA57E'],['travel','Μετακίνηση','🚗','#9C7BC0'],['other','Άλλο','📌','#C46A7A']];
+function blocks(){return S.data.blocks=S.data.blocks||[];}
+const blkCat=b=>BLOCK_CATS.find(c=>c[0]===b.cat)||BLOCK_CATS[BLOCK_CATS.length-1];
+const blkColor=b=>b.color||blkCat(b)[3];
+const blkTitle=b=>b.title||blkCat(b)[1];
+function blockOcc(from,to,{by}={}){const B=by!==undefined?by:AGF;const out=[];
+  for(const b of blocks()){const pv=b.by||'me';if(B&&pv!==B)continue;const push=d=>{if(d<from||d>to)return;if((b.ex||{})[d]==='skip')return;out.push({blk:b,a:{id:b.id,by:b.by,kind:b.kind,sid:null},by:b.by,date:d,s:b.s,e:b.e,st:'',key:b.id+'|'+d});};
+    if(b.kind==='once'){push(b.date);continue;}
+    for(let d=from>b.date?from:b.date;d<=to;d=addDays(d,1)){if(b.until&&d>b.until)break;if((b.days||[]).includes(wdOf(d)))push(d);}}
+  return out.sort((x,y)=>(x.date+x.s).localeCompare(y.date+y.s));}
+function blockChipHTML(o){const b=o.blk;return`<button type="button" class="appt blk" data-blk="${o.key}" style="--bc:${blkColor(b)}"><span class="av">${blkCat(b)[2]}</span><span class="grow"><b>${esc(blkTitle(b))}</b><small>${o.s}–${o.e} · ${esc(blkCat(b)[1])}${b.kind==='weekly'?' · κάθε εβδομάδα':''}</small></span></button>`;}
+
+function blockDialog({date,s,b,by}={}){const edit=!!b;const PV=providers();let pv=b?(b.by||'me'):(by||PV[0].id);let cat=b?b.cat:'study';let kind=b?b.kind:'weekly';let days=b?(b.days||[]).slice():[wdOf(date||todayISO())];const st0=b?b.s:(s||'09:00');
+  const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">${edit?'Αλλαγή δέσμευσης':'Νέα δέσμευση'}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
+   <p class="small muted" style="margin-top:0">Ώρες που δεν είσαι διαθέσιμος για ραντεβού — π.χ. τα μαθήματά σου στη σχολή ή μια δεύτερη δουλειά. Φαίνονται με δικό τους χρώμα και δεν προτείνονται ως ελεύθερες.</p>
+   <form id="bf"><label class="f">Τι είναι</label><div class="bcats field">${BLOCK_CATS.map(([k,l,e,c])=>`<button type="button" class="bcat ${cat===k?'on':''}" data-bc="${k}" style="--bc:${c}"><span>${e}</span>${esc(l)}</button>`).join('')}</div>
+    <div class="field"><label class="f" for="b-t">Τίτλος (προαιρετικό)</label><input class="in" id="b-t" name="title" value="${esc(b&&b.title||'')}" placeholder="π.χ. Στατιστική, Καφετέρια, Γυμναστήριο"></div>
+    ${PV.length>1?`<div class="field"><label class="f" for="b-p">Ποιου η δέσμευση</label><select class="in" id="b-p" name="pv">${PV.map(p=>opt(p.id,p.id==='me'?(S.user.name||'Εγώ')+' (εγώ)':p.name,pv)).join('')}</select></div>`:''}
+    <div class="seg field" id="bk"><button type="button" data-bk="weekly" class="${kind==='weekly'?'on':''}">Κάθε εβδομάδα</button><button type="button" data-bk="once" class="${kind==='once'?'on':''}">Μία φορά</button></div>
+    <div class="field" id="b-dw"><label class="f">Ποιες μέρες</label><div class="chips">${DAY_ORDER.map(d=>`<button type="button" class="chipt ${days.includes(d)?'on':''}" data-bd="${d}">${WDAYS_S[d]}</button>`).join('')}</div></div>
+    <div class="field" id="b-ow"><label class="f" for="b-d">${kind==='once'?'Ημερομηνία':'Από'}</label><input class="in" type="date" id="b-d" name="date" required value="${b?b.date:date||todayISO()}"></div>
+    <div class="grid g2" style="gap:10px"><div class="field"><label class="f" for="b-s">Από ώρα</label><input class="in" type="time" id="b-s" name="s" required value="${st0}"></div><div class="field"><label class="f" for="b-e">Έως ώρα</label><input class="in" type="time" id="b-e" name="e" required value="${b?b.e:tstr(tmin(st0)+120)}"></div></div>
+    <div class="field" id="b-uw"><label class="f" for="b-u">Μέχρι (προαιρετικό)</label><input class="in" type="date" id="b-u" name="until" value="${b&&b.until||''}"><div class="tiny muted" style="margin-top:4px">Π.χ. τέλος εξαμήνου. Κενό = χωρίς λήξη.</div></div>
+    <div id="b-cf"></div>
+    <div class="row" style="justify-content:space-between">${edit?`<button type="button" class="btn danger" id="b-del">${ic('trash',16)} Διαγραφή</button>`:'<span></span>'}<span class="row"><button type="button" class="btn" data-close>Άκυρο</button><button class="btn pri">${ic('check',16)} Αποθήκευση</button></span></div></form>`);
+  const f=$('#bf',md.el);
+  const draw=()=>{$('#b-dw',md.el).style.display=kind==='weekly'?'':'none';$('#b-uw',md.el).style.display=kind==='weekly'?'':'none';$('#b-ow label',md.el).textContent=kind==='once'?'Ημερομηνία':'Από';
+    const d0=f.date.value;const chk=kind==='once'?[d0]:[...Array(14)].map((_,i)=>addDays(d0,i)).filter(d=>days.includes(wdOf(d)));const pid=f.pv?f.pv.value:pv;
+    const C=chk.flatMap(d=>occ(d,d,{by:pid})).filter(o=>tmin(o.s)<tmin(f.e.value)&&tmin(f.s.value)<tmin(o.e));
+    $('#b-cf',md.el).innerHTML=C.length?`<div class="note small field" style="background:var(--pink)">${ic('alert',14)} Πέφτει πάνω σε ραντεβού: ${C.slice(0,4).map(o=>esc(stuName(stOf(o.a.sid)))+' '+WDAYS_S[wdOf(o.date)]+' '+o.s).join(', ')}${C.length>4?'…':''}. Μετακίνησέ τα ή άλλαξε τις ώρες.</div>`:'';};
+  draw();f.addEventListener('input',draw);f.addEventListener('change',draw);
+  md.el.addEventListener('click',e=>{const c=e.target.closest('[data-bc]');if(c){cat=c.dataset.bc;$$('[data-bc]',md.el).forEach(x=>x.classList.toggle('on',x===c));}
+    const k=e.target.closest('[data-bk]');if(k){kind=k.dataset.bk;$$('[data-bk]',md.el).forEach(x=>x.classList.toggle('on',x===k));draw();}
+    const d=e.target.closest('[data-bd]');if(d){const v=+d.dataset.bd;days=days.includes(v)?days.filter(x=>x!==v):days.concat(v);d.classList.toggle('on');draw();}});
+  const del=$('#b-del',md.el);if(del)del.onclick=async()=>{if(!await confirmDlg(b.kind==='weekly'?'Διαγραφή της δέσμευσης για όλες τις εβδομάδες;':'Διαγραφή δέσμευσης;',{danger:true,ok:'Διαγραφή'}))return;S.data.blocks=blocks().filter(x=>x.id!==b.id);save();md.close();render();};
+  f.onsubmit=e=>{e.preventDefault();const o=fd(f);if(tmin(o.e)<=tmin(o.s))return toast('Έλεγξε τις ώρες.','bad');if(kind==='weekly'&&!days.length)return toast('Διάλεξε τουλάχιστον μία μέρα.','bad');
+    const rec={cat,title:(o.title||'').trim(),by:(o.pv||pv)==='me'?undefined:(o.pv||pv),kind,date:o.date,days:kind==='weekly'?days.slice().sort():[],s:o.s,e:o.e,until:kind==='weekly'?(o.until||null):null};
+    if(edit)Object.assign(b,rec);else blocks().push({id:uid(),ex:{},created:new Date().toISOString(),...rec});save();md.close();toast(edit?'Η δέσμευση άλλαξε.':'Η δέσμευση μπήκε στο ημερολόγιο.','ok');render();};}
+function blockSheet(key){const[id,date]=key.split('|');const b=blocks().find(x=>x.id===id);if(!b)return;const c=blkCat(b);
+  const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">Δέσμευση</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
+   <div class="qsum" style="border-left:5px solid ${blkColor(b)}"><span class="av lg">${c[2]}</span><div><b>${esc(blkTitle(b))}</b><div class="small">${WDAYS[wdOf(date)]} ${fmtDate(date)} · ${b.s}–${b.e}</div><div class="tiny muted">${esc(c[1])}${b.kind==='weekly'?' · κάθε '+b.days.map(d=>WDAYS_S[d]).join(', '):''}${b.until?' · μέχρι '+fmtShort(b.until):''}</div></div></div>
+   <div class="actgrid"><button class="btn" data-b="edit">${ic('edit',16)}<span>Αλλαγή</span></button>${b.kind==='weekly'?`<button class="btn" data-b="skip">${ic('x',16)}<span>Όχι αυτή τη φορά</span></button><button class="btn" data-b="stop">${ic('l-flag',16)}<span>Τέλος από εδώ</span></button>`:''}<button class="btn danger" data-b="del">${ic('trash',16)}<span>Διαγραφή</span></button></div>`);
+  md.el.addEventListener('click',async e=>{const x=e.target.closest('[data-b]');if(!x)return;const k=x.dataset.b;
+    if(k==='edit'){md.close();return blockDialog({b});}
+    if(k==='skip'){b.ex=b.ex||{};b.ex[date]='skip';save();md.close();toast('Αυτή τη φορά είσαι ελεύθερος.','ok');return render();}
+    if(k==='stop'){b.until=addDays(date,-1);save();md.close();return render();}
+    if(k==='del'){if(!await confirmDlg('Διαγραφή δέσμευσης;',{danger:true,ok:'Διαγραφή'}))return;S.data.blocks=blocks().filter(y=>y.id!==b.id);save();md.close();return render();}});}
+document.addEventListener('click',e=>{if(!S.user||!e.target.closest)return;const b=e.target.closest('[data-blk]');if(b){e.stopPropagation();blockSheet(b.dataset.blk);}},true);
+
 /* ===== Υλικό ανά ραντεβού και πρόοδος για τους γονείς ===== */
 /* υλικό: a.mats (πάγιο, κάθε φορά) ή ex[date].mats (μόνο εκείνη τη μέρα) */
 function apptMats(a,date){const x=(a.ex||{})[date];const ids=x&&x.mats?x.mats:(a.mats||[]);return ids.map(id=>S.data.materials.find(m=>m.id===id)).filter(Boolean);}
@@ -3626,6 +3691,18 @@ function progressDialog(sid,{date,kind}={}){const st=getStudent(sid)||stOf(sid);
   const sm=$('#p-sms',md.el);if(sm)sm.onclick=()=>{const sep=/iP(hone|ad|od)/.test(navigator.userAgent)?'&':'?';location.href=`sms:${telLink(phones[0].phone)}${sep}body=${encodeURIComponent(txt())}`;};
   $('#p-sh',md.el).onclick=async()=>{if(navigator.share)return mkPdf(true).catch(()=>{});try{await navigator.clipboard.writeText(txt());toast('Το κείμενο αντιγράφηκε.','ok');}catch(e){promptDlg('Αντίγραψε το κείμενο',{value:txt()});}};}
 
+/* ---- «Ποιο παιδί παίζει;» — πρώτα όσα έχουν μάθημα τώρα ή σήμερα ---- */
+async function choosePlayer({pre}={}){const t=todayISO(),nm=nowMin();const O=occ(t,addDays(t,6),{by:''}).filter(o=>o.st!=='cancel');
+  const rank=sid=>{if(sid===pre)return[-1,'το υλικό είναι για αυτό το παιδί'];const X=O.filter(o=>o.a.sid===sid&&o.date===t);
+    const live=X.find(o=>tmin(o.s)-15<=nm&&nm<tmin(o.e));if(live)return[0,`<span class="chip ok">μάθημα τώρα ${live.s}–${live.e}</span>`];
+    const nx=X.filter(o=>tmin(o.s)>nm).sort((a,b)=>a.s.localeCompare(b.s))[0];if(nx)return[1+(tmin(nx.s)-nm)/2000,`<span class="chip">σήμερα ${nx.s}</span>`];
+    if(X.length)return[1.9,`σήμερα ${X[X.length-1].s} (πέρασε)`];const W=O.filter(o=>o.a.sid===sid);if(W.length)return[2+W[0].date.localeCompare(t)/1e9,`επόμενο: ${WDAYS_S[wdOf(W[0].date)]} ${W[0].s}`];return[3,''];};
+  const L=myStudents().map(s=>({s,r:rank(s.id)})).sort((a,b)=>a.r[0]-b.r[0]||stuName(a.s).localeCompare(stuName(b.s),'el'));
+  const items=[{id:'_none',label:'Κανένα — δοκιμή',av:'👀',sub:'Παίζεις εσύ· δεν καταγράφεται αποτέλεσμα'},...L.map(({s,r})=>({id:s.id,label:stuName(s),av:s.avatar||'🙂',sub:r[1].startsWith('<')?'':esc(r[1]),badge:r[1].startsWith('<')?r[1]:''}))];
+  const r=await richPick({title:'Ποιο παιδί παίζει;',items,sel:['_none'],search:L.length>8,hint:L.some(x=>x.r[0]<2)?'Πρώτα τα παιδιά που έχουν μάθημα τώρα ή σήμερα.':'Το αποτέλεσμα καταγράφεται στο παιδί που θα διαλέξεις.'});
+  return r?r[0]:null;}
+async function playWithPicker(m,opt={}){if(!m)return;const sid=await choosePlayer(opt);if(sid==null)return;if(sid==='_none')return playGame(m,{preview:true,band:m.ageBand});playForStudent(m.id,sid);}
+
 /* ===== Βοήθεια: διακριτικό «!» δίπλα σε τίτλους — εξηγεί κάθε κουμπί της σελίδας ===== */
 const HELP={
  dashboard:['Αρχική','Η πρώτη σελίδα: τι έχεις σήμερα και γρήγορη πρόσβαση σε όλα.',[
@@ -3649,6 +3726,7 @@ const HELP={
   ['Βελάκια ώρας','Δίπλα σε κάθε ώρα: πάνω = μισή ώρα αργότερα, κάτω = μισή ώρα νωρίτερα. Αν αλλάξεις την έναρξη, η λήξη μετακινείται μαζί και κρατά την ίδια διάρκεια.'],
   ['Πράσινες γραμμές και «+»','Ελεύθερη ώρα — πάτα για να κλείσεις ραντεβού ακριβώς εκεί.'],
   ['Πάτημα σε ραντεβού','Ήρθε (καταχώριση συνεδρίας), Απουσία, Μετακίνηση, Ακύρωση μόνο αυτή τη φορά, Αλλαγή, Τέλος πάγιου, και υπενθύμιση στον γονέα με SMS ή email. Πάτα πάνω στον μαθητή (κουτί με το μολύβι) για γρήγορη αλλαγή: ποιος κάνει το μάθημα, ώρα, σημείωση — μόνο για εκείνη τη μέρα ή για όλες τις φορές.'],
+  ['Δέσμευση (κουμπί)','Ώρες που δεν είσαι διαθέσιμος — μάθημα σχολής, δεύτερη δουλειά, προσωπικό, διάλειμμα, μετακίνηση. Μία φορά ή κάθε εβδομάδα σε όσες μέρες θέλεις. Φαίνονται με ριγέ χρώμα, δεν προτείνονται ως ελεύθερες και μετράνε στην πληρότητα. Πάτα πάνω τους για αλλαγή ή «όχι αυτή τη φορά».'],
   ['Τι θα κάνουμε','Μέσα στο ραντεβού: διαλέγεις παιχνίδια ή ασκήσεις (δικά σου ή έτοιμα) για εκείνο το μάθημα ή για όλα τα μαθήματα του πάγιου. «Παίξε» τα ανοίγει για τον μαθητή και το αποτέλεσμα καταγράφεται. Μπαίνουν και από το «Νέο ραντεβού».'],
   ['Πρόοδος για τους γονείς','Από το ραντεβού ή από το προφίλ μαθητή: παρουσίες, δραστηριότητες, επιτυχία ανά μάθημα, δυνατά σημεία και τι θα δουλέψουμε — για το μάθημα, την εβδομάδα, τον μήνα, όλα ή από–έως. PDF, email, SMS ή κοινοποίηση, με δικό σου σχόλιο.'],
   ['Κλειστά αυτή τη μέρα','Για άδεια ή τοπική γιορτή: η μέρα γίνεται κόκκινη και κρύβει τα πάγια χωρίς να τα σβήνει. Οι επίσημες αργίες κλείνουν μόνες τους (Ρυθμίσεις → Η επιχείρησή μου → Αργίες)· σε αργία που δουλεύετε πάτα «Άνοιγμα ημέρας».'],
@@ -3676,7 +3754,7 @@ const HELP={
  create:['Δημιουργία','Διαλέγεις τι θα φτιάξεις.',[
   ['Δημιουργία (κουμπί)','Ξεκινά βήμα-βήμα: μαθητής, στόχος, θέμα, δυσκολία.'],
   ['Έτοιμες','Ανοίγει έτοιμες επιλογές με εικονίδια (π.χ. είδη παιχνιδιών, θέματα, στόχοι) — διαλέγεις και ο οδηγός ανοίγει ήδη συμπληρωμένος.'],
-  ['Έτοιμες (με αριθμό)','Ο αριθμός στο «Έτοιμες» δείχνει πόσα έτοιμα υπάρχουν σε κάθε είδος: παιχνίδια, ασκήσεις, δραστηριότητες, κάρτες, ιστορίες. Χρησιμοποιούνται αμέσως, χωρίς τεχνητή νοημοσύνη — «Άνοιγμα» για ανάθεση σε μαθητή. Από κάτω υπάρχουν και οι επιλογές για νέο υλικό με τεχνητή νοημοσύνη.'],
+  ['Έτοιμες (με αριθμό)','Ο αριθμός πάνω δεξιά δείχνει πόσα έτοιμα έχει κάθε είδος — πάτα τον ή το «Έτοιμες» και ανοίγουν κατευθείαν. Αχνό «Έτοιμες» = δεν υπάρχουν ακόμα έτοιμα, μόνο επιλογές με τεχνητή νοημοσύνη. Στο «Παίξε» διαλέγεις ποιο παιδί παίζει (πρώτα όσα έχουν μάθημα τώρα) ή «Κανένα — δοκιμή».'],
   ['Αλλαγή σειράς','Μετακινείς τις κάρτες με τα βελάκια· η σειρά μένει και στο μενού.'],
   ['Πρόσφατα','Ό,τι έφτιαξες τελευταία.']]],
  wizard:['Οδηγός δημιουργίας','Συμπλήρωσε τα βήματα — η εργασία σώζεται μόνη της και δεν χάνεται.',[
