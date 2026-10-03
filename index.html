@@ -642,6 +642,30 @@ body.on-tm .main{padding-bottom:0}
 @media(max-width:1100px){.wmgrid{grid-template-columns:minmax(0,1fr)}}
 .wmprev{width:100%;max-width:300px;height:auto;display:block;margin:0 auto;border:1px solid var(--line);border-radius:8px;box-shadow:var(--sh);background:#fff}
 .field input[type=range]{width:100%;accent-color:var(--lilac-d)}
+.conrow{grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr) auto!important;padding:10px;border:1px solid var(--line2);border-radius:14px}
+.conrow [data-cf=phone]{grid-column:1/2!important;grid-row:2!important}
+.conrow [data-cf=email]{grid-column:2/4!important;grid-row:2!important}
+@media(max-width:620px){.conrow [data-cf=phone]{grid-column:1/4!important;grid-row:2!important}.conrow [data-cf=email]{grid-column:1/4!important;grid-row:3!important}}
+.in.err{border-color:var(--bad)!important;background:var(--badbg)}
+.subjbtn{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer;min-height:46px;height:auto;padding-top:8px;padding-bottom:8px}
+.subjbtn .chips{gap:5px}
+.picklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;max-height:55vh;overflow:auto}
+@media(max-width:520px){.picklist{grid-template-columns:minmax(0,1fr)}}
+.plrow{padding:8px 4px;border-bottom:1px solid var(--line2)}
+/* ---- Ταμείο: συνεδρίες & καρτέλες ---- */
+.tmseg{margin:0 0 14px;max-width:100%}
+.tmseg a{display:inline-flex;align-items:center;gap:6px}
+.stucards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+@media(max-width:620px){.stucards{grid-template-columns:minmax(0,1fr)}}
+.stucard .nm{display:block;font-size:1.02rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.av{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--line2);font-size:1.3rem;flex:none}
+.av.lg{width:52px;height:52px;border-radius:16px;font-size:1.7rem}
+.slotrow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) auto;gap:6px;margin-bottom:8px;align-items:center}
+.planbox{background:var(--lilac);border-radius:14px;padding:12px 14px}
+.qsum{display:flex;gap:14px;align-items:center;padding:14px;border-radius:16px;background:var(--line2);margin-bottom:12px}
+.qamt{font-family:var(--head);font-size:1.6rem;font-weight:700;margin-top:4px}
+.rcpt{white-space:pre-wrap;font-family:var(--font);font-size:.86rem;line-height:1.55;max-height:42vh;overflow:auto}
+.finlock{display:flex;align-items:center;gap:12px;padding:14px 16px}
 
 /* ===== games ===== */
 .gwrap{position:fixed;inset:0;z-index:80;overflow:auto;display:flex;flex-direction:column;font-family:"Comfortaa","Commissioner",sans-serif}
@@ -815,7 +839,7 @@ body.on-tm .main{padding-bottom:0}
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.7.0';
+const APP_VERSION='2.8.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -983,7 +1007,8 @@ async function shareOrCopy(text,title){if(navigator.share){try{await navigator.s
 /* ---- εμφάνιση ---- */
 /* ---- εμφάνιση: θέμα, χρώματα, φόντο ---- */
 const PALETTES={lavender:{n:'Λεβάντα',c:['#E9E2F7','#7462B4','#FAF6EF']},sea:{n:'Θάλασσα',c:['#DCEEF0','#2F7F8C','#F3F7F7']},peach:{n:'Ροδάκινο',c:['#FBE4D8','#BF6A45','#FBF4EE']},forest:{n:'Δάσος',c:['#E2EEDC','#4D8649','#F4F6EF']}};
-const TM_PALS={petrol:{n:'Πετρόλ',brand:'#2F5D62',accent:'#F6CF5E'},plum:{n:'Δαμασκηνί',brand:'#5B4B8A',accent:'#F2C46D'},navy:{n:'Μπλε νύχτας',brand:'#2D4A6B',accent:'#F0B37E'},wine:{n:'Μπορντό',brand:'#7A3E55',accent:'#F3C77A'}};
+const TM_PALS={mint:{n:'Μέντα',brand:'#D7EEE3',on:'#24584A',ln:'#8FC4AE',accent:'#F7DC8C',onaccent:'#5C4612',acctx:'#B98A1E'},sky:{n:'Ουρανός',brand:'#D9E8F6',on:'#2B4C6E',ln:'#9BBCDD',accent:'#F6D2A8',onaccent:'#6B3E14',acctx:'#C77A4E'},lilac:{n:'Λιλά',brand:'#E5DEF6',on:'#4A3D82',ln:'#B3A6E0',accent:'#F7DC8C',onaccent:'#5C4612',acctx:'#B98A1E'},peach:{n:'Ροδάκινο',brand:'#FBE1D3',on:'#7A3E22',ln:'#E9B096',accent:'#F3D9A0',onaccent:'#5C4612',acctx:'#A8742E'},petrol:{n:'Πετρόλ',brand:'#2F5D62',on:'#FFFFFF',ln:'#2F5D62',accent:'#F6CF5E',onaccent:'#2E2A33',acctx:'#F6CF5E',deep:1},navy:{n:'Μπλε νύχτας',brand:'#2D4A6B',on:'#FFFFFF',ln:'#2D4A6B',accent:'#F0B37E',onaccent:'#2E2A33',acctx:'#F0B37E',deep:1}};
+const TM_PAL_DEF='mint';
 const BGS=[['icon','Σχέδιο του εικονιδίου'],['scene','Σκηνή της αρχικής'],['custom','Δική μου εικόνα'],['none','Χωρίς φόντο']];
 const LOGO_ART=LOGO.replace(/<rect[^>]*\/>/,'');
 const svgURL=svg=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(/xmlns=/.test(svg)?svg:svg.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" '));
@@ -1413,6 +1438,11 @@ function showResult(id){const r=S.data.results.find(x=>x.id===id);if(!r)return;c
 const AVATARS=['🦊','🐼','🦁','🐯','🐨','🐸','🦄','🐙','🐬','🦖','🚀','⚽','🎨','🎸','🌟','🌈','🤖','🧚','🦸','🐱','🐶','🐰','🦋','🐢',
  '🐻','🐵','🐷','🐮','🐔','🐧','🐦','🦉','🐝','🐞','🐠','🐳','🦒','🦓','🐘','🦔','🐿️','🦜','🦩','🦕','🐲','🐌','🦀','🐞',
  '🏀','🏈','🎾','🏐','🚲','🛹','🏎️','🚂','✈️','🚁','⛵','🛸','🎮','🧩','🎲','🎯','🎹','🥁','🎺','📚','🔭','🧪','🌻','🍉'].filter((x,i,a)=>a.indexOf(x)===i);
+function pickList(title,items,sel,{other}={}){return new Promise(res=>{let cur=sel.slice();let done=false;const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">${esc(title)}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div><p class="small muted" style="margin-top:0">Διάλεξε όσα θέλεις.</p><div class="picklist" id="pl"></div>${other?`<button type="button" class="btn sm" id="plo" style="margin-top:10px">${ic('plus',15)} ${esc(other)}</button>`:''}<div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" data-close>Άκυρο</button><button class="btn pri" id="plok">${ic('check',16)} Εντάξει</button></div>`,{onClose:()=>{if(!done)res(null);}});
+  const draw=()=>{$('#pl',md.el).innerHTML=items.map(x=>`<label class="check plrow"><input type="checkbox" value="${esc(x)}" ${cur.includes(x)?'checked':''}><span>${esc(x)}</span></label>`).join('');};draw();
+  $('#pl',md.el).onchange=e=>{const v=e.target.value;cur=e.target.checked?cur.concat(v):cur.filter(y=>y!==v);};
+  const o=$('#plo',md.el);if(o)o.onclick=async()=>{const v=(await promptDlg(other)||'').trim();if(v&&!items.includes(v)){items=items.concat(v);cur.push(v);draw();}};
+  $('#plok',md.el).onclick=()=>{done=true;md.close();res(items.filter(x=>cur.includes(x)));};});}
 const CONTACT_ROLES=['Μητέρα','Πατέρας','Κηδεμόνας','Γιαγιά','Παππούς','Θεία','Θείος','Αδελφός/ή','Άλλο'];
 const telLink=p=>String(p||'').replace(/[^\d+]/g,'');
 function viewStudentEdit(r){const isNew=r.id==='new';const s0=isNew?{id:uid(),code:genCode(),avatar:pick(AVATARS),ownerId:S.user.id,levels:{},created:new Date().toISOString()}:getStudent(r.id);if(!s0)return go('students');
@@ -1421,8 +1451,9 @@ function viewStudentEdit(r){const isNew=r.id==='new';const s0=isNew?{id:uid(),co
   const custom=S.data.settings.lpCustom=S.data.settings.lpCustom||{};
   let subj=(s.subjects||'').split(/[,;]/).map(x=>x.trim()).filter(Boolean);let contacts=(s.contacts||[]).map(c=>({...c}));if(!contacts.length)contacts.push({role:'Μητέρα',name:'',phone:''});
   const ta=(n,l,ph)=>`<div class="field"><label class="f">${l}</label><textarea class="in" name="${n}" placeholder="${esc(ph||'')}" style="min-height:64px">${esc(s[n]||'')}</textarea></div>`;
-  const subjHTML=()=>`<div class="chips">${[...new Set(SUBJECTS.concat(subj))].map(x=>`<button type="button" class="chipt ${subj.includes(x)?'on':''}" data-subj="${esc(x)}">${esc(x)}</button>`).join('')}<button type="button" class="chipt add" data-subjadd="1">${ic('plus',14)} Άλλο</button></div>`;
-  const conHTML=()=>contacts.map((c,i)=>`<div class="conrow" data-ci="${i}"><select class="in" data-cf="role" aria-label="Ιδιότητα">${CONTACT_ROLES.map(x=>opt(x,x,c.role)).join('')}</select><input class="in" data-cf="name" value="${esc(c.name||'')}" placeholder="Όνομα" aria-label="Όνομα"><input class="in" data-cf="phone" type="tel" inputmode="tel" value="${esc(c.phone||'')}" placeholder="Τηλέφωνο" aria-label="Τηλέφωνο"><button type="button" class="iconbtn" data-cdel="${i}" aria-label="Αφαίρεση">${ic('x',16)}</button></div>`).join('')+`<button type="button" class="btn sm" id="cadd">${ic('plus',15)} Προσθήκη επαφής</button>`;
+  const canPick=!!(navigator.contacts&&window.ContactsManager);
+  const conHTML=()=>contacts.map((c,i)=>`<div class="conrow" data-ci="${i}"><select class="in" data-cf="role" aria-label="Ιδιότητα">${CONTACT_ROLES.map(x=>opt(x,x,c.role)).join('')}</select><input class="in" data-cf="name" value="${esc(c.name||'')}" placeholder="Ονοματεπώνυμο" aria-label="Ονοματεπώνυμο" autocomplete="name"><button type="button" class="iconbtn" data-cdel="${i}" aria-label="Αφαίρεση επαφής">${ic('x',16)}</button><input class="in" data-cf="phone" type="tel" inputmode="tel" value="${esc(c.phone||'')}" placeholder="Τηλέφωνο" aria-label="Τηλέφωνο" autocomplete="tel"><input class="in" data-cf="email" type="email" inputmode="email" autocapitalize="none" value="${esc(c.email||'')}" placeholder="Email (για αποδείξεις) *" aria-label="Email" autocomplete="email"></div>`).join('')+`<div class="row" style="gap:8px"><button type="button" class="btn sm" id="cadd">${ic('plus',15)} Προσθήκη επαφής</button>${canPick?`<button type="button" class="btn sm" id="cpick">${ic('users',15)} Από τις επαφές του κινητού</button>`:''}</div>${canPick?'':`<p class="tiny muted" style="margin:8px 0 0">Η εισαγωγή από τις επαφές λειτουργεί σε κινητά Android (Chrome). Στο iPhone το Safari δεν το επιτρέπει ακόμη· εκεί το πληκτρολόγιο προτείνει στοιχεία καθώς γράφεις.</p>`}<p class="tiny muted" style="margin:6px 0 0">* Χρειάζεται τουλάχιστον ένα email γονέα — εκεί στέλνονται οι αποδείξεις.</p>`;
+  const subjHTML=()=>`<button type="button" class="in subjbtn" id="subjb">${subj.length?`<span class="chips">${subj.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</span>`:'<span class="muted">Διάλεξε μαθήματα</span>'}${ic('down',16)}</button>`;
   const catHTML=c=>{const v=lp[c.key]||{c:[],t:''};const opts=[...new Set(c.chips.concat(custom[c.key]||[]).concat(v.c||[]))];return`<details class="lpcat" ${(v.c||[]).length||v.t?'open':''} data-k="${c.key}"><summary><span class="ricon">${ic(c.icon,17)}</span><span class="grow"><b>${c.name}</b><small>${(v.c||[]).length?(v.c.length+' επιλογές'):''}${v.t?((v.c||[]).length?' · ':'')+'δικό σου κείμενο':''}${!(v.c||[]).length&&!v.t?esc(c.hint):''}</small></span>${ic('down',16)}</summary>
     <div class="chips">${opts.map(x=>`<button type="button" class="chipt ${(v.c||[]).includes(x)?'on':''}" data-lp="${esc(x)}">${esc(x)}${(custom[c.key]||[]).includes(x)?`<span class="cx" data-lpdel="${esc(x)}" aria-label="Αφαίρεση από τις επιλογές">${ic('x',12)}</span>`:''}</button>`).join('')}<button type="button" class="chipt add" data-lpadd="1">${ic('plus',14)} Δική μου επιλογή</button></div>
     ${c.def.length?`<div class="tiny muted" style="margin:6px 0 0">«${c.def.join('», «')}»: ${LP_GENERAL.toLowerCase()}.</div>`:''}
@@ -1433,10 +1464,10 @@ function viewStudentEdit(r){const isNew=r.id==='new';const s0=isNew?{id:uid(),co
     <div class="field"><label class="f">Εικονίδιο <span class="muted tiny">· σύρε για περισσότερα</span></label><div class="avscroll">${AVATARS.map(a=>`<button type="button" class="${a===s.avatar?'on':''}" data-av="${a}" aria-label="Εικονίδιο ${a}">${a}</button>`).join('')}</div><input type="hidden" name="avatar" value="${s.avatar}"></div>
     <div class="grid g2" style="gap:10px"><div class="field"><label class="f">Κωδικός μαθητή</label><input class="in" name="code" value="${esc(s.code)}" readonly></div><div class="field"><label class="f">Όνομα (προαιρετικό)</label><input class="in" name="name" value="${esc(s.name||'')}"></div>
     <div class="field"><label class="f">Ηλικία</label><input class="in" type="number" min="3" max="19" name="age" value="${esc(s.age||'')}"></div><div class="field"><label class="f">Τάξη</label><select class="in" name="grade">${opt('','—')}${GRADES.map(g=>opt(g,g,s.grade)).join('')}</select></div></div>
-    <div class="field"><label class="f">Μαθήματα <span class="muted tiny">· διάλεξε όσα θέλεις</span></label><div id="subjw">${subjHTML()}</div></div>
+    <div class="field"><label class="f">Μαθήματα</label><div id="subjw">${subjHTML()}</div></div>
     <div class="field"><label class="f">Επίπεδο γνώσεων</label><select class="in" name="knowledge">${opt('','—')}${Object.keys(LEVEL_FROM).map(g=>opt(g,g,s.knowledge)).join('')}</select></div>
     ${isAdmin()?`<div class="field"><label class="f">Υπεύθυνος παιδαγωγός</label><select class="in" name="ownerId">${S.meta.users.map(u=>opt(u.id,u.name,s.ownerId)).join('')}</select></div>`:''}
-    <h3 style="margin-top:18px">Επικοινωνία γονέων</h3><div id="conw">${conHTML()}</div>
+    <h3 style="margin-top:18px">Επικοινωνία γονέων</h3><p class="small muted" style="margin-top:-6px">Μητέρα, πατέρας ή κηδεμόνας — όσες επαφές θέλεις.</p><div id="conw">${conHTML()}</div>
   </div><div class="card"><h3>Μαθησιακή ταυτότητα</h3><p class="small muted" style="margin-top:-4px">Πάτα όσες επιλογές ισχύουν και γράψε ό,τι θέλεις με δικά σου λόγια. Σε κάθε κατηγορία μπορείς να προσθέσεις και δικές σου επιλογές.</p>
     <div class="lpcats">${LP_CATS.map(catHTML).join('')}</div>
     <details class="lpcat" ${s.difficulties||s.prior||s.notes?'open':''}><summary><span class="ricon">${ic('edit',17)}</span><span class="grow"><b>Άλλες παρατηρήσεις</b><small>Δυσκολίες, προηγούμενες επιδόσεις, ιδιωτικές σημειώσεις</small></span>${ic('down',16)}</summary>
@@ -1445,21 +1476,24 @@ function viewStudentEdit(r){const isNew=r.id==='new';const s0=isNew?{id:uid(),co
   <div style="grid-column:1/-1" class="row"><button class="btn pri">${ic('check',16)} Αποθήκευση</button>${!isNew?`<button type="button" class="btn danger" id="del">${ic('trash',16)} Διαγραφή μαθητή και όλων των δεδομένων του</button>`:''}</div></form>`;
   const F=$('#f');let dirty=false;const mark=()=>{dirty=true;};
   const readCons=()=>{$$('.conrow',F).forEach(rw=>{const c=contacts[+rw.dataset.ci];if(c)$$('[data-cf]',rw).forEach(x=>c[x.dataset.cf]=x.value);});};
-  const doSave=()=>{readCons();const o=fd(F);delete o.undefined;Object.keys(o).forEach(k=>{if(k.startsWith('lp_'))delete o[k];});
+  const valid=()=>{readCons();const okE=contacts.some(c=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((c.email||'').trim()));const bad=contacts.filter(c=>(c.email||'').trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email.trim()));
+    $$('.conrow [data-cf=email]',F).forEach(x=>x.classList.toggle('err',!okE||(x.value.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.value.trim()))));
+    if(!okE||bad.length){toast(bad.length?'Έλεγξε το email του γονέα.':'Βάλε τουλάχιστον ένα email γονέα — εκεί στέλνονται οι αποδείξεις.','bad');$('#conw').scrollIntoView({behavior:'smooth',block:'center'});return false;}return true;};
+  const doSave=()=>{if(!valid())return null;readCons();const o=fd(F);delete o.undefined;Object.keys(o).forEach(k=>{if(k.startsWith('lp_'))delete o[k];});
     $$('.lpcat[data-k]',F).forEach(d=>{const k=d.dataset.k;const t=$('[data-lpt]',d).value.trim();const c=$$('[data-lp].on',d).map(b=>b.dataset.lp);if(c.length||t)lp[k]={c,t};else delete lp[k];});
-    const tgt=isNew?s0:s0;Object.assign(tgt,o,{subjects:subj.join(', '),contacts:contacts.filter(c=>(c.name||'').trim()||(c.phone||'').trim()),lp,updated:new Date().toISOString()});lpSync(tgt);if(!tgt.ownerId)tgt.ownerId=S.user.id;if(isNew&&!S.data.students.includes(tgt))S.data.students.push(tgt);save();dirty=false;S.leave=null;toast('Αποθηκεύτηκε.','ok');return tgt;};
-  S.leave={hash:location.hash,dirty:()=>dirty,save:()=>{doSave();}};
+    const tgt=isNew?s0:s0;Object.assign(tgt,o,{subjects:subj.join(', '),contacts:contacts.filter(c=>(c.name||'').trim()||(c.phone||'').trim()||(c.email||'').trim()).map(c=>({...c,email:(c.email||'').trim().toLowerCase()})),lp,updated:new Date().toISOString()});lpSync(tgt);if(!tgt.ownerId)tgt.ownerId=S.user.id;if(isNew&&!S.data.students.includes(tgt))S.data.students.push(tgt);save();dirty=false;S.leave=null;toast('Αποθηκεύτηκε.','ok');return tgt;};
+  S.leave={hash:location.hash,dirty:()=>dirty,save:()=>!!doSave()};
   F.addEventListener('input',mark);F.addEventListener('change',mark);
   F.onclick=async e=>{const t=e.target;
     const av=t.closest('[data-av]');if(av){$$('[data-av]').forEach(x=>x.classList.remove('on'));av.classList.add('on');$('[name=avatar]').value=av.dataset.av;mark();return;}
-    const sb=t.closest('[data-subj]');if(sb){const x=sb.dataset.subj;subj=subj.includes(x)?subj.filter(y=>y!==x):subj.concat(x);sb.classList.toggle('on');mark();return;}
-    if(t.closest('[data-subjadd]')){const v=(await promptDlg('Άλλο μάθημα')||'').trim();if(v&&!subj.includes(v)){subj.push(v);$('#subjw').innerHTML=subjHTML();mark();}return;}
-    if(t.closest('#cadd')){readCons();contacts.push({role:contacts.length===1?'Πατέρας':'Κηδεμόνας',name:'',phone:''});$('#conw').innerHTML=conHTML();mark();$$('.conrow [data-cf=name]').pop().focus();return;}
+    if(t.closest('#subjb')){const r=await pickList('Μαθήματα',[...new Set(SUBJECTS.concat(subj))],subj,{other:'Άλλο μάθημα'});if(r){subj=r;$('#subjw').innerHTML=subjHTML();mark();}return;}
+    if(t.closest('#cpick')){try{readCons();const L=await navigator.contacts.select(['name','tel','email'],{multiple:true});if(!L||!L.length)return;contacts=contacts.filter(c=>(c.name||'').trim()||(c.phone||'').trim()||(c.email||'').trim());L.forEach((x,i)=>contacts.push({role:contacts.length===0?'Μητέρα':contacts.length===1?'Πατέρας':'Κηδεμόνας',name:(x.name||[])[0]||'',phone:(x.tel||[])[0]||'',email:(x.email||[])[0]||''}));$('#conw').innerHTML=conHTML();mark();toast(L.length===1?'Η επαφή προστέθηκε.':L.length+' επαφές προστέθηκαν.','ok');}catch(err){if(err&&err.name!=='AbortError')toast('Δεν ήταν δυνατή η πρόσβαση στις επαφές.','bad');}return;}
+    if(t.closest('#cadd')){readCons();contacts.push({role:contacts.length===1?'Πατέρας':'Κηδεμόνας',name:'',phone:'',email:''});$('#conw').innerHTML=conHTML();mark();$$('.conrow [data-cf=name]').pop().focus();return;}
     const cd=t.closest('[data-cdel]');if(cd){readCons();contacts.splice(+cd.dataset.cdel,1);if(!contacts.length)contacts.push({role:'Μητέρα',name:'',phone:''});$('#conw').innerHTML=conHTML();mark();return;}
     const del=t.closest('[data-lpdel]');if(del){e.preventDefault();const d=del.closest('.lpcat');const k=d.dataset.k;const x=del.dataset.lpdel;if(!await confirmDlg(`Να αφαιρεθεί η επιλογή «${esc(x)}» από την κατηγορία; (Δεν σβήνεται από όσους μαθητές την έχουν ήδη.)`,{ok:'Αφαίρεση'}))return;custom[k]=(custom[k]||[]).filter(y=>y!==x);save();const b=del.closest('[data-lp]');if(!b.classList.contains('on'))b.remove();else del.remove();return;}
     const lb=t.closest('[data-lp]');if(lb){lb.classList.toggle('on');const d=lb.closest('.lpcat');const n=$$('[data-lp].on',d).length;mark();return;}
     if(t.closest('[data-lpadd]')){const d=t.closest('.lpcat');const k=d.dataset.k;const v=(await promptDlg('Νέα επιλογή για «'+LP_CATS.find(c=>c.key===k).name+'»')||'').trim();if(!v)return;custom[k]=[...new Set((custom[k]||[]).concat(v))];save();const b=document.createElement('button');b.type='button';b.className='chipt on';b.dataset.lp=v;b.innerHTML=`${esc(v)}<span class="cx" data-lpdel="${esc(v)}" aria-label="Αφαίρεση από τις επιλογές">${ic('x',12)}</span>`;t.closest('[data-lpadd]').before(b);mark();return;}};
-  const submit=e=>{if(e)e.preventDefault();const st=doSave();go('student/'+st.id);};
+  const submit=e=>{if(e)e.preventDefault();const st=doSave();if(st)go('student/'+st.id);};
   F.onsubmit=submit;$('#sv1').onclick=()=>submit();
   if(!isNew)$('#del').onclick=()=>{S.leave=null;deleteStudent(s0);};}
 async function deleteStudent(s){if(!await confirmDlg(`Οριστική διαγραφή του μαθητή «${esc(stuName(s))}» μαζί με όλα τα αποτελέσματα, τις αναθέσεις, τα προγράμματα και τις αναφορές του; Η ενέργεια δεν αναιρείται.`,{danger:true,ok:'Οριστική διαγραφή'}))return;const id=s.id;const D=S.data;D.students=D.students.filter(x=>x.id!==id);D.results=D.results.filter(x=>x.studentId!==id);D.assignments=D.assignments.filter(x=>x.studentId!==id);D.programs=D.programs.filter(x=>x.studentId!==id);D.reports=D.reports.filter(x=>x.studentId!==id);D.materials.forEach(m=>{if(m.studentId===id)m.studentId=null;});save();toast('Τα δεδομένα του μαθητή διαγράφηκαν. Αν υπάρχουν συνεδρίες στο Ταμείο, διάγραψέ τες από εκεί.','ok');go('students');}
@@ -1643,7 +1677,7 @@ function sidebarHTML(sec,r){const cOpen=sec==='create'||localStorage.getItem('lu
    <div class="sub ${cOpen?'':'hidden'}" id="cSub"><a href="#/create" class="${sec==='create'&&!r.id?'on':''}">Όλες οι επιλογές</a>${createOrder().map(k=>CT[k]).map(([k,,, t])=>`<a href="#/create/${k}" class="${sec==='create'&&r.id===k?'on':''}">${t}</a>`).join('')}</div>
    <div class="nav-h">Βιβλιοθήκη</div>${a('games','game','Τα παιχνίδια μου')}${a('worksheets','file','Φύλλα εργασίας')}${a('materials','clip','Υλικό')}
    <div class="nav-h">Παρακολούθηση</div>${a('reports','chart','Πρόοδος & Αναφορές')}${a('calendar','calendar','Ημερολόγιο')}
-   <div class="nav-h">Διαχείριση</div>${a('earnings','wallet','Ταμείο')}${a('sessions','clock','Συνεδρίες')}${a('profile','user','Το προφίλ μου')}${a('settings','settings','Ρυθμίσεις')}</nav>
+   <div class="nav-h">Διαχείριση</div>${a('earnings','wallet','Ταμείο')}${a('profile','user','Το προφίλ μου')}${a('settings','settings','Ρυθμίσεις')}</nav>
   <div class="side-foot"><a href="#/profile" class="sfme">${meAvatar(34)}<div><b>${esc(S.user.name)}</b><span>${esc(S.data.profile.title||(S.user.role==='admin'?'Διαχειριστής':'Παιδαγωγός'))}</span></div></a><button class="iconbtn" id="logoutBtn" title="Αποσύνδεση" aria-label="Αποσύνδεση">${ic('logout',18)}</button></div></aside><div class="drawer-ov" id="drawerOv"></div>`;}
 
 function render(){
@@ -1673,9 +1707,9 @@ function render(){
   if(stuLocked)return StuLock.view();
   Promise.resolve(V(r)).catch(e=>{console.error(e);M().innerHTML=`<div class="card"><h2>Κάτι πήγε στραβά</h2><p class="muted">${esc(e.message)}</p><a class="btn" href="#/dashboard">Αρχική</a></div>`;});
 }
-function contactsHTML(s){const L=(s.contacts||[]).filter(c=>c.name||c.phone);if(!L.length)return'';return`<div class="card section"><div class="card-h"><h3>Επικοινωνία γονέων</h3><a class="btn sm" href="#/student-edit/${s.id}">${ic('edit',15)} Αλλαγή</a></div><div class="list">${L.map(c=>`<div class="rw static wrapm"><span class="ricon">${ic('l-phone',17)}</span><span class="grow"><b>${esc(c.name||c.role)}</b><small>${esc(c.role||'')}${c.phone?' · '+esc(c.phone):''}</small></span>${c.phone?`<span class="end"><a class="btn sm" href="tel:${telLink(c.phone)}">${ic('l-phone',15)} Κλήση</a><a class="btn sm" href="sms:${telLink(c.phone)}">${ic('l-message-square',15)} Μήνυμα</a></span>`:''}</div>`).join('')}</div></div>`;}
+function contactsHTML(s){const L=(s.contacts||[]).filter(c=>c.name||c.phone);if(!L.length)return'';return`<div class="card section"><div class="card-h"><h3>Επικοινωνία γονέων</h3><a class="btn sm" href="#/student-edit/${s.id}">${ic('edit',15)} Αλλαγή</a></div><div class="list">${L.map(c=>`<div class="rw static wrapm"><span class="ricon">${ic('l-phone',17)}</span><span class="grow"><b>${esc(c.name||c.role)}</b><small>${esc(c.role||'')}${c.phone?' · '+esc(c.phone):''}${c.email?' · '+esc(c.email):''}</small></span>${c.phone||c.email?`<span class="end">${c.phone?`<a class="btn sm" href="tel:${telLink(c.phone)}">${ic('l-phone',15)} Κλήση</a><a class="btn sm" href="sms:${telLink(c.phone)}">${ic('l-message-square',15)} Μήνυμα</a>`:''}${c.email?`<a class="btn sm" href="mailto:${esc(c.email)}">${ic('send',15)} Email</a>`:''}</span>`:''}</div>`).join('')}</div></div>`;}
 function leaveDialog(to){const m=modal(`<h3 style="margin-top:0">Δεν έχεις αποθηκεύσει</h3><p class="small muted">Έκανες αλλαγές που δεν έχουν αποθηκευτεί. Τι θέλεις να γίνει;</p><div class="stackbtn"><button class="btn pri block" data-lv="save">${ic('check',16)} Αποθήκευση και συνέχεια</button><button class="btn danger block" data-lv="drop">Έξοδος χωρίς αποθήκευση</button><button class="btn block" data-lv="stay">Συνέχεια επεξεργασίας</button></div>`);
-  m.el.onclick=e=>{const b=e.target.closest('[data-lv]');if(!b)return;const v=b.dataset.lv;m.close();if(v==='stay')return;if(v==='save'&&S.leave)S.leave.save();S.leave=null;location.hash=to;};}
+  m.el.onclick=e=>{const b=e.target.closest('[data-lv]');if(!b)return;const v=b.dataset.lv;m.close();if(v==='stay')return;if(v==='save'&&S.leave&&!S.leave.save())return;S.leave=null;location.hash=to;};}
 async function askLogout(){if(await confirmDlg('Αποσύνδεση από αυτή τη συσκευή; Την επόμενη φορά θα χρειαστεί ξανά ο κωδικός σου.',{ok:'Αποσύνδεση'}))logout('Αποσυνδέθηκες.');}
 function showInbox(){const L=S.data.inbox.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);const m=modal(`<div class="spread" style="margin-bottom:12px"><h3 style="margin:0">Ειδοποιήσεις</h3><button class="iconbtn" data-close>${ic('x',18)}</button></div>${L.length?`<div class="list">${L.map(x=>`<a class="rw" href="${esc(x.link||'#/dashboard')}" data-close data-id="${x.id}"><span class="ricon ${x.read?'':'l'}">${ic('bell',18)}</span><span class="grow"><b style="white-space:normal">${esc(x.text)}</b><small>${fmtDate(x.date)}</small></span></a>`).join('')}</div><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn sm" id="allread">Σήμανση όλων ως αναγνωσμένων</button></div>`:`<div class="empty"><div class="e">${ic('bell',32)}</div>Δεν υπάρχουν ειδοποιήσεις.</div>`}`);
   m.el.addEventListener('click',e=>{const a=e.target.closest('[data-id]');if(a){const x=S.data.inbox.find(i=>i.id===a.dataset.id);if(x){x.read=true;save();}}if(e.target.closest('#allread')){S.data.inbox.forEach(x=>x.read=true);save();m.close();render();}});}
@@ -1796,7 +1830,7 @@ function viewStudent(r){const s=getStudent(r.id);if(!s)return go('students');con
   const tb=$('#tb');const rs=resultsOf(s.id);
   if(tab==='overview'){const r30=rs.filter(x=>x.date>=new Date(Date.now()-30*864e5).toISOString());const la=lastActivity(s.id);const subs=[...new Set([...Object.keys(s.levels||{}),...rs.map(x=>x.subject).filter(Boolean)])];const pend=S.data.assignments.filter(a=>a.studentId===s.id&&a.status!=='done');
     tb.innerHTML=`<div class="kpis section"><div class="kpi"><div class="k">Δραστηριότητες</div><div class="v">${rs.length}</div></div><div class="kpi"><div class="k">Μέση επίδοση 30 ημ.</div><div class="v">${r30.length?Math.round(avg(r30.map(x=>x.pct)))+'%':'—'}</div></div><div class="kpi"><div class="k">Χρόνος εκπαίδευσης</div><div class="v sm">${fmtMin(rs.reduce((a,x)=>a+x.durationSec,0))}</div></div><div class="kpi"><div class="k">Τελευταία δραστηριότητα</div><div class="v sm">${la?fmtDate(la):'—'}</div></div></div>
-    ${contactsHTML(s)}<div class="grid g2 section"><div class="card"><div class="card-h"><h3>Επίπεδα ανά μάθημα</h3></div>${subs.length?`<div class="list">${subs.map(x=>`<div class="rw static"><span class="grow"><b>${esc(x)}</b><small>${needsSupport(s,x)?'Με επιπλέον υποστήριξη':'Κανονική υποστήριξη'}</small></span><span class="chip l">Επίπεδο ${levelOf(s,x)}/5</span></div>`).join('')}</div>`:'<p class="muted small">Τα επίπεδα θα εμφανιστούν μετά τις πρώτες δραστηριότητες.</p>'}<p class="tiny muted" style="margin:10px 0 0">Η δυσκολία προσαρμόζεται αυτόματα: ≥90% ανεβαίνει, 60–89% μένει, <60% κατεβαίνει.</p></div>
+    ${contactsHTML(s)}${finCardHTML(s)}<div class="grid g2 section"><div class="card"><div class="card-h"><h3>Επίπεδα ανά μάθημα</h3></div>${subs.length?`<div class="list">${subs.map(x=>`<div class="rw static"><span class="grow"><b>${esc(x)}</b><small>${needsSupport(s,x)?'Με επιπλέον υποστήριξη':'Κανονική υποστήριξη'}</small></span><span class="chip l">Επίπεδο ${levelOf(s,x)}/5</span></div>`).join('')}</div>`:'<p class="muted small">Τα επίπεδα θα εμφανιστούν μετά τις πρώτες δραστηριότητες.</p>'}<p class="tiny muted" style="margin:10px 0 0">Η δυσκολία προσαρμόζεται αυτόματα: ≥90% ανεβαίνει, 60–89% μένει, <60% κατεβαίνει.</p></div>
      <div class="card"><div class="card-h"><h3>Τι να δουλέψουμε</h3></div><p class="small muted">Προτάσεις βασισμένες στα πραγματικά αποτελέσματα του μαθητή — εκπαιδευτικές, όχι διάγνωση.</p><div class="stack"><button class="btn yel block" id="sug">${ic('bulb',17)} Τι να δουλέψω την επόμενη εβδομάδα;</button><button class="btn block" id="rev">${ic('repeat',17)} Επανάληψη λαθών του μήνα</button></div>
       ${weakConcepts(s.id).length?`<div class="chips" style="margin-top:14px">${weakConcepts(s.id).slice(0,4).map(c=>`<span class="chip bad">${esc(c.concept)} · ${c.recentAcc}%</span>`).join('')}</div>`:''}</div></div>
     <div class="grid g2"><section><div class="section-h"><h2>Πρόσφατες δραστηριότητες</h2><a href="#/${base}?tab=activities">Όλες</a></div>${resultsList(rs.slice().reverse().slice(0,5))}</section>
@@ -2163,7 +2197,7 @@ function calEvents(sid){const ids=new Set(sid?[sid]:myStudents().map(s=>s.id));c
 function dayDetailHTML(day,list){const F=calFilters();list=list.filter(e=>F[e.t]);return`<div class="card-h"><h3>${fmtDate(day)}</h3></div>${list.length?`<div class="list">${list.map(v=>{if(v.t==='res'){const s=S.data.students.find(x=>x.id===v.x.studentId);return`<button class="rw" data-res="${v.x.id}"><span class="ricon ${v.x.pct>=60?'g':'r'}">${ic('game',17)}</span><span class="grow"><b>${esc(v.x.title)}</b><small>${esc(stuName(s))} · ${fmtMin(v.x.durationSec)} · ${v.x.correct}/${v.x.total}</small></span><span class="pct">${v.x.pct}%</span></button>`;}
   if(v.t==='mat')return`<a class="rw" href="#/preview/${v.x.id}"><span class="ricon pe">${ic(catOf(v.x)==='worksheet'?'file':'sparkles',17)}</span><span class="grow"><b>${esc(v.x.title)}</b><small>Δημιουργήθηκε · ${CAT_LABEL[catOf(v.x)]}</small></span></a>`;
   if(v.t==='plan'){const s=S.data.students.find(x=>x.id===v.p.studentId);return`<a class="rw" href="#/plan/${v.p.id}"><span class="ricon y">${ic('target',17)}</span><span class="grow"><b>${esc(v.x.title)}</b><small>${esc(stuName(s))} · ${esc(v.p.title)}</small></span></a>`;}
-  const s=S.data.students.find(x=>x.id===v.x.studentId);return`<a class="rw" href="#/sessions"><span class="ricon b">${ic('clock',17)}</span><span class="grow"><b>Συνεδρία ${v.x.start}–${v.x.end}</b><small>${esc(stuName(s))} · ${Math.floor(v.x.minutes/60)}ώ ${v.x.minutes%60}λ</small></span></a>`;}).join('')}</div>`:'<p class="muted small" style="margin:0">Τίποτα αυτή την ημέρα.</p>'}`;}
+  const s=S.data.students.find(x=>x.id===v.x.studentId);return`<a class="rw" href="#/earnings?v=sessions"><span class="ricon b">${ic('clock',17)}</span><span class="grow"><b>Συνεδρία ${v.x.start}–${v.x.end}</b><small>${esc(stuName(s))} · ${Math.floor(v.x.minutes/60)}ώ ${v.x.minutes%60}λ</small></span></a>`;}).join('')}</div>`:'<p class="muted small" style="margin:0">Τίποτα αυτή την ημέρα.</p>'}`;}
 function mountCalendar(el,{sid,ym,base}){ym=ym||todayISO().slice(0,7);const[Y,Mo]=ym.split('-').map(Number);const start=weekStart(new Date(Y,Mo-1,1));const ev=calEvents(sid);const today=todayISO();const prev=isoDate(new Date(Y,Mo-2,1)).slice(0,7),next=isoDate(new Date(Y,Mo,1)).slice(0,7);let sel=ym===today.slice(0,7)?today:isoDate(new Date(Y,Mo-1,1));
   const draw=()=>{const F=calFilters();el.innerHTML=`<div class="side2"><div class="card"><div class="spread" style="margin-bottom:14px"><a class="iconbtn" href="#/${base}&m=${prev}" aria-label="Προηγούμενος μήνας">${ic('left',20)}</a><h2 style="margin:0">${MONTHS[Mo-1]} ${Y}</h2><a class="iconbtn" href="#/${base}&m=${next}" aria-label="Επόμενος μήνας">${ic('right',20)}</a></div>
    <div class="cal">${DAYS.map(d=>`<div class="h">${d}</div>`).join('')}${Array.from({length:42},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const k=isoDate(d);const e=(ev[k]||[]).filter(v=>F[v.t]);return`<button class="d ${d.getMonth()!==Mo-1?'out':''} ${k===today?'today':''} ${k===sel?'sel':''}" data-d="${k}"><div class="n">${d.getDate()}</div>${e.slice(0,3).map(v=>`<span class="ev ${v.t} ${v.t==='res'&&v.x.pct<60?'low':''}">${esc(v.label)}</span>`).join('')}${e.length>3?`<span class="tiny muted">+${e.length-3}</span>`:''}<span class="dots">${e.slice(0,4).map(v=>`<i style="background:${EV_TYPES.find(t=>t[0]===v.t)[2]}"></i>`).join('')}</span></button>`;}).join('')}</div>
@@ -2193,17 +2227,7 @@ function viewProgram(r){const p=S.data.programs.find(x=>x.id===r.id);const st=p&
 /* ===== Συνεδρίες Ταμείου & Ρυθμίσεις ===== */
 const hoursTxt=min=>`${Math.floor(min/60)}ώ ${pad(min%60)}λ`;
 const hoursNum=min=>(min/60).toLocaleString('el-GR',{maximumFractionDigits:2});
-function sessionDialog(s){const E=S.earn;const st=myStudents();if(!st.length)return toast('Πρόσθεσε πρώτα μαθητή.','bad');s=s||{};const md=modal(`<div class="spread" style="margin-bottom:12px"><h3 style="margin:0">${s.id?'Επεξεργασία συνεδρίας':'Νέα συνεδρία'}</h3><button class="iconbtn" data-close>${ic('x',18)}</button></div>
-  <form id="sf"><div class="field"><label class="f" for="s-st">Μαθητής</label><select class="in" id="s-st" name="studentId" required>${opt('','— διάλεξε —')}${st.map(x=>opt(x.id,stuName(x),s.studentId)).join('')}</select></div>
-  <div class="field"><label class="f" for="s-rate">Ωριαία αμοιβή</label><div class="row" style="flex-wrap:nowrap"><input class="in" type="number" step="0.5" min="0" id="s-rate" name="rate" required value="${esc(s.rate??'')}" placeholder="π.χ. 15"><span class="muted" style="white-space:nowrap">€ / ώρα</span></div></div>
-  <div class="grid g3" style="gap:10px"><div class="field"><label class="f" for="s-d">Ημερομηνία</label><input class="in" type="date" id="s-d" name="date" value="${s.date||todayISO()}" required></div><div class="field"><label class="f" for="s-s">Έναρξη</label><input class="in" type="time" id="s-s" name="start" value="${s.start||'17:00'}" required></div><div class="field"><label class="f" for="s-e">Λήξη</label><input class="in" type="time" id="s-e" name="end" value="${s.end||'18:30'}" required></div></div>
-  <div class="note field" id="calc" aria-live="polite"></div>
-  <label class="check field"><input type="checkbox" name="paid" ${s.paid?'checked':''}> <span>Πληρώθηκε</span></label>
-  <div class="grid g2" style="gap:10px"><div class="field"><label class="f" for="s-pa">Ποσό πληρωμής (€)</label><input class="in" type="number" step="0.01" min="0" id="s-pa" name="paidAmount" value="${s.paid?esc(s.paidAmount):''}" placeholder="ίδιο με την αμοιβή"></div><div class="field"><label class="f" for="s-n">Σημείωση</label><input class="in" id="s-n" name="note" value="${esc(s.note||'')}"></div></div>
-  <div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-close>Άκυρο</button><button class="btn pri">${ic('check',16)} Αποθήκευση</button></div></form>`);
-  const f=$('#sf',md.el);const calc=()=>{const o=fd(f);const m=sessMin(o.start,o.end);$('#calc',md.el).innerHTML=o.rate&&m?`<div class="spread"><span>Διάρκεια: <b>${hoursTxt(m)}</b></span><span>Ποσό: <b style="font-size:1.1rem">${fmtEur(sessAmount(o.rate,m))}</b></span></div><div class="tiny" style="margin-top:4px">${fmtEur(+o.rate)}/ώρα × ${hoursNum(m)} ώρες = ${fmtEur(sessAmount(o.rate,m))}</div>`:'Συμπλήρωσε ωριαία αμοιβή και ώρες — το ποσό υπολογίζεται αυτόματα.';};
-  f.studentId.onchange=()=>{const rt=E.rates[f.studentId.value];if(rt!=null&&rt!=='')f.rate.value=rt;calc();};f.oninput=calc;calc();
-  f.onsubmit=async e=>{e.preventDefault();const o=fd(f);const m=sessMin(o.start,o.end);if(!m)return toast('Έλεγξε τις ώρες.','bad');const amount=sessAmount(o.rate,m);const rec={id:s.id||uid(),studentId:o.studentId,date:o.date,start:o.start,end:o.end,minutes:m,rate:+o.rate,amount,paid:!!o.paid,paidAmount:o.paid?(o.paidAmount===''?amount:+o.paidAmount):0,note:o.note||''};const i=E.sessions.findIndex(x=>x.id===rec.id);if(i>=0)E.sessions[i]=rec;else E.sessions.push(rec);if(E.rates[o.studentId]==null||E.rates[o.studentId]==='')E.rates[o.studentId]=+o.rate;await Earn.save();md.close();toast(`Αποθηκεύτηκε: ${fmtEur(amount)}`,'ok');render();};}
+/* η καταχώριση συνεδρίας βρίσκεται στο cash.js */
 
 /* ===== Ρυθμίσεις ===== */
 const SETTINGS_GROUPS=[['me','Ο λογαριασμός μου'],['app','Εφαρμογή'],['docs','Έγγραφα'],['data','Δεδομένα & απόρρητο'],['svc','Υπηρεσίες'],['org','Οργανισμός'],['about','Σχετικά']];
@@ -2249,18 +2273,18 @@ const SET={
   $('#ex',el).onclick=async()=>{if(!await confirmDlg('Η εξαγωγή περιέχει όλα τα δεδομένα <b>μη κρυπτογραφημένα</b>. Συνέχεια;',{ok:'Εξαγωγή'}))return;const d=JSON.parse(JSON.stringify(S.data));d.settings.aiKey=d.settings.aiKey?'(κρυφό)':'';downloadText(`lumio-dedomena-${todayISO()}.json`,JSON.stringify(d,null,2),'application/json');};
   $('#wipe',el).onclick=async()=>{const p=await promptDlg('Για οριστική διαγραφή ΟΛΩΝ των δεδομένων αυτής της συσκευής, γράψε τον κωδικό σου',{type:'password',okText:'Διαγραφή όλων'});if(!p)return;try{await unwrapRaw(S.user.wrap,p);}catch(e){return toast('Λάθος κωδικός.','bad');}for(const k of await IDB.keys())await IDB.del(k);TM.lsKeys().forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});S.meta=null;logout('Όλα τα δεδομένα διαγράφηκαν.');location.hash='#/welcome';};},
  async language(el){el.innerHTML=card('Γλώσσα εφαρμογής',`<div class="optrow"><button class="choice on"><b>Ελληνικά</b><span>Ενεργή</span></button><button class="choice" disabled style="opacity:.5;cursor:not-allowed"><b>Αγγλικά</b><span>Δεν είναι ακόμη διαθέσιμα</span></button></div><p class="tiny muted" style="margin:12px 0 0">Το περιεχόμενο που δημιουργεί η τεχνητή νοημοσύνη για ξένες γλώσσες (π.χ. Αγγλικά ως μάθημα) λειτουργεί κανονικά.</p>`);},
- async appearance(el){const t=lsGet('lumio-theme','system'),z=lsGet('lumio-size','normal'),pal=lsGet('lumio-pal','lavender'),tp=lsGet('lumio-tpal','petrol'),bg=lsGet('lumio-bg','icon'),op=+lsGet('lumio-bgop','0.1')||.1;
+ async appearance(el){const t=lsGet('lumio-theme','system'),z=lsGet('lumio-size','normal'),pal=lsGet('lumio-pal','lavender'),tp=lsGet('lumio-tpal',TM_PAL_DEF),bg=lsGet('lumio-bg','icon'),op=+lsGet('lumio-bgop','0.1')||.1;
   const sw=c=>`<span class="swx">${c.map(x=>`<i style="background:${x}"></i>`).join('')}</span>`;
   el.innerHTML=card('Θέμα',`<div class="optrow">${[['system','settings','Όπως η συσκευή'],['light','sun','Ανοιχτό'],['dark','moon','Σκούρο']].map(([k,i,l])=>`<button class="choice ${t===k?'on':''}" data-th="${k}"><span class="e">${ic(i,22)}</span><b>${l}</b></button>`).join('')}</div>`)
    +card('Χρώματα εφαρμογής',`<div class="optrow">${Object.entries(PALETTES).map(([k,v])=>`<button class="choice ${pal===k?'on':''}" data-pal="${k}">${sw(v.c)}<b>${v.n}</b></button>`).join('')}</div>`)
-   +card('Χρώματα Ταμείου',`<p class="small muted" style="margin-top:0">Η μπάρα και τα κουμπιά του Ταμείου, στο ίδιο ύφος με την εφαρμογή.</p><div class="optrow">${Object.entries(TM_PALS).map(([k,v])=>`<button class="choice ${tp===k?'on':''}" data-tp="${k}">${sw([v.brand,v.accent])}<b>${v.n}</b></button>`).join('')}</div>`)
+   +card('Χρώματα Ταμείου',`<p class="small muted" style="margin-top:0">Η μπάρα και τα κουμπιά του Ταμείου, στο ίδιο ύφος με την εφαρμογή.</p><div class="optrow">${Object.entries(TM_PALS).map(([k,v])=>`<button class="choice ${tp===k?'on':''}" data-tp="${k}">${sw([v.brand,v.deep?v.accent:v.on,v.accent])}<b>${v.n}</b></button>`).join('')}</div>`)
    +card('Φόντο',`<div class="optrow">${BGS.map(([k,l])=>`<button class="choice ${bg===k?'on':''}" data-bg="${k}"><span class="bgprev bg-${k}" ${k==='custom'&&lsGet('lumio-bgimg','')?`style="background-image:url('${lsGet('lumio-bgimg','')}')"`:''}></span><b>${l}</b></button>`).join('')}</div>
      <input type="file" id="bgf" accept="image/*" class="hidden">${bg==='custom'?`<button class="btn sm" id="bgch" style="margin-top:10px">${ic('upload',15)} Αλλαγή εικόνας</button>`:''}
      <div class="field" style="margin-top:14px"><label class="f" for="bgo">Διαφάνεια φόντου: <b id="bgov">${Math.round(op*100)}%</b></label><input type="range" id="bgo" min="2" max="40" step="1" value="${Math.round(op*100)}" ${bg==='none'?'disabled':''}></div>
      <p class="tiny muted" style="margin:0">Το φόντο φαίνεται πίσω από όλες τις σελίδες και στο Ταμείο. Δεν μπαίνει στις εκτυπώσεις.</p>`)
    +card('Μέγεθος κειμένου',`<div class="optrow">${[['normal','Κανονικό'],['large','Μεγάλο']].map(([k,l])=>`<button class="choice ${z===k?'on':''}" data-sz="${k}"><b style="font-size:${k==='large'?'1.15rem':'.95rem'}">Αα</b><span>${l}</span></button>`).join('')}</div><p class="tiny muted" style="margin:12px 0 0">Τα παιχνίδια των μαθητών κρατούν πάντα τα δικά τους χρώματα.</p>`);
   const set=(k,v)=>{try{localStorage.setItem(k,v);}catch(x){toast('Δεν αποθηκεύτηκε — ο χώρος της συσκευής είναι γεμάτος.','bad');}};
-  el.onclick=e=>{const g=s=>e.target.closest(s);let a;
+  el.onclick=e=>{const g=s=>{const x=e.target.closest(s);return x&&el.contains(x)?x:null;};let a;
     if(a=g('[data-th]'))set('lumio-theme',a.dataset.th);else if(a=g('[data-sz]'))set('lumio-size',a.dataset.sz);else if(a=g('[data-pal]'))set('lumio-pal',a.dataset.pal);else if(a=g('[data-tp]'))set('lumio-tpal',a.dataset.tp);
     else if(a=g('[data-bg]')){if(a.dataset.bg==='custom'&&!lsGet('lumio-bgimg','')){$('#bgf',el).click();return;}set('lumio-bg',a.dataset.bg);}
     else if(g('#bgch')){$('#bgf',el).click();return;}
@@ -2383,17 +2407,17 @@ const TM={
   workKey(){return'lumio-work-'+S.user.id;},
   frame(){return document.getElementById('tmf');},
   isOpen(){return!!this.frame();},
-  syncWork(){if(!S.user||!S.earn)return;try{const L=(S.earn.sessions||[]).filter(s=>s.paid).map(s=>({id:'ls-'+s.id,date:s.date+'T'+(s.start||'12:00'),amount:+(s.paidAmount||s.amount)||0,dir:'in',kind:'payment',note:'Συνεδρία'}));
+  syncWork(){if(!S.user||!S.earn)return;try{const L=(S.earn.sessions||[]).filter(s=>s.paid).map(s=>({id:'ls-'+s.id,date:(s.paidAt&&s.paidAt!==s.date?s.paidAt+'T12:00':s.date+'T'+(s.start||'12:00')),amount:+(s.paidAmount||s.amount)||0,dir:'in',kind:'payment',note:'Συνεδρία'}));
     localStorage.setItem(this.workKey(),JSON.stringify({ledger:L,settings:{kinds:[]},meta:{appVersion:'LUMIO '+APP_VERSION}}));localStorage.setItem(this.workKey()+'-at',String(Date.now()));}catch(e){}},
   seed(){try{if(localStorage.getItem(this.key())==null)localStorage.setItem(this.key(),JSON.stringify({settings:{defaultBook:'company',bookHidden:{extra:true,x2:true}},meta:{firstRun:Date.now(),changes:0,lastBackup:null}}));}catch(e){}},
   /* χρώματα, γραμματοσειρά και φόντο του LUMIO μέσα στο Ταμείο */
   styleFrame(){const f=this.frame();if(!f)return;let d;try{d=f.contentDocument;}catch(e){return;}if(!d||!d.head)return;
-    const cs=getComputedStyle(document.documentElement),v=n=>cs.getPropertyValue(n).trim();const tp=TM_PALS[lsGet('lumio-tpal','petrol')]||TM_PALS.petrol;const dark=isDarkMode();
+    const cs=getComputedStyle(document.documentElement),v=n=>cs.getPropertyValue(n).trim();const tp=TM_PALS[lsGet('lumio-tpal',TM_PAL_DEF)]||TM_PALS[TM_PAL_DEF];const dark=isDarkMode();const P=tp.deep?{brand:tp.brand,onb:'#fff',tx:dark?tp.accent:tp.brand,ln:tp.ln,ink:dark?v('--ink'):tp.brand}:(dark?{brand:tp.on,onb:'#fff',tx:tp.brand,ln:tp.ln,ink:v('--ink')}:{brand:tp.brand,onb:tp.on,tx:tp.on,ln:tp.ln,ink:tp.on});
     let st=d.getElementById('lumio-style');if(!st){st=d.createElement('style');st.id='lumio-style';d.head.appendChild(st);
       const ln=d.createElement('link');ln.rel='stylesheet';ln.href='https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700;800&display=swap&subset=greek';d.head.appendChild(ln);}
     const bgOn=document.documentElement.classList.contains('hasbg');const bgPos={icon:'right -3vw bottom -3vh / min(70vw,540px) auto',scene:'right bottom / min(100vw,1100px) auto',custom:'center / cover'}[document.documentElement.dataset.bg]||'center / contain';
     st.textContent=`header{display:none!important}
-:root{--hdr:0px!important;--brand:${tp.brand}!important;--onbrand:#fff!important;--accent:${tp.accent}!important;--onaccent:#2E2A33!important;--paper:${v('--cream')}!important;--card:${v('--paper')}!important;--ink:${dark?v('--ink'):tp.brand}!important;--muted:${v('--ink2')}!important;--line:${v('--line')}!important;--red:${v('--bad')}!important;--green:${v('--ok')}!important;--z:1!important}
+:root{--hdr:0px!important;--brand:${P.brand}!important;--onbrand:${P.onb}!important;--brandtx:${P.tx}!important;--brandln:${P.ln}!important;--accent:${tp.accent}!important;--onaccent:${tp.onaccent}!important;--accenttx:${tp.acctx}!important;--paper:${v('--cream')}!important;--card:${v('--paper')}!important;--ink:${P.ink}!important;--muted:${v('--ink2')}!important;--line:${v('--line')}!important;--red:${v('--bad')}!important;--green:${v('--ok')}!important;--z:1!important}
 html{background:var(--paper)!important;${dark?'color-scheme:dark;':''}}
 body{background:transparent!important;font-family:${v('--font')}!important}
 body.hasbg:before{display:none!important}
@@ -2418,33 +2442,172 @@ function earnPinView(){const first=!Earn.hasPin();M().innerHTML=`<div class="gen
   $('#pin').focus();$('#f').onsubmit=async e=>{e.preventDefault();const o=fd(e.target);try{if(first){if(o.p!==o.p2)throw new Error('Τα PIN δεν ταιριάζουν.');await Earn.setup(o.p);}else await Earn.unlock(o.p);S.earn.rates=S.earn.rates||{};S.earn.sessions=S.earn.sessions||[];render();}catch(err){toast(err.message&&/PIN/.test(err.message)?err.message:'Λάθος PIN.','bad');}};}
 
 const sumA=a=>a.reduce((x,t)=>x+(+t.amount||0),0);
-const paidSum=a=>a.filter(s=>s.paid).reduce((x,s)=>x+(+s.paidAmount||s.amount),0);
+const paidOf=s=>s.paid?(+s.paidAmount||+s.amount||0):0;
+const paidSum=a=>a.reduce((x,s)=>x+paidOf(s),0);
+const r2=n=>Math.round((+n||0)*100)/100;
 function sessMonth(ym){return S.earn?(S.earn.sessions||[]).filter(s=>s.date.startsWith(ym)):[];}
+const WDAYS=['Κυριακή','Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο'];
+const WDAYS_S=['Κυρ','Δευ','Τρί','Τετ','Πέμ','Παρ','Σάβ'];
+const DAY_ORDER=[1,2,3,4,5,6,0];
+const wdOf=iso=>new Date(iso+'T12:00').getDay();
+function earnInit(){const E=S.earn;if(!E)return null;E.sessions=E.sessions||[];E.rates=E.rates||{};E.plans=E.plans||{};
+  for(const k in E.rates){if(E.rates[k]!=null&&E.rates[k]!==''&&!E.plans[k])E.plans[k]={mode:'hour',price:+E.rates[k],slots:[]};}return E;}
+function planOf(sid){const E=earnInit();return E&&E.plans[sid]||null;}
+function priceTxt(p){return p?`${fmtEur(p.price)} ${p.mode==='hour'?'την ώρα':'τη συνεδρία'}`:'—';}
+function slotsTxt(p){if(!p||!(p.slots||[]).length)return'Χωρίς σταθερή μέρα';return p.slots.slice().sort((a,b)=>DAY_ORDER.indexOf(+a.d)-DAY_ORDER.indexOf(+b.d)).map(x=>`${WDAYS_S[+x.d]} ${x.s}–${x.e}`).join(' · ');}
+function slotFor(p,date){if(!p||!(p.slots||[]).length)return null;const wd=wdOf(date);return p.slots.find(x=>+x.d===wd)||null;}
+function amountOf(mode,price,min){return mode==='hour'?r2((+price||0)*min/60):r2(+price||0);}
+function balanceOf(sid){const E=earnInit();if(!E)return{sum:0,n:0,list:[]};const L=E.sessions.filter(x=>x.studentId===sid&&!x.paid);return{sum:sumA(L),n:L.length,list:L};}
+const stuNm=id=>stuName(S.data.students.find(s=>s.id===id))||'(διαγραμμένος)';
+function parentEmails(sid){const st=S.data.students.find(s=>s.id===sid);return((st&&st.contacts)||[]).filter(c=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email||''));}
+const rateTxt=s=>s.mode==='session'?`${fmtEur(s.price)}/συνεδρία`:`${hoursTxt(s.minutes)} × ${fmtEur(s.rate??s.price)}/ώρα`;
 
-function viewEarnings(r){if(!S.earnKey)return earnPinView();TM.seed();TM.syncWork();
-  M().innerHTML=`<div class="tmhead"><h1>Ταμείο</h1><span class="grow"></span><a class="btn sm" href="#/sessions">${ic('clock',15)} <span class="hide-xs">Συνεδρίες</span></a><button class="iconbtn" id="tmset" aria-label="Ρυθμίσεις Ταμείου" title="Ρυθμίσεις Ταμείου">${ic('settings',19)}</button><button class="iconbtn" id="lk" aria-label="Κλείδωμα" title="Κλείδωμα">${ic('lock',19)}</button></div>
-   <iframe id="tmf" class="tmframe" title="Ταμείο" src="tameio.html?embed=1&lang=el&u=${encodeURIComponent(S.user.id)}"></iframe>`;
-  document.body.classList.add('on-tm');TM.mount();TM.hist();$('#tmset').onclick=()=>TM.settings();$('#lk').onclick=()=>{Earn.lock();render();};}
+/* ---- η σελίδα του Ταμείου: Ταμείο | Συνεδρίες | Καρτέλες μαθητών ---- */
+function viewEarnings(r){if(!S.earnKey)return earnPinView();earnInit();TM.seed();TM.syncWork();const v=['sessions','cards'].includes(r.q.v)?r.q.v:'';
+  const segs=[['','wallet','Ταμείο'],['sessions','clock','Συνεδρίες'],['cards','users','Καρτέλες μαθητών']];
+  M().innerHTML=`<div class="tmhead"><h1>Ταμείο</h1><span class="grow"></span>${v===''?`<button class="iconbtn" id="tmset" aria-label="Ρυθμίσεις Ταμείου" title="Ρυθμίσεις Ταμείου">${ic('settings',19)}</button>`:`<button class="btn pri sm" id="addS">${ic('plus',15)} Συνεδρία</button>`}<button class="iconbtn" id="lk" aria-label="Κλείδωμα" title="Κλείδωμα">${ic('lock',19)}</button></div>
+   <div class="seg tmseg">${segs.map(([k,i,l])=>`<a href="#/earnings${k?'?v='+k:''}" class="${v===k?'on':''}">${ic(i,15)} ${l}</a>`).join('')}</div>
+   ${v===''?`<iframe id="tmf" class="tmframe" title="Ταμείο" src="tameio.html?embed=1&lang=el&u=${encodeURIComponent(S.user.id)}"></iframe>`:'<div id="eb"></div>'}`;
+  $('#lk').onclick=()=>{Earn.lock();render();};
+  if(v===''){document.body.classList.add('on-tm');TM.mount();TM.hist();$('#tmset').onclick=()=>TM.settings();return;}
+  $('#addS').onclick=()=>sessionDialog(null,{sid:r.q.st});
+  if(v==='sessions')sessionsView($('#eb'),r);else cardsView($('#eb'),r);}
+function viewSessions(r){go('earnings?v=sessions'+(r.q.st?'&st='+r.q.st:''));}
 
-/* ---- Συνεδρίες (με αυτόματο υπολογισμό ποσού) ---- */
-function viewSessions(r){if(!S.earnKey)return earnPinView();const E=S.earn;E.sessions=E.sessions||[];E.rates=E.rates||{};
-  const ym=r.q.m||todayISO().slice(0,7);const[Y,Mo]=ym.split('-').map(Number);const prev=isoDate(new Date(Y,Mo-2,1)).slice(0,7),next=isoDate(new Date(Y,Mo,1)).slice(0,7);
-  const tab=r.q.tab==='rates'?'rates':'list';const f=r.q.f||'';const fs=r.q.st||'';const st=myStudents();const nm=id=>stuName(S.data.students.find(s=>s.id===id))||'(διαγραμμένος)';
-  const ms=sessMonth(ym);const q=`m=${ym}`;
-  M().innerHTML=`${pageHead('Συνεδρίες','Το ποσό υπολογίζεται αυτόματα από την ωριαία αμοιβή και τη διάρκεια',`<div class="seg" style="align-items:center"><a href="#/sessions?tab=${tab}&m=${prev}" aria-label="Προηγούμενος μήνας">${ic('left',16)}</a><span style="padding:6px 10px;font-weight:600;font-size:.88rem">${MONTHS[Mo-1]} ${Y}</span><a href="#/sessions?tab=${tab}&m=${next}" aria-label="Επόμενος μήνας">${ic('right',16)}</a></div><button class="btn pri" id="add">${ic('plus',16)} Νέα συνεδρία</button><a class="btn" href="#/earnings">${ic('wallet',16)} Ταμείο</a>`)}
-   <div class="kpis section"><div class="kpi"><div class="k">Συνεδρίες</div><div class="v sm">${ms.length}</div></div><div class="kpi"><div class="k">Ώρες</div><div class="v sm">${hoursNum(ms.reduce((a,s)=>a+s.minutes,0))}</div></div><div class="kpi"><div class="k">Εισπράχθηκαν</div><div class="v sm" style="color:var(--ok)">${fmtEur(paidSum(ms))}</div></div><div class="kpi"><div class="k">Απλήρωτα (όλοι οι μήνες)</div><div class="v sm" style="color:var(--bad)">${fmtEur(sumA(E.sessions.filter(s=>!s.paid)))}</div></div></div>
-   <nav class="tabs">${[['list','Συνεδρίες'],['rates','Αμοιβές μαθητών']].map(([k,l])=>`<a href="#/sessions?tab=${k}&${q}" class="${k===tab?'on':''}">${l}</a>`).join('')}</nav><div id="eb"></div>`;
-  const eb=$('#eb');
-  if(tab==='list'){const list=E.sessions.filter(s=>(!fs||s.studentId===fs)&&(f===''||(f==='unpaid'?!s.paid:s.paid))&&(f==='unpaid'||s.date.startsWith(ym))).sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start));
-    eb.innerHTML=`<div class="toolbar"><div class="seg">${[['','Όλες'],['paid','Πληρωμένες'],['unpaid','Απλήρωτες (όλοι οι μήνες)']].map(([k,l])=>`<a href="#/sessions?${q}&f=${k}${fs?'&st='+fs:''}" class="${f===k?'on':''}">${l}</a>`).join('')}</div><select class="in" id="fst" aria-label="Μαθητής">${opt('','Όλοι οι μαθητές')}${st.map(s=>opt(s.id,stuName(s),fs)).join('')}</select></div>
-     ${list.length?`<div class="list">${list.map(s=>`<div class="rw static wrapm"><span class="ricon ${s.paid?'g':'r'}">${ic(s.paid?'check':'clock',18)}</span><span class="grow"><b>${esc(nm(s.studentId))} · ${fmtEur(s.amount)}</b><small>${fmtDate(s.date)} · ${s.start}–${s.end} · ${hoursTxt(s.minutes)} × ${fmtEur(s.rate)}/ώρα${s.note?' · '+esc(s.note):''}</small></span><span class="end"><button class="chip ${s.paid?'ok':'bad'}" data-tp="${s.id}">${s.paid?'Πληρώθηκε':'Απλήρωτη'}</button><button class="iconbtn" data-ed="${s.id}" aria-label="Επεξεργασία">${ic('edit',16)}</button><button class="iconbtn" data-rm="${s.id}" aria-label="Διαγραφή">${ic('trash',16)}</button></span></div>`).join('')}</div>`:emptyHTML('clock','Καμία συνεδρία','Πρόσθεσε συνεδρία — το ποσό υπολογίζεται αυτόματα. Όταν σημειωθεί «Πληρώθηκε», περνά στο Ταμείο.',`<button class="btn pri" id="add2">${ic('plus',16)} Νέα συνεδρία</button>`)}`;
-    $('#fst').onchange=e=>go(`sessions?${q}&f=${f}${e.target.value?'&st='+e.target.value:''}`);}
-  else{eb.innerHTML=st.length?`<div class="card pad0"><div class="tablewrap"><table class="t"><tr><th style="padding-left:16px">Μαθητής</th><th>Ωριαία αμοιβή</th><th class="n">Συνεδρίες</th><th class="n">Ώρες</th><th class="n">Σύνολο</th><th class="n" style="padding-right:16px">Απλήρωτα</th></tr>${st.map(s=>{const L=E.sessions.filter(x=>x.studentId===s.id);return`<tr><td style="padding-left:16px">${s.avatar||''} ${esc(stuName(s))}</td><td><input class="in sm" type="number" step="0.5" min="0" data-rate="${s.id}" value="${esc(E.rates[s.id]??'')}" placeholder="€/ώρα" style="width:100px" aria-label="Ωριαία αμοιβή"></td><td class="n">${L.length}</td><td class="n">${hoursNum(L.reduce((a,x)=>a+x.minutes,0))}</td><td class="n"><b>${fmtEur(sumA(L))}</b></td><td class="n" style="padding-right:16px;color:${L.some(x=>!x.paid)?'var(--bad)':'inherit'}">${fmtEur(sumA(L.filter(x=>!x.paid)))}</td></tr>`;}).join('')}</table></div></div><p class="tiny muted">Η ωριαία αμοιβή συμπληρώνεται αυτόματα σε κάθε νέα συνεδρία. Αλλαγές αποθηκεύονται αμέσως.</p>`:emptyHTML('users','Δεν υπάρχουν μαθητές','');
-    $$('[data-rate]').forEach(i=>i.onchange=async()=>{E.rates[i.dataset.rate]=i.value===''?null:+i.value;await Earn.save();toast('Αποθηκεύτηκε.','ok');});}
-  $('#add').onclick=()=>sessionDialog();const a2=$('#add2');if(a2)a2.onclick=()=>sessionDialog();
-  M().onclick=async e=>{const t=e.target;const tp=t.closest('[data-tp]');if(tp){const s=E.sessions.find(x=>x.id===tp.dataset.tp);s.paid=!s.paid;s.paidAmount=s.paid?s.amount:0;await Earn.save();return render();}
-    const ed=t.closest('[data-ed]');if(ed)return sessionDialog(E.sessions.find(x=>x.id===ed.dataset.ed));
-    const rm=t.closest('[data-rm]');if(rm&&await confirmDlg('Διαγραφή συνεδρίας;',{danger:true,ok:'Διαγραφή'})){S.earn.sessions=E.sessions.filter(x=>x.id!==rm.dataset.rm);await Earn.save();render();}};}
+function todayBlock(){const E=earnInit();const t=todayISO(),wd=wdOf(t);const L=myStudents().map(s=>({s,p:planOf(s.id)})).filter(x=>x.p&&(x.p.slots||[]).some(y=>+y.d===wd));
+  if(!L.length)return'';return`<div class="card section"><div class="card-h"><h3>Σήμερα, ${WDAYS[wd]}</h3></div><div class="list">${L.map(({s,p})=>{const sl=slotFor(p,t);const done=E.sessions.some(x=>x.studentId===s.id&&x.date===t);
+    return`<div class="rw static wrapm"><span class="av">${s.avatar||'🙂'}</span><span class="grow"><b>${esc(stuName(s))}</b><small>${sl.s}–${sl.e} · ${priceTxt(p)}</small></span><span class="end">${done?`<span class="chip ok">${ic('check',13)} Καταχωρίστηκε</span>`:`<button class="btn sm pri" data-qs="${s.id}">${ic('check',15)} Ήρθε — καταχώριση</button>`}</span></div>`;}).join('')}</div></div>`;}
+
+function sessionsView(eb,r){const E=earnInit();const ym=r.q.m||todayISO().slice(0,7);const[Y,Mo]=ym.split('-').map(Number);const prev=isoDate(new Date(Y,Mo-2,1)).slice(0,7),next=isoDate(new Date(Y,Mo,1)).slice(0,7);
+  const f=r.q.f||'';const fs=r.q.st||'';const st=myStudents();const ms=sessMonth(ym);const base=`earnings?v=sessions&m=${ym}`;
+  const list=E.sessions.filter(s=>(!fs||s.studentId===fs)&&(f===''||(f==='unpaid'?!s.paid:s.paid))&&(f==='unpaid'||fs||s.date.startsWith(ym))).sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start));
+  eb.innerHTML=`${fs?'':todayBlock()}<div class="toolbar"><div class="seg" style="align-items:center"><a href="#/earnings?v=sessions&m=${prev}" aria-label="Προηγούμενος μήνας">${ic('left',16)}</a><span style="padding:6px 10px;font-weight:600;font-size:.88rem">${MONTHS[Mo-1]} ${Y}</span><a href="#/earnings?v=sessions&m=${next}" aria-label="Επόμενος μήνας">${ic('right',16)}</a></div></div>
+   <div class="kpis section"><div class="kpi"><div class="k">Συνεδρίες</div><div class="v sm">${ms.length}</div></div><div class="kpi"><div class="k">Ώρες</div><div class="v sm">${hoursNum(ms.reduce((a,s)=>a+s.minutes,0))}</div></div><div class="kpi"><div class="k">Εισπράχθηκαν</div><div class="v sm" style="color:var(--ok)">${fmtEur(paidSum(ms))}</div></div><div class="kpi"><div class="k">Υπόλοιπα (όλοι οι μήνες)</div><div class="v sm" style="color:var(--bad)">${fmtEur(sumA(E.sessions.filter(s=>!s.paid)))}</div></div></div>
+   <div class="toolbar"><div class="seg">${[['','Όλες'],['paid','Πληρωμένες'],['unpaid','Απλήρωτες (όλοι οι μήνες)']].map(([k,l])=>`<a href="#/${base}&f=${k}${fs?'&st='+fs:''}" class="${f===k?'on':''}">${l}</a>`).join('')}</div><select class="in" id="fst" aria-label="Μαθητής">${opt('','Όλοι οι μαθητές')}${st.map(s=>opt(s.id,stuName(s),fs)).join('')}</select></div>
+   ${list.length?`<div class="list">${list.map(sessRowHTML).join('')}</div>`:emptyHTML('clock','Καμία συνεδρία','Πάτα «Συνεδρία» — με σταθερή καρτέλα μαθητή η καταχώριση γίνεται με ένα πάτημα.')}`;
+  $('#fst',eb).onchange=e=>go(`${base}&f=${f}${e.target.value?'&st='+e.target.value:''}`);}
+function sessRowHTML(s){return`<div class="rw static wrapm"><span class="ricon ${s.paid?'g':'r'}">${ic(s.paid?'check':'clock',18)}</span><span class="grow"><b>${esc(stuNm(s.studentId))} · ${fmtEur(s.amount)}</b><small>${fmtDate(s.date)} · ${s.start}–${s.end} · ${rateTxt(s)}${s.receiptNo?' · απόδειξη #'+s.receiptNo:''}${s.note?' · '+esc(s.note):''}</small></span><span class="end"><button class="chip ${s.paid?'ok':'bad'}" data-stp="${s.id}">${s.paid?'Πληρώθηκε':'Απλήρωτη'}</button>${s.paid?`<button class="iconbtn" data-rcpt="${s.id}" aria-label="Απόδειξη" title="Απόδειξη">${ic('l-stamp',16)}</button>`:''}<button class="iconbtn" data-sed="${s.id}" aria-label="Επεξεργασία">${ic('edit',16)}</button><button class="iconbtn" data-srm="${s.id}" aria-label="Διαγραφή">${ic('trash',16)}</button></span></div>`;}
+
+function cardsView(eb){const st=myStudents();
+  eb.innerHTML=st.length?`<p class="small muted" style="margin-top:0">Η σταθερή καρτέλα κάθε μαθητή κρατά τιμή, μέρες και ώρες. Από εδώ καταχωρίζεις συνεδρία με ένα πάτημα και βλέπεις το υπόλοιπο.</p><div class="stucards">${st.map(s=>{const p=planOf(s.id);const b=balanceOf(s.id);const em=parentEmails(s.id);
+    return`<div class="card stucard"><div class="row" style="flex-wrap:nowrap;gap:12px"><span class="av lg">${s.avatar||'🙂'}</span><div class="grow" style="min-width:0"><b class="nm">${esc(stuName(s))}</b><div class="small muted">${p?priceTxt(p):'Δεν έχει οριστεί τιμή'}</div></div><button class="iconbtn" data-plan="${s.id}" aria-label="Αλλαγή καρτέλας" title="Αλλαγή καρτέλας">${ic('edit',17)}</button></div>
+     <dl class="kv small" style="margin:12px 0"><dt>Πρόγραμμα</dt><dd>${esc(slotsTxt(p))}</dd><dt>Υπόλοιπο</dt><dd>${b.sum?`<b style="color:var(--bad)">${fmtEur(b.sum)}</b> <span class="muted">(${b.n} ${b.n===1?'συνεδρία':'συνεδρίες'})</span>`:'<span style="color:var(--ok)">Εξοφλημένο</span>'}</dd><dt>Αποδείξεις</dt><dd>${em.length?esc(em.map(c=>c.email).join(', ')):'<span style="color:var(--bad)">Λείπει email γονέα</span>'}</dd></dl>
+     <div class="row" style="gap:6px"><button class="btn sm pri" data-qs="${s.id}">${ic('check',15)} Καταχώριση συνεδρίας</button>${b.sum?`<button class="btn sm" data-settle="${s.id}">${ic('wallet',15)} Εξόφληση</button>`:''}<a class="btn sm ghost" href="#/earnings?v=sessions&st=${s.id}">Ιστορικό</a></div></div>`;}).join('')}</div>`:emptyHTML('users','Δεν υπάρχουν μαθητές','');}
+
+/* ---- σταθερή καρτέλα μαθητή: τιμή, μέρες, ώρες ---- */
+function planDialog(sid,after){const E=earnInit();const st=S.data.students.find(x=>x.id===sid);if(!st)return;const p0=planOf(sid);const p=p0?JSON.parse(JSON.stringify(p0)):{mode:'session',price:'',slots:[{d:wdOf(todayISO()),s:'17:00',e:'18:00'}]};
+  const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">Καρτέλα · ${esc(stuName(st))}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div><p class="small muted" style="margin-top:0">Τα σταθερά της συνεδρίας. Συμπληρώνονται μόνα τους σε κάθε καταχώριση και αλλάζουν όποτε θέλεις.</p>
+   <form id="pf"><div class="seg" style="margin-bottom:12px" id="pm">${[['session','Τιμή ανά συνεδρία'],['hour','Τιμή ανά ώρα']].map(([k,l])=>`<button type="button" data-pm="${k}" class="${p.mode===k?'on':''}">${l}</button>`).join('')}</div>
+   <div class="field"><label class="f" for="p-pr">Τιμή (€)</label><input class="in" id="p-pr" type="number" inputmode="decimal" step="0.5" min="0" required value="${esc(p.price)}" placeholder="π.χ. 20"></div>
+   <label class="f">Μέρες και ώρες που έρχεται</label><div id="psl"></div><button type="button" class="btn sm" id="pad">${ic('plus',15)} Προσθήκη μέρας</button>
+   <div class="row" style="justify-content:flex-end;margin-top:16px"><button type="button" class="btn" data-close>Άκυρο</button><button class="btn pri">${ic('check',16)} Αποθήκευση</button></div></form>`);
+  const drawS=()=>{$('#psl',md.el).innerHTML=p.slots.map((x,i)=>`<div class="slotrow" data-i="${i}"><select class="in" data-k="d" aria-label="Μέρα">${DAY_ORDER.map(d=>opt(d,WDAYS[d],String(x.d))).join('')}</select><input class="in" type="time" data-k="s" value="${x.s}" aria-label="Έναρξη"><input class="in" type="time" data-k="e" value="${x.e}" aria-label="Λήξη"><button type="button" class="iconbtn" data-rm="${i}" aria-label="Αφαίρεση">${ic('x',16)}</button></div>`).join('')||'<p class="tiny muted">Χωρίς σταθερή μέρα — η ώρα θα συμπληρώνεται από την τελευταία συνεδρία.</p>';};drawS();
+  md.el.addEventListener('input',e=>{const rw=e.target.closest('.slotrow');if(rw){p.slots[+rw.dataset.i][e.target.dataset.k]=e.target.dataset.k==='d'?+e.target.value:e.target.value;}});
+  md.el.addEventListener('change',e=>{const rw=e.target.closest('.slotrow');if(rw){p.slots[+rw.dataset.i][e.target.dataset.k]=e.target.dataset.k==='d'?+e.target.value:e.target.value;}});
+  md.el.addEventListener('click',e=>{const m=e.target.closest('[data-pm]');if(m){p.mode=m.dataset.pm;$$('[data-pm]',md.el).forEach(b=>b.classList.toggle('on',b===m));}
+    const rm=e.target.closest('[data-rm]');if(rm){p.slots.splice(+rm.dataset.rm,1);drawS();}
+    if(e.target.closest('#pad')){const last=p.slots[p.slots.length-1];p.slots.push({d:last?DAY_ORDER[(DAY_ORDER.indexOf(+last.d)+2)%7]:1,s:last?last.s:'17:00',e:last?last.e:'18:00'});drawS();}});
+  $('#pf',md.el).onsubmit=async e=>{e.preventDefault();p.price=+$('#p-pr',md.el).value;if(!(p.price>=0))return toast('Βάλε τιμή.','bad');if(p.slots.some(x=>!sessMin(x.s,x.e)))return toast('Έλεγξε τις ώρες.','bad');E.plans[sid]=p;if(p.mode==='hour')E.rates[sid]=p.price;await Earn.save();md.close();toast('Η καρτέλα αποθηκεύτηκε.','ok');if(after)after();else render();};}
+
+/* ---- καταχώριση με ένα πάτημα (με τα σταθερά της καρτέλας) ---- */
+function quickSession(sid,date){const E=earnInit();const p=planOf(sid);if(!p)return planDialog(sid,()=>quickSession(sid,date));date=date||todayISO();const st=S.data.students.find(x=>x.id===sid);
+  const last=E.sessions.filter(x=>x.studentId===sid).sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start))[0];const sl=slotFor(p,date)||(last?{s:last.start,e:last.end}:{s:'17:00',e:'18:00'});const min=sessMin(sl.s,sl.e);const amt=amountOf(p.mode,p.price,min);const em=parentEmails(sid);
+  const dup=E.sessions.some(x=>x.studentId===sid&&x.date===date);
+  const md=modal(`<h3 style="margin-top:0">Καταχώριση συνεδρίας</h3><div class="qsum"><span class="av lg">${st.avatar||'🙂'}</span><div><b>${esc(stuName(st))}</b><div class="small">${WDAYS[wdOf(date)]} ${fmtDate(date)} · ${sl.s}–${sl.e} (${hoursTxt(min)})</div><div class="qamt">${fmtEur(amt)}</div><div class="tiny muted">${p.mode==='hour'?`${fmtEur(p.price)}/ώρα × ${hoursNum(min)} ώρες`:'Τιμή ανά συνεδρία'}</div></div></div>
+   <div class="note small field">${ic('info',14)} Με τα σταθερά της καρτέλας — δεν έχεις αλλάξει τίποτα. Αν σήμερα ήταν διαφορετικά, πάτα «Αλλαγή».</div>${dup?`<div class="note small field" style="background:var(--pink)">${ic('alert',14)} Υπάρχει ήδη συνεδρία αυτού του μαθητή σήμερα.</div>`:''}
+   <label class="check field"><input type="checkbox" id="q-paid"> <span>Πληρώθηκε τώρα</span></label>
+   <label class="check field" id="q-rw" style="display:none"><input type="checkbox" id="q-rc" ${em.length?'checked':'disabled'}> <span>Αποστολή απόδειξης ${em.length?'στο '+esc(em.map(c=>c.email).join(', ')):'(λείπει email γονέα)'}</span></label>
+   <p class="tiny muted" style="margin:0 0 12px">Αν δεν πληρωθεί, το ποσό μένει ως υπόλοιπο στην καρτέλα του μαθητή.</p>
+   <div class="row" style="justify-content:flex-end"><button class="btn" id="q-ch">${ic('edit',15)} Αλλαγή</button><button class="btn pri" id="q-ok">${ic('check',16)} Καταχώριση</button></div>`);
+  $('#q-paid',md.el).onchange=e=>{$('#q-rw',md.el).style.display=e.target.checked?'':'none';};
+  $('#q-ch',md.el).onclick=()=>{md.close();sessionDialog(null,{sid,date,unlock:true});};
+  $('#q-ok',md.el).onclick=async()=>{const paid=$('#q-paid',md.el).checked;const rec={id:uid(),studentId:sid,date,start:sl.s,end:sl.e,minutes:min,mode:p.mode,price:p.price,rate:p.mode==='hour'?p.price:null,amount:amt,paid,paidAmount:paid?amt:0,paidAt:paid?todayISO():null,note:'',fromPlan:true};E.sessions.push(rec);await Earn.save();md.close();toast(`Καταχωρίστηκε: ${fmtEur(amt)}`,'ok');render();if(paid&&$('#q-rc',md.el).checked)receiptDialog([rec]);};}
+
+/* ---- πλήρης φόρμα συνεδρίας ---- */
+function sessionDialog(s,{sid,date,unlock}={}){const E=earnInit();const st=myStudents();if(!st.length)return toast('Πρόσθεσε πρώτα μαθητή.','bad');s=s||{};const isNew=!s.id;
+  const md=modal(`<div class="spread" style="margin-bottom:12px"><h3 style="margin:0">${isNew?'Νέα συνεδρία':'Επεξεργασία συνεδρίας'}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
+  <form id="sf"><div class="grid g2" style="gap:10px"><div class="field"><label class="f" for="s-st">Μαθητής</label><select class="in" id="s-st" name="studentId" required>${opt('','— διάλεξε —')}${st.map(x=>opt(x.id,stuName(x),s.studentId||sid)).join('')}</select></div><div class="field"><label class="f" for="s-d">Ημερομηνία</label><input class="in" type="date" id="s-d" name="date" value="${s.date||date||todayISO()}" required></div></div>
+  <div id="s-lock" class="planbox field"></div>
+  <div id="s-ed"><div class="seg" style="margin-bottom:10px">${[['session','Ανά συνεδρία'],['hour','Ανά ώρα']].map(([k,l])=>`<button type="button" data-sm="${k}">${l}</button>`).join('')}</div>
+   <div class="grid g3" style="gap:10px"><div class="field"><label class="f" for="s-pr">Τιμή (€)</label><input class="in" type="number" inputmode="decimal" step="0.5" min="0" id="s-pr" name="price" required></div><div class="field"><label class="f" for="s-s">Έναρξη</label><input class="in" type="time" id="s-s" name="start" required></div><div class="field"><label class="f" for="s-e">Λήξη</label><input class="in" type="time" id="s-e" name="end" required></div></div>
+   <label class="check field" id="s-upw"><input type="checkbox" name="upd"> <span id="s-upl">Να γίνουν αυτά τα σταθερά της καρτέλας του μαθητή</span></label></div>
+  <div class="note field" id="calc" aria-live="polite"></div>
+  <label class="check field"><input type="checkbox" name="paid" ${s.paid?'checked':''}> <span>Πληρώθηκε</span></label>
+  <div id="s-pw"><div class="field"><label class="f" for="s-pa">Ποσό πληρωμής (€)</label><input class="in" type="number" step="0.01" min="0" id="s-pa" name="paidAmount" value="${s.paid?esc(s.paidAmount):''}" placeholder="ίδιο με το ποσό"></div>
+   <label class="check field" id="s-rcw"><input type="checkbox" name="rc"> <span id="s-rcl"></span></label></div>
+  <p class="tiny muted" id="s-unp" style="margin:0 0 10px">Αν δεν πληρωθεί, το ποσό μένει ως υπόλοιπο στην καρτέλα του μαθητή.</p>
+  <div class="field"><label class="f" for="s-n">Σημείωση</label><input class="in" id="s-n" name="note" value="${esc(s.note||'')}"></div>
+  <div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-close>Άκυρο</button><button class="btn pri">${ic('check',16)} Αποθήκευση</button></div></form>`);
+  const f=$('#sf',md.el);let mode=s.mode||'session';let locked=false;let plan=null;
+  const setMode=m=>{mode=m;$$('[data-sm]',md.el).forEach(b=>b.classList.toggle('on',b.dataset.sm===m));calc();};
+  const fill=(keepTimes)=>{const id=f.studentId.value;plan=id?planOf(id):null;const d=f.date.value;
+    if(isNew||!keepTimes){if(plan){const last=E.sessions.filter(x=>x.studentId===id).sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start))[0];const sl=slotFor(plan,d)||(last?{s:last.start,e:last.end}:{s:'17:00',e:'18:00'});f.price.value=plan.price;f.start.value=sl.s;f.end.value=sl.e;setMode(plan.mode);}
+      else if(isNew){const last=id&&E.sessions.filter(x=>x.studentId===id).slice(-1)[0];f.price.value=last?(last.price??last.rate):'';f.start.value=last?last.start:'17:00';f.end.value=last?last.end:'18:00';setMode(last?(last.mode||'hour'):'session');}}
+    locked=!!plan&&isNew&&!unlock;drawLock();calc();};
+  const drawLock=()=>{const id=f.studentId.value;const em=id?parentEmails(id):[];
+    $('#s-lock',md.el).innerHTML=plan?(locked?`<div class="spread"><div><div class="tiny muted">Από τη σταθερή καρτέλα</div><b>${f.start.value}–${f.end.value} · ${priceTxt(plan)}</b></div><button type="button" class="btn sm" id="s-unl">${ic('edit',14)} Αλλαγή</button></div><div class="tiny muted" style="margin-top:6px">${ic('info',12)} Δεν έχεις αλλάξει τίποτα — καταχωρίζεται με τα σταθερά.</div>`:`<div class="tiny muted">Σταθερά καρτέλας: ${esc(slotsTxt(plan))} · ${priceTxt(plan)}</div>`):(id?`<div class="tiny muted">${ic('info',12)} Ο μαθητής δεν έχει ακόμη σταθερή καρτέλα — τα στοιχεία αυτά μπορούν να γίνουν τα σταθερά του.</div>`:'');
+    $('#s-lock',md.el).style.display=$('#s-lock',md.el).innerHTML?'':'none';$('#s-ed',md.el).style.display=locked?'none':'';
+    f.upd.checked=!plan&&isNew;$('#s-upl',md.el).textContent=plan?'Να ενημερωθεί και η σταθερή καρτέλα με αυτά':'Να γίνουν αυτά τα σταθερά της καρτέλας του μαθητή';
+    $('#s-rcl',md.el).textContent=em.length?'Αποστολή απόδειξης στο '+em.map(c=>c.email).join(', '):'Αποστολή απόδειξης (λείπει email γονέα στην καρτέλα του μαθητή)';f.rc.disabled=!em.length;if(isNew)f.rc.checked=!!em.length;
+    const u=$('#s-unl',md.el);if(u)u.onclick=()=>{locked=false;drawLock();};};
+  const calc=()=>{const m=sessMin(f.start.value,f.end.value);const pr=+f.price.value;const amt=amountOf(mode,pr,m);const pd=f.paid.checked;$('#s-pw',md.el).style.display=pd?'':'none';$('#s-unp',md.el).style.display=pd?'none':'';
+    $('#calc',md.el).innerHTML=m&&f.price.value!==''?`<div class="spread"><span>Διάρκεια: <b>${hoursTxt(m)}</b></span><span>Ποσό: <b style="font-size:1.1rem">${fmtEur(amt)}</b></span></div><div class="tiny" style="margin-top:4px">${mode==='hour'?`${fmtEur(pr)}/ώρα × ${hoursNum(m)} ώρες = ${fmtEur(amt)}`:'Σταθερή τιμή ανά συνεδρία'}</div>`:'Διάλεξε μαθητή — τιμή και ώρες συμπληρώνονται από την καρτέλα του.';};
+  if(!isNew){f.price.value=s.price??s.rate??'';f.start.value=s.start;f.end.value=s.end;plan=planOf(s.studentId);setMode(s.mode||'hour');locked=false;drawLock();$('#s-upw',md.el).style.display='';f.upd.checked=false;f.rc.checked=false;calc();}else fill();
+  f.studentId.onchange=()=>fill();f.date.onchange=()=>{if(locked||isNew)fill(!isNew);};f.oninput=calc;f.paid.onchange=calc;
+  md.el.addEventListener('click',e=>{const m=e.target.closest('[data-sm]');if(m)setMode(m.dataset.sm);});
+  f.onsubmit=async e=>{e.preventDefault();const o=fd(f);const m=sessMin(o.start,o.end);if(!o.studentId)return toast('Διάλεξε μαθητή.','bad');if(!m)return toast('Έλεγξε τις ώρες.','bad');const pr=+o.price;const amount=amountOf(mode,pr,m);
+    const rec=Object.assign({},s,{id:s.id||uid(),studentId:o.studentId,date:o.date,start:o.start,end:o.end,minutes:m,mode,price:pr,rate:mode==='hour'?pr:null,amount,paid:!!o.paid,paidAmount:o.paid?(o.paidAmount===''?amount:+o.paidAmount):0,paidAt:o.paid?(s.paidAt||todayISO()):null,note:o.note||'',fromPlan:locked});
+    const i=E.sessions.findIndex(x=>x.id===rec.id);if(i>=0)E.sessions[i]=rec;else E.sessions.push(rec);
+    if(o.upd){const p=planOf(o.studentId)||{slots:[]};p.mode=mode;p.price=pr;const wd=wdOf(o.date);const sl=(p.slots||[]).find(x=>+x.d===wd);if(sl){sl.s=o.start;sl.e=o.end;}else(p.slots=p.slots||[]).push({d:wd,s:o.start,e:o.end});E.plans[o.studentId]=p;if(mode==='hour')E.rates[o.studentId]=pr;}
+    await Earn.save();md.close();toast(`Αποθηκεύτηκε: ${fmtEur(amount)}`,'ok');render();if(rec.paid&&o.rc)receiptDialog([rec]);};}
+
+/* ---- εξόφληση υπολοίπου ---- */
+function settleDialog(sid){const E=earnInit();const b=balanceOf(sid);if(!b.n)return toast('Δεν υπάρχει υπόλοιπο.');const L=b.list.slice().sort((x,y)=>x.date.localeCompare(y.date));const em=parentEmails(sid);
+  const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">Εξόφληση · ${esc(stuNm(sid))}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
+   <div class="list" id="stl">${L.map(s=>`<label class="rw static check"><input type="checkbox" value="${s.id}" checked><span class="grow"><b>${fmtDate(s.date)} · ${s.start}–${s.end}</b></span><b>${fmtEur(s.amount)}</b></label>`).join('')}</div>
+   <div class="note field spread" style="margin-top:12px"><span>Σύνολο</span><b id="stt">${fmtEur(b.sum)}</b></div>
+   <label class="check field"><input type="checkbox" id="st-rc" ${em.length?'checked':'disabled'}> <span>Αποστολή απόδειξης ${em.length?'στο '+esc(em.map(c=>c.email).join(', ')):'(λείπει email γονέα)'}</span></label>
+   <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Άκυρο</button><button class="btn pri" id="st-ok">${ic('check',16)} Εξόφληση</button></div>`);
+  const sel=()=>$$('#stl input:checked',md.el).map(x=>E.sessions.find(s=>s.id===x.value));$('#stl',md.el).onchange=()=>{$('#stt',md.el).textContent=fmtEur(sumA(sel()));};
+  $('#st-ok',md.el).onclick=async()=>{const S2=sel();if(!S2.length)return toast('Διάλεξε τουλάχιστον μία συνεδρία.','bad');S2.forEach(s=>{s.paid=true;s.paidAmount=s.amount;s.paidAt=todayISO();});await Earn.save();md.close();toast(`Εξοφλήθηκαν ${fmtEur(sumA(S2))}.`,'ok');render();if($('#st-rc',md.el).checked)receiptDialog(S2);};}
+
+/* ---- απόδειξη πληρωμής: email γονέα, PDF, κοινοποίηση ---- */
+function receiptText(L,no){const P=S.data.profile||{};const sid=L[0].studentId;const st=S.data.students.find(x=>x.id===sid)||{};const par=((st.contacts||[]).find(c=>c.email)||{});const tot=L.reduce((a,s)=>a+(+s.paidAmount||+s.amount||0),0);
+  const lines=[`ΑΠΟΔΕΙΞΗ ΠΛΗΡΩΜΗΣ αρ. ${no}`,`Ημερομηνία: ${fmtDate(todayISO())}`,'',`Από: ${S.user.name}${P.title?', '+P.title:''}`,P.vat?`ΑΦΜ: ${P.vat}`:null,P.address?`Διεύθυνση: ${P.address}`:null,P.phone?`Τηλέφωνο: ${P.phone}`:null,S.user.email?`Email: ${S.user.email}`:null,'',`Προς: ${par.name||'Γονέα/κηδεμόνα'}`,`Για: ${stuName(st)}`,'','Εκπαιδευτικές συνεδρίες:',...L.map(s=>`• ${WDAYS[wdOf(s.date)]} ${fmtDate(s.date)}, ${s.start}–${s.end} (${hoursTxt(s.minutes)}): ${fmtEur(+s.paidAmount||+s.amount)}`),'',`ΣΥΝΟΛΟ ΠΟΥ ΕΙΣΠΡΑΧΘΗΚΕ: ${fmtEur(tot)}`,'','Ευχαριστώ πολύ!',S.user.name,'',`Η απόδειξη αυτή βεβαιώνει την πληρωμή και δεν αποτελεί φορολογικό παραστατικό.`];
+  return{text:lines.filter(x=>x!==null).join('\n'),tot,st,par};}
+async function receiptDialog(L){const E=earnInit();L=L.filter(Boolean);if(!L.length)return;let no=L[0].receiptNo&&L.every(s=>s.receiptNo===L[0].receiptNo)?L[0].receiptNo:null;
+  if(!no){E.recNo=(E.recNo||0)+1;no=E.recNo;L.forEach(s=>s.receiptNo=no);await Earn.save();}
+  const R=receiptText(L,no);const em=parentEmails(L[0].studentId);
+  const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">Απόδειξη αρ. ${no}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
+   ${em.length?`<div class="field"><label class="f">Αποστολή σε</label>${em.map(c=>`<label class="check"><input type="checkbox" class="rcto" value="${esc(c.email)}" checked> <span>${esc(c.name||c.role)} · ${esc(c.email)}</span></label>`).join('')}</div>`:`<div class="note field" style="background:var(--pink)">Δεν υπάρχει email γονέα στην καρτέλα του μαθητή. <a href="#/student-edit/${L[0].studentId}" data-close>Πρόσθεσε email</a></div>`}
+   <pre class="pre rcpt">${esc(R.text)}</pre>
+   <div class="row" style="gap:8px;margin-top:12px">${em.length?`<button class="btn pri" id="rc-mail">${ic('send',16)} Αποστολή με email</button>`:''}<button class="btn" id="rc-pdf">${ic('download',16)} PDF</button>${navigator.share?`<button class="btn" id="rc-sh">${ic('upload',16)} Κοινοποίηση</button>`:''}</div>
+   <p class="tiny muted" style="margin:10px 0 0">Η αποστολή ανοίγει την εφαρμογή email της συσκευής με όλα έτοιμα — πατάς μόνο «Αποστολή».</p>`);
+  const to=()=>$$('.rcto:checked',md.el).map(x=>x.value);
+  const pdfEl=()=>{const el=document.createElement('div');el.className='report';el.style.cssText='position:fixed;left:-9999px;top:0;width:794px';el.innerHTML=`<div class="rh">${LOGO}<div><h2 style="margin:0">Απόδειξη πληρωμής αρ. ${no}</h2><div class="small">${esc(S.user.name)}${S.data.profile.title?' · '+esc(S.data.profile.title):''}</div></div></div><pre style="font-family:inherit;white-space:pre-wrap;font-size:15px;line-height:1.6">${esc(R.text)}</pre>`;document.body.appendChild(el);return el;};
+  const fname=`apodeixi-${no}-${(R.st.code||'')}.pdf`;
+  const mb=$('#rc-mail',md.el);if(mb)mb.onclick=()=>{const t=to();if(!t.length)return toast('Διάλεξε παραλήπτη.','bad');const subj=`Απόδειξη πληρωμής αρ. ${no} — ${stuName(R.st)}`;location.href=`mailto:${t.map(encodeURIComponent).join(',')}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(R.text)}`;L.forEach(s=>s.receiptSent=todayISO());Earn.save();};
+  $('#rc-pdf',md.el).onclick=async e=>{const b=e.currentTarget;b.disabled=true;const el=pdfEl();try{await makePDF(el,fname);}catch(err){toast(err.message,'bad');}el.remove();b.disabled=false;};
+  const sh=$('#rc-sh',md.el);if(sh)sh.onclick=async()=>{try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');const el=pdfEl();const blob=await window.html2pdf().set({margin:[10,10,12,10],image:{type:'jpeg',quality:.95},html2canvas:{scale:2,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4'}}).from(el).outputPdf('blob');el.remove();const file=new File([blob],fname,{type:'application/pdf'});
+    if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title:`Απόδειξη αρ. ${no}`,text:R.text});else await navigator.share({title:`Απόδειξη αρ. ${no}`,text:R.text});}catch(err){if(err&&err.name!=='AbortError')toast('Η κοινοποίηση δεν ολοκληρώθηκε.','bad');}};}
+
+/* ---- κουμπιά που λειτουργούν σε κάθε σελίδα (συνεδρίες, καρτέλες, προφίλ μαθητή) ---- */
+document.addEventListener('click',async e=>{const t=e.target;if(!S.user||!t.closest)return;let b;
+  if(b=t.closest('[data-qs]')){if(!S.earnKey)return go('earnings?v=cards');return quickSession(b.dataset.qs);}
+  if(b=t.closest('[data-settle]')){if(!S.earnKey)return go('earnings?v=cards');return settleDialog(b.dataset.settle);}
+  if(b=t.closest('[data-plan]')){if(!S.earnKey)return go('earnings?v=cards');return planDialog(b.dataset.plan);}
+  if(!S.earn)return;const E=S.earn;
+  if(b=t.closest('[data-rcpt]'))return receiptDialog([E.sessions.find(x=>x.id===b.dataset.rcpt)]);
+  if(b=t.closest('[data-sed]'))return sessionDialog(E.sessions.find(x=>x.id===b.dataset.sed));
+  if(b=t.closest('[data-srm]')){if(await confirmDlg('Διαγραφή συνεδρίας;',{danger:true,ok:'Διαγραφή'})){S.earn.sessions=E.sessions.filter(x=>x.id!==b.dataset.srm);await Earn.save();render();}return;}
+  if(b=t.closest('[data-stp]')){const s=E.sessions.find(x=>x.id===b.dataset.stp);s.paid=!s.paid;s.paidAmount=s.paid?s.amount:0;s.paidAt=s.paid?todayISO():null;await Earn.save();render();
+    if(s.paid&&parentEmails(s.studentId).length&&await confirmDlg(`Πληρώθηκε ${fmtEur(s.amount)}. Να ετοιμαστεί απόδειξη για τον γονέα;`,{ok:'Απόδειξη'}))receiptDialog([s]);}});
+
+/* ---- στο προφίλ του μαθητή: σταθερή καρτέλα και υπόλοιπο ---- */
+function finCardHTML(s){if(!S.earnKey)return`<div class="card section finlock"><span class="ricon y">${ic('lock',17)}</span><span class="grow small">Τιμή, πρόγραμμα και υπόλοιπο συνεδριών φαίνονται μόλις ξεκλειδώσεις το Ταμείο.</span><a class="btn sm" href="#/earnings?v=cards">Ξεκλείδωμα</a></div>`;
+  const p=planOf(s.id),b=balanceOf(s.id);return`<div class="card section"><div class="card-h"><h3>Συνεδρίες & υπόλοιπο</h3><button class="btn sm" data-plan="${s.id}">${ic('edit',15)} Καρτέλα</button></div>
+   <div class="kpis k3"><div class="kpi"><div class="k">Τιμή</div><div class="v sm">${p?priceTxt(p):'—'}</div></div><div class="kpi"><div class="k">Πρόγραμμα</div><div class="v sm" style="font-size:.92rem;white-space:normal">${esc(slotsTxt(p))}</div></div><div class="kpi"><div class="k">Υπόλοιπο</div><div class="v sm" style="color:${b.sum?'var(--bad)':'var(--ok)'}">${b.sum?fmtEur(b.sum):'Εξοφλημένο'}</div>${b.n?`<div class="d">${b.n} ${b.n===1?'συνεδρία':'συνεδρίες'}</div>`:''}</div></div>
+   <div class="row" style="gap:6px;margin-top:12px"><button class="btn sm pri" data-qs="${s.id}">${ic('check',15)} Καταχώριση συνεδρίας</button>${b.sum?`<button class="btn sm" data-settle="${s.id}">${ic('wallet',15)} Εξόφληση</button>`:''}<a class="btn sm ghost" href="#/earnings?v=sessions&st=${s.id}">Ιστορικό</a></div></div>`;}
 
 /* ===== Κλείδωμα μαθητών με απλό κωδικό ===== */
 const StuLock={
