@@ -1016,9 +1016,9 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:8px}.fgrid .in{width:100%}
 .stutools .search{position:relative}.stutools .search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink3)}.stutools .search input{padding-left:38px;width:100%}
 .stulist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
-.scard{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:16px;color:var(--ink);text-decoration:none;min-width:0}
-.scard:active{background:var(--raise)}.scard>.ic{color:var(--ink3);flex:none}
-.scard .av{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:1.4rem;flex:none}
+.stcard{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:16px;color:var(--ink);text-decoration:none;min-width:0}
+.stcard:active{background:var(--raise)}.stcard>.ic{color:var(--ink3);flex:none}
+.stcard .av{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:1.4rem;flex:none}
 .sc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .sc-top{display:flex;align-items:center;gap:6px;min-width:0}.sc-top b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sc-ic{color:var(--lilac-d);display:inline-flex}
 .chip.sm{font-size:.68rem;padding:1px 7px}
@@ -1032,6 +1032,8 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 .mlegend{display:flex;flex-wrap:wrap;gap:12px;font-size:.78rem;color:var(--ink2);margin:0 0 8px}.mlegend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-2px;border:2px solid}
 .lg-main{background:var(--ink);border-color:var(--ink)!important}.lg-branch{background:var(--lilac);border-color:var(--lilac-d)!important}.lg-home{background:var(--mint);border-color:var(--ok)!important}.lg-other{background:var(--yellow);border-color:var(--yellow-d)!important}.lg-stu{background:var(--paper);border-color:var(--lilac-d)!important;border-radius:50%!important}
 .plic.pl-main{background:var(--ink);color:#fff}.plic.pl-branch{background:var(--lilac);color:var(--lilac-d)}.plic.pl-home{background:var(--mint)}.plic.pl-other{background:var(--yellow)}
+.mdmini{display:flex;flex-wrap:wrap;gap:6px;font-size:1.5rem}
+.awgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:12px}.awb{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:1px solid var(--line);border-radius:14px;background:var(--paper);font:inherit;font-size:.78rem;cursor:pointer;color:var(--ink)}.awb span{font-size:1.6rem}.awb.on{border-color:var(--lilac-d);background:var(--lilac)}
 
 /* ===== games ===== */
 .gwrap{position:fixed;inset:0;z-index:80;overflow:auto;display:flex;flex-direction:column;font-family:"Comfortaa","Commissioner",sans-serif}
@@ -1232,11 +1234,24 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 .pan{position:absolute;top:8px;width:42%;display:flex;justify-content:center}.pan.l{left:0}.pan.r{right:0}
 .pan span{background:#fff;color:#2E2A33;border-radius:12px;padding:10px 12px;font-weight:800;font-size:1.15rem;box-shadow:0 4px 12px rgba(0,0,0,.12);transform:translateY(-100%)}
 .fulc{position:absolute;left:50%;top:48px;transform:translateX(-50%);width:0;height:0;border-left:26px solid transparent;border-right:26px solid transparent;border-bottom:60px solid #8A7553}
+.badges .badge{border:2px solid transparent;font:inherit;font-size:.8rem;color:inherit;cursor:pointer;line-height:1.25}
+.badge.bronze{border-color:#E3B58C}.badge.silver{border-color:#C9CED6}.badge.gold{border-color:#E8C04A;box-shadow:0 0 0 3px rgba(232,192,74,.18)}
+.badge.award{border-color:#B9A6E8}.badge.off{border-color:transparent}
+.mdhead{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;margin-bottom:14px}.mdhead .small{grid-column:2}
+.mdcount{grid-row:span 2;text-align:center;background:#fff;border-radius:18px;padding:8px 14px}.mdcount b{display:block;font-size:1.8rem;line-height:1}.mdcount span{font-size:.72rem}
+.mdbar{height:10px;border-radius:6px;background:rgba(255,255,255,.7);overflow:hidden}.mdbar i{display:block;height:100%;background:linear-gradient(90deg,#F2B544,#E9774E);border-radius:6px}.mdbar.sm{height:7px;margin-top:4px}
+.mdnext{background:rgba(255,255,255,.75);border-radius:18px;padding:12px;margin-bottom:12px}.mdn{display:flex;gap:10px;align-items:center;margin-top:8px}.mdn .e{font-size:1.8rem}.mdn .grow{flex:1;min-width:0}
+.mdt{margin:16px 0 8px;font-family:inherit;font-size:1rem}
+.mdpop{position:fixed;inset:0;z-index:3000;background:rgba(30,25,40,.45);display:grid;place-items:center;padding:20px;animation:drop .25s}
+.mdcard{background:#fff;color:#2E2A33;border-radius:26px;padding:22px;max-width:340px;width:100%;text-align:center;border:4px solid #eee}
+.mdcard.bronze{border-color:#E3B58C}.mdcard.silver{border-color:#C9CED6}.mdcard.gold{border-color:#E8C04A}
+.mdcard .big{font-size:5rem;line-height:1.1;margin:8px 0}.mdcard .big.off{filter:grayscale(1);opacity:.4}.mdcard h3{margin:4px 0;font-family:inherit}
+.mdpop.new .big{animation:mdpop .6s cubic-bezier(.2,1.6,.4,1)}@keyframes mdpop{from{transform:scale(.2) rotate(-20deg)}to{transform:none}}
 </style></head>
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.25.0';
+const APP_VERSION='2.26.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -2179,22 +2194,22 @@ function viewReport(r){const rep=S.data.reports.find(x=>x.id===r.id);const st=re
 function sessMin(s,e){if(!s||!e)return 0;const[a,b]=s.split(':').map(Number),[c,d]=e.split(':').map(Number);let m=(c*60+d)-(a*60+b);if(m<0)m+=1440;return m;}
 const sessAmount=(rate,min)=>Math.round((+rate||0)*min/60*100)/100;
 const BADGES=[['first','🌱','Πρώτο βήμα',h=>h.length>=1],['five','🔥','5 δραστηριότητες',h=>h.length>=5],['ten','🚀','10 δραστηριότητες',h=>h.length>=10],['perfect','💯','Τέλειο σκορ',h=>h.some(x=>x.pct===100)],['persist','💪','Δεν το βάζω κάτω',h=>h.some(x=>x.pct<60)],['improve','📈','Βελτίωση',h=>h.some((x,i)=>i>0&&x.pct-h[i-1].pct>=15)],['helper','💡','Ζήτησα βοήθεια και τα κατάφερα',h=>h.some(x=>x.hints>0&&x.pct>=60)],['streak','📅','3 μέρες στη σειρά',h=>{const d=[...new Set(h.map(x=>x.date.slice(0,10)))].sort();for(let i=2;i<d.length;i++){const a=new Date(d[i-2]),c=new Date(d[i]);if((c-a)/864e5===2)return true;}return false;}],['twenty','🌟','20 δραστηριότητες',h=>h.length>=20],['star90','🏅','3 φορές πάνω από 90%',h=>h.filter(x=>x.pct>=90).length>=3]];
-function stuShellHTML({name,avatar,theme,band,hist,tasks,tab}){const pts=hist.reduce((a,x)=>a+(x.score||0),0)+hist.length*5;const lvl=Math.floor(pts/100)+1,into=pts%100;const look=themeBg(theme,band);const T=THEMES[theme]||THEMES.neutral;const txt=look.dark?'#fff':'#2E2A33';
+function stuShellHTML({name,avatar,theme,band,hist,tasks,tab,awards}){window.MEDAL_HIST=hist;const pts=hist.reduce((a,x)=>a+(x.score||0),0)+hist.length*5;const lvl=Math.floor(pts/100)+1,into=pts%100;const look=themeBg(theme,band);const T=THEMES[theme]||THEMES.neutral;const txt=look.dark?'#fff':'#2E2A33';
   return`<div class="stu ${band}" style="background:${look.bg};color:${txt}"><div class="shead"><button class="bigav" id="sav">${avatar}</button><div class="lvl"><div style="font-weight:800;font-size:1.15rem">👋 Γεια σου! ${T.e}</div>${name?`<div class="small" style="font-weight:700">${esc(name)}</div>`:''}<div class="small">Επίπεδο ${lvl} · ${pts} πόντοι</div><div class="bar" style="margin-top:6px"><i style="width:${into}%"></i></div></div><div id="sx"></div></div>
   <div class="sbody"><div class="philo" style="margin-bottom:14px"><span>Μάθε</span>→<span>Εξασκήσου</span>→<span>Βελτιώσου</span>→<span>Γιόρτασε την πρόοδο</span></div>
   <div class="tabs" style="border:0">${[['tasks','🎯 Οι αποστολές μου'],['journey','🗺️ Η διαδρομή μου'],['badges','🏅 Τα μετάλλιά μου']].map(([k,l])=>`<button data-st="${k}" class="${tab===k?'on':''}" style="${tab===k?'':'background:rgba(255,255,255,.6);color:#2E2A33'}">${l}</button>`).join('')}</div>
   ${tab==='tasks'?`<div class="scard">${tasks.length?tasks.map(t=>`<div class="act" data-play="${t.id}" style="${t.done?'opacity:.7':''}"><span class="e">${(GAME_TYPES[t.gameType]||{}).e||'🎮'}</span><div style="flex:1"><b>${esc(t.title)}</b><div class="small">${t.done?'✓ Ολοκληρώθηκε'+(t.pct!=null?' · '+t.pct+'%':'')+' — παίξε ξανά!':'Νέα αποστολή!'}</div></div><span style="font-size:1.6rem">▶</span></div>`).join(''):'<div class="empty">Δεν υπάρχουν αποστολές αυτή τη στιγμή. 🌤️</div>'}</div>`:''}
   ${tab==='journey'?`<div class="scard"><h3 style="font-family:inherit">Η διαδρομή μου (${hist.length})</h3>${hist.length?`<div class="journey">${hist.map((x,i)=>`${i?'<span class="sep"></span>':''}<span class="j" title="${esc(x.title)} · ${fmtShort(x.date.slice(0,10))}">${(GAME_TYPES[x.gameType]||{}).e||'⭐'}<small>${x.pct>=90?'⭐⭐⭐':x.pct>=60?'⭐⭐':'⭐'}</small></span>`).join('')}<span class="sep"></span><span class="j" style="background:#2E2A33;color:#fff">${T.goal}</span></div>`:'<p>Η διαδρομή σου ξεκινά με την πρώτη αποστολή!</p>'}${hist.length>=2?`<p class="small" style="margin-top:14px">${hist[hist.length-1].pct>=hist[0].pct?'📈 Βελτιώνεσαι σε σχέση με την αρχή — συνέχισε!':'💪 Κάθε προσπάθεια μετράει!'}</p>`:''}</div>`:''}
-  ${tab==='badges'?`<div class="scard"><div class="badges">${BADGES.map(([k,e,n,f])=>`<div class="badge ${f(hist)?'':'off'}"><div class="e">${e}</div>${n}</div>`).join('')}</div><p class="small" style="margin-top:12px">Τα μετάλλια δείχνουν τη δική σου πρόοδο — δεν είναι αγώνας με κανέναν.</p></div>`:''}</div></div>`;}
+  ${tab==='badges'?`<div class="scard">${medalsHTML(hist,awards)}</div>`:''}</div></div>`;}
 function avatarPicker(cur){return new Promise(res=>{const m=modal(`<h3>Διάλεξε το εικονίδιό σου</h3><div class="avpick">${AVATARS.map(a=>`<button class="${a===cur?'on':''}" data-a="${a}">${a}</button>`).join('')}</div>`,{onClose:()=>res(null)});m.el.onclick=e=>{const b=e.target.closest('[data-a]');if(b){res(b.dataset.a);m.close();}};});}
 async function startStudentMode(preId){const sid=preId||await pickStudent('Ποιος μαθητής θα χρησιμοποιήσει τη συσκευή;');if(!sid)return;S.studentMode={studentId:sid,tab:'tasks'};render();}
 const StudentDevice={render(){const s=S.data.students.find(x=>x.id===S.studentMode.studentId);if(!s){S.studentMode=null;return render();}const band=ageBand(s.age);const hist=resultsOf(s.id);
   const asg=S.data.assignments.filter(a=>a.studentId===s.id).sort((a,b)=>(a.status==='done')-(b.status==='done')||b.created.localeCompare(a.created));const tasks=asg.map(a=>{const m=S.data.materials.find(x=>x.id===a.materialId);if(!m)return null;const last=hist.filter(r=>r.materialId===m.id).pop();return{id:a.id,title:m.title,gameType:m.gameType,done:a.status==='done',pct:last?last.pct:null};}).filter(Boolean);
-  document.body.innerHTML=stuShellHTML({name:s.name?s.name.split(' ')[0]:'',avatar:s.avatar||'🙂',theme:themeFor(s),band,hist,tasks,tab:S.studentMode.tab});
+  document.body.innerHTML=stuShellHTML({name:s.name?s.name.split(' ')[0]:'',avatar:s.avatar||'🙂',theme:themeFor(s),band,hist,tasks,tab:S.studentMode.tab,awards:s.awards||[]});
   $('#sx').innerHTML='<button class="gbtn" id="exit">🔒 Έξοδος</button>';
   $('#exit').onclick=async()=>{const p=await promptDlg('Κωδικός παιδαγωγού για έξοδο',{type:'password'});if(!p)return;try{await unwrapRaw(S.user.wrap,p);S.studentMode=null;render();}catch(e){toast('Λάθος κωδικός.','bad');}};
   $('#sav').onclick=async()=>{const a=await avatarPicker(s.avatar);if(a){s.avatar=a;save();this.render();}};
-  document.body.onclick=e=>{const t=e.target.closest('[data-st]');if(t){S.studentMode.tab=t.dataset.st;this.render();}const p=e.target.closest('[data-play]');if(p){const a=S.data.assignments.find(x=>x.id===p.dataset.play);const m=S.data.materials.find(x=>x.id===a.materialId);playGame(m,{student:s,band,support:needsSupport(s,m.subject),assignmentId:a.id,onFinish:res=>{res.source='device';recordResult(res);},onExit:()=>{document.body.onclick=null;this.render();}});}};}};
+  document.body.onclick=e=>{const t=e.target.closest('[data-st]');if(t){S.studentMode.tab=t.dataset.st;this.render();}const p=e.target.closest('[data-play]');if(p){const a=S.data.assignments.find(x=>x.id===p.dataset.play);const m=S.data.materials.find(x=>x.id===a.materialId);playGame(m,{student:s,band,support:needsSupport(s,m.subject),assignmentId:a.id,onFinish:res=>{res.source='device';const b0=medalsEarned(resultsOf(s.id));recordResult(res);save();medalCelebrate(medalsNew(b0,medalsEarned(resultsOf(s.id))));},onExit:()=>{document.body.onclick=null;this.render();}});}};}};
 const StudentLink={payload:null,tab:'tasks',
   prof(code){try{return JSON.parse(localStorage.getItem('pai-stu-'+code)||'null')||{avatar:null,hist:[],pending:[]};}catch(e){return{avatar:null,hist:[],pending:[]};}},
   saveProf(code,p){try{localStorage.setItem('pai-stu-'+code,JSON.stringify(p));}catch(e){}},
@@ -2205,7 +2220,7 @@ const StudentLink={payload:null,tab:'tasks',
     const send=async()=>{const last=pend[pend.length-1]||pr.pending[pr.pending.length-1];if(!last)return;const url=location.origin+location.pathname+'#res='+await packLink(last.pack);const how=await shareOrCopy(url,'Αποτελέσματα: '+P.m.title);if(how){pr.pending=pr.pending.filter(x=>x!==last);this.saveProf(P.sc,pr);toast('Ευχαριστούμε! 🎉','ok');this.render();}};
     if($('#send'))$('#send').onclick=send;
     $('#sav').onclick=async()=>{const a=await avatarPicker(pr.avatar);if(a){pr.avatar=a;this.saveProf(P.sc,pr);this.render();}};
-    document.body.onclick=e=>{const t=e.target.closest('[data-st]');if(t){this.tab=t.dataset.st;this.render();}if(e.target.closest('[data-play]')){const mat={...P.m,id:P.m.mid};playGame(mat,{band:P.band,support:P.sup,assignmentId:P.a,onFinish:res=>{const k=uid();const {id,studentId,...rest}=res;pr.hist.push({a:P.a,title:res.title,gameType:res.gameType,date:res.date,pct:res.pct,score:res.score,hints:res.hints});pr.pending.push({a:P.a,pack:{v:1,a:P.a,sc:P.sc,k,r:rest}});this.saveProf(P.sc,pr);},onExit:r=>{document.body.onclick=null;this.render();if(r)setTimeout(()=>{if($('#send'))modal(`<div style="text-align:center"><div style="font-size:3rem">📤</div><h3>Στείλε τα αποτελέσματα στον/στην παιδαγωγό σου!</h3><p class="small muted">Θα ανοίξει η αποστολή μηνύματος — διάλεξε τον/την παιδαγωγό σου.</p><button class="btn pri" id="s2" data-close>Αποστολή</button></div>`).el.querySelector('#s2').onclick=send;},300);}});}};}};
+    document.body.onclick=e=>{const t=e.target.closest('[data-st]');if(t){this.tab=t.dataset.st;this.render();}if(e.target.closest('[data-play]')){const mat={...P.m,id:P.m.mid};playGame(mat,{band:P.band,support:P.sup,assignmentId:P.a,onFinish:res=>{const k=uid();const {id,studentId,...rest}=res;const b0=medalsEarned(pr.hist);setTimeout(()=>medalCelebrate(medalsNew(b0,medalsEarned(pr.hist))),0);pr.hist.push({a:P.a,title:res.title,gameType:res.gameType,date:res.date,pct:res.pct,score:res.score,hints:res.hints,subject:res.subject,durationSec:res.durationSec,difficulty:res.difficulty,answers:(res.answers||[]).map(x=>({ok:x.ok,concept:x.concept}))});pr.pending.push({a:P.a,pack:{v:1,a:P.a,sc:P.sc,k,r:rest}});this.saveProf(P.sc,pr);},onExit:r=>{document.body.onclick=null;this.render();if(r)setTimeout(()=>{if($('#send'))modal(`<div style="text-align:center"><div style="font-size:3rem">📤</div><h3>Στείλε τα αποτελέσματα στον/στην παιδαγωγό σου!</h3><p class="small muted">Θα ανοίξει η αποστολή μηνύματος — διάλεξε τον/την παιδαγωγό σου.</p><button class="btn pri" id="s2" data-close>Αποστολή</button></div>`).el.querySelector('#s2').onclick=send;},300);}});}};}};
 
 /* ===== LUMIO — κέλυφος, πλοήγηση, σύνδεση, αρχική, μαθητές ===== */
 const M=()=>$('#main');
@@ -2390,7 +2405,7 @@ function viewStudents(r){const all=myStudents();const q=r.q;
     let list=all.filter(s=>{if(f.q&&!((s.name||'').toLowerCase().includes(f.q)||s.code.toLowerCase().includes(f.q)))return false;if(f.age){const[a,b]=f.age.split('-').map(Number);if(!(+s.age>=a&&+s.age<=b))return false;}if(f.gr&&s.grade!==f.gr)return false;if(f.sub&&!(s.subjects||'').toLowerCase().includes(f.sub.toLowerCase())&&!Object.keys(s.levels||{}).includes(f.sub))return false;if(f.lv&&s.knowledge!==f.lv)return false;if(f.goal&&!(s.goals||'').toLowerCase().includes(f.goal))return false;return true;});
     if(f.sort==='last')list.sort((a,b)=>(lastActivity(b.id)||'').localeCompare(lastActivity(a.id)||''));if(f.sort==='prog')list.sort((a,b)=>(stuProgress(a.id)??101)-(stuProgress(b.id)??101));
     $('#sl').innerHTML=list.length?`<div class="stulist">${list.map(s=>{const p=stuProgress(s.id);const la=lastActivity(s.id);const pend=S.data.assignments.filter(x=>x.studentId===s.id&&x.status!=='done').length;const subs=mainSubjects(s);const col=p==null?'var(--line)':p>=90?'var(--ok)':p>=60?'var(--yellow-d)':'var(--pink-d)';
-      return`<a class="scard" href="#/student/${s.id}"><span class="av" style="background:${['var(--lilac)','var(--pink)','var(--yellow)','var(--blue)','var(--peach)','var(--mint)'][s.code.charCodeAt(0)%6]}">${s.avatar||'🙂'}</span>
+      return`<a class="stcard" href="#/student/${s.id}"><span class="av" style="background:${['var(--lilac)','var(--pink)','var(--yellow)','var(--blue)','var(--peach)','var(--mint)'][s.code.charCodeAt(0)%6]}">${s.avatar||'🙂'}</span>
        <span class="sc-main"><span class="sc-top"><b>${esc(stuName(s))}</b>${s.loc&&s.loc.home!==false?`<span class="sc-ic" title="Μαθήματα στο σπίτι">${ic('l-map',13)}</span>`:''}${pend?`<span class="chip y sm">${pend} σε αναμονή</span>`:''}</span>
         <span class="sc-meta">${[s.age?s.age+' ετών':'',s.grade||'',subs.join(', ')].filter(Boolean).join(' · ')||'Κωδ. '+s.code}</span>
         <span class="sc-prog"><span class="bar"><i style="width:${p||0}%;background:${col}"></i></span><span class="sc-pv">${p!=null?p+'%':'—'}</span></span>
@@ -2409,7 +2424,7 @@ function viewStudent(r){const s=getStudent(r.id);if(!s)return go('students');con
   const tb=$('#tb');const rs=resultsOf(s.id);
   if(tab==='overview'){const r30=rs.filter(x=>x.date>=new Date(Date.now()-30*864e5).toISOString());const la=lastActivity(s.id);const subs=[...new Set([...Object.keys(s.levels||{}),...rs.map(x=>x.subject).filter(Boolean)])];const pend=S.data.assignments.filter(a=>a.studentId===s.id&&a.status!=='done');
     tb.innerHTML=`<div class="kpis section"><div class="kpi"><div class="k">Δραστηριότητες</div><div class="v">${rs.length}</div></div><div class="kpi"><div class="k">Μέση επίδοση 30 ημ.</div><div class="v">${r30.length?Math.round(avg(r30.map(x=>x.pct)))+'%':'—'}</div></div><div class="kpi"><div class="k">Χρόνος εκπαίδευσης</div><div class="v sm">${fmtMin(rs.reduce((a,x)=>a+x.durationSec,0))}</div></div><div class="kpi"><div class="k">Τελευταία δραστηριότητα</div><div class="v sm">${la?fmtDate(la):'—'}</div></div></div>
-    ${contactsHTML(s)}${stuLocCardHTML(s)}${finCardHTML(s)}${consentCardHTML(s)}<div class="grid g2 section"><div class="card"><div class="card-h"><h3>Επίπεδα ανά μάθημα</h3></div>${subs.length?`<div class="list">${subs.map(x=>`<div class="rw static"><span class="grow"><b>${esc(x)}</b><small>${needsSupport(s,x)?'Με επιπλέον υποστήριξη':'Κανονική υποστήριξη'}</small></span><span class="chip l">Επίπεδο ${levelOf(s,x)}/5</span></div>`).join('')}</div>`:'<p class="muted small">Τα επίπεδα θα εμφανιστούν μετά τις πρώτες δραστηριότητες.</p>'}<p class="tiny muted" style="margin:10px 0 0">Η δυσκολία προσαρμόζεται αυτόματα: ≥90% ανεβαίνει, 60–89% μένει, <60% κατεβαίνει.</p></div>
+    ${contactsHTML(s)}${stuLocCardHTML(s)}${finCardHTML(s)}${medalTeacherCardHTML(s)}${consentCardHTML(s)}<div class="grid g2 section"><div class="card"><div class="card-h"><h3>Επίπεδα ανά μάθημα</h3></div>${subs.length?`<div class="list">${subs.map(x=>`<div class="rw static"><span class="grow"><b>${esc(x)}</b><small>${needsSupport(s,x)?'Με επιπλέον υποστήριξη':'Κανονική υποστήριξη'}</small></span><span class="chip l">Επίπεδο ${levelOf(s,x)}/5</span></div>`).join('')}</div>`:'<p class="muted small">Τα επίπεδα θα εμφανιστούν μετά τις πρώτες δραστηριότητες.</p>'}<p class="tiny muted" style="margin:10px 0 0">Η δυσκολία προσαρμόζεται αυτόματα: ≥90% ανεβαίνει, 60–89% μένει, <60% κατεβαίνει.</p></div>
      <div class="card"><div class="card-h"><h3>Τι να δουλέψουμε</h3></div><p class="small muted">Προτάσεις βασισμένες στα πραγματικά αποτελέσματα του μαθητή — εκπαιδευτικές, όχι διάγνωση.</p><div class="stack"><button class="btn yel block" id="sug">${ic('bulb',17)} Τι να δουλέψω την επόμενη εβδομάδα;</button><button class="btn block" id="rev">${ic('repeat',17)} Επανάληψη λαθών του μήνα</button></div>
       ${weakConcepts(s.id).length?`<div class="chips" style="margin-top:14px">${weakConcepts(s.id).slice(0,4).map(c=>`<span class="chip bad">${esc(c.concept)} · ${c.recentAcc}%</span>`).join('')}</div>`:''}</div></div>
     <div class="grid g2"><section><div class="section-h"><h2>Πρόσφατες δραστηριότητες</h2><a href="#/${base}?tab=activities">Όλες</a></div>${resultsList(rs.slice().reverse().slice(0,5))}</section>
@@ -3942,7 +3957,7 @@ async function apptMatsEdit(a,date){const rec=a.kind!=='once';const st=stOf(a.si
   a.ex=a.ex||{};if(scope==='once'){a.ex[date]={...(a.ex[date]||{}),mats:ids};}else{a.mats=ids;if(a.ex[date]&&a.ex[date].mats){delete a.ex[date].mats;if(!Object.keys(a.ex[date]).length)delete a.ex[date];}}
   save();toast('Το υλικό του μαθήματος αποθηκεύτηκε.','ok');return true;}
 function playForStudent(mid,sid,after){const m=S.data.materials.find(x=>x.id===mid);const st=getStudent(sid)||stOf(sid);if(!m||!st)return;
-  playGame(m,{student:st,support:needsSupport(st,m.subject),onFinish:res=>{res.source='lesson';recordResult(res);save();},onExit:()=>after&&after()});}
+  playGame(m,{student:st,support:needsSupport(st,m.subject),onFinish:res=>{res.source='lesson';const b0=medalsEarned(resultsOf(st.id));recordResult(res);save();medalCelebrate(medalsNew(b0,medalsEarned(resultsOf(st.id))));},onExit:()=>after&&after()});}
 
 /* ---- πρόοδος για τους γονείς: ανά μάθημα, εβδομάδα, μήνα ή όλα ---- */
 function progressData(sid,from,to){const rs=resultsOf(sid).filter(r=>{const d=r.date.slice(0,10);return d>=from&&d<=to;});
@@ -4541,6 +4556,106 @@ function placesCardHTML(){const P=bizPlaces();return`<div class="list">${P.map(p
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-plc]');if(!b)return;e.preventDefault();placeDialog(b.dataset.plc?bizPlaces().find(p=>p.id===b.dataset.plc):null);});
 function bizContact(){const B=biz(),P=S.data.profile||{};return{phone:B.phone||P.phone||'',email:B.email||P.email||'',web:B.web||'',afm:B.afm||'',addr:(bizLoc()||{}).addr||''};}
 
+/* ===== Μετάλλια: ενθάρρυνση της προσπάθειας, της επιμονής και της βελτίωσης =====
+   Αρχές: έπαινος για την προσπάθεια/στρατηγική (όχι «είσαι έξυπνος»), σύγκριση μόνο με τον εαυτό,
+   γρήγορες πρώτες επιτυχίες (εύκολα), στόχοι μέσης διάρκειας (δύσκολα), μακρινοί στόχοι (πολύ δύσκολα). */
+const MTIER=[null,['Εύκολα','🥉','bronze'],['Δύσκολα','🥈','silver'],['Πολύ δύσκολα','🥇','gold']];
+function medalStats(h){h=(h||[]).filter(x=>x&&x.date).slice().sort((a,b)=>a.date.localeCompare(b.date));const day=x=>{const d=new Date(x.date);return isoDate(d);};
+  const days=[...new Set(h.map(day))].sort();let st=0,best=0,prev=null;for(const d of days){st=prev&&addDays(prev,1)===d?st+1:1;best=Math.max(best,st);prev=d;}
+  const weeks=[...new Set(days.map(d=>mondayOf(d)))].sort();let ws=0,wb=0,wp=null;for(const w of weeks){ws=wp&&addDays(wp,7)===w?ws+1:1;wb=Math.max(wb,ws);wp=w;}
+  const byT={};h.forEach(x=>{const k=x.title||x.gameType||'?';(byT[k]=byT[k]||[]).push(x);});
+  let imp=0,comebacks=0;for(const k in byT){const L=byT[k];for(let i=1;i<L.length;i++){const mn=Math.min(...L.slice(0,i).map(x=>x.pct));imp=Math.max(imp,L[i].pct-mn);}let low=false;L.forEach(x=>{if(x.pct<60)low=true;else if(low&&x.pct>=80){comebacks++;low=false;}});}
+  const perDay={};h.forEach(x=>{const d=day(x);perDay[d]=(perDay[d]||0)+1;});const perWeek={};h.forEach(x=>{const w=mondayOf(day(x));perWeek[w]=(perWeek[w]||0)+1;});
+  const subj={};h.forEach(x=>{if(x.subject)(subj[x.subject]=subj[x.subject]||[]).push(x.pct);});const subjMaster=Object.values(subj).some(v=>v.length>=10&&avg(v)>=85);
+  const last10=h.slice(-10);const hr=x=>new Date(x.date).getHours();
+  /* έμαθα από τα λάθη: έννοια που ήταν λάθος και μετά σωστή 3 φορές */
+  const cw={};let learned=0;h.forEach(x=>(x.answers||[]).forEach(a=>{if(!a.concept)return;const o=cw[a.concept]=cw[a.concept]||{wrong:false,ok:0,done:false};if(!a.ok)o.wrong=true;else if(o.wrong&&!o.done){o.ok++;if(o.ok>=3){o.done=true;learned++;}}}));
+  return{n:h.length,days:days.length,streak:best,weekStreak:wb,types:new Set(h.map(x=>x.gameType).filter(Boolean)).size,subjects:Object.keys(subj).length,
+    p60:h.filter(x=>x.pct>=60).length,p90:h.filter(x=>x.pct>=90).length,p100:h.filter(x=>x.pct===100).length,low:h.filter(x=>x.pct<60).length,
+    hintOk:h.filter(x=>(x.hints||0)>0&&x.pct>=60).length,hintUsed:h.filter(x=>(x.hints||0)>0).length,nohint90:h.filter(x=>!(x.hints||0)&&x.pct>=90).length,
+    replay:Math.max(0,...Object.values(byT).map(L=>L.length)),imp,comebacks,maxDay:Math.max(0,...Object.values(perDay)),maxWeek:Math.max(0,...Object.values(perWeek)),
+    weekend:h.some(x=>[0,6].includes(new Date(x.date).getDay())),morning:h.some(x=>hr(x)<10),evening:h.some(x=>hr(x)>=19),
+    hard80:h.filter(x=>(x.difficulty||0)>=4&&x.pct>=80).length,long:h.filter(x=>(x.durationSec||0)>=600).length,avg10:last10.length>=10?avg(last10.map(x=>x.pct)):0,subjMaster,learned};}
+/* [κλειδί, εικόνα, τίτλος, βαθμίδα, συνθήκη, πρόοδος [τώρα,στόχος], έπαινος] */
+const MEDALS=[
+ ['first','🌱','Πρώτο βήμα',1,s=>s.n>=1,s=>[s.n,1],'Ξεκίνησες! Κάθε ταξίδι αρχίζει με ένα βήμα.'],
+ ['three','🌿','Τρεις αποστολές',1,s=>s.n>=3,s=>[s.n,3],'Τρεις φορές εξάσκηση — έτσι μεγαλώνει η γνώση!'],
+ ['ok60','⭐','Πρώτο αστέρι',1,s=>s.p60>=1,s=>[s.p60,1],'Τα κατάφερες πάνω από 60% — η προσπάθεια φαίνεται!'],
+ ['brave','💪','Δεν τα παράτησα',1,s=>s.low>=1,s=>[s.low,1],'Ήταν δύσκολο και το τελείωσες. Αυτό θέλει θάρρος!'],
+ ['askhelp','💡','Ζήτησα βοήθεια',1,s=>s.hintUsed>=1,s=>[s.hintUsed,1],'Οι έξυπνοι μαθητές ζητούν βοήθεια όταν τη χρειάζονται.'],
+ ['retry','🔁','Ξαναδοκίμασα',1,s=>s.replay>=2,s=>[s.replay,2],'Έπαιξες ξανά το ίδιο — έτσι γίνεσαι καλύτερος/η!'],
+ ['explore','🎲','Εξερευνητής',1,s=>s.types>=3,s=>[s.types,3],'Δοκίμασες 3 διαφορετικά είδη παιχνιδιών!'],
+ ['twoday','📅','Ξανά την επόμενη μέρα',1,s=>s.streak>=2,s=>[s.streak,2],'Δύο μέρες στη σειρά — χτίζεις συνήθεια!'],
+ ['morning','🌅','Πρωινό μυαλό',1,s=>s.morning,null,'Εξάσκηση από νωρίς το πρωί!'],
+ ['evening','🌙','Βραδινή εξάσκηση',1,s=>s.evening,null,'Λίγη εξάσκηση και το βράδυ — μπράβο!'],
+ ['weekend','🏖️','Και το Σαββατοκύριακο',1,s=>s.weekend,null,'Μαθαίνεις ακόμη και στις διακοπές σου!'],
+ ['ten','🚀','Δέκα αποστολές',2,s=>s.n>=10,s=>[s.n,10],'Δέκα φορές εξάσκηση — η επιμονή σου αποδίδει!'],
+ ['perfect','💯','Τέλειο σκορ',2,s=>s.p100>=1,s=>[s.p100,1],'Όλα σωστά! Η δουλειά σου φέρνει αποτέλεσμα.'],
+ ['improve','📈','Βελτίωση',2,s=>s.imp>=15,s=>[Math.round(s.imp),15],'Ανέβηκες 15+ μονάδες στο ίδιο παιχνίδι — βλέπεις τι κάνει η εξάσκηση;'],
+ ['comeback','🦸','Μεγάλη επιστροφή',2,s=>s.comebacks>=1,s=>[s.comebacks,1],'Από κάτω από 60% πήγες πάνω από 80%! Δεν τα παράτησες.'],
+ ['streak3','🔥','Τρεις μέρες στη σειρά',2,s=>s.streak>=3,s=>[s.streak,3],'Τρεις μέρες στη σειρά — η συνέπεια είναι υπερδύναμη!'],
+ ['star3','🏅','Τρία μεγάλα αστέρια',2,s=>s.p90>=3,s=>[s.p90,3],'Τρεις φορές πάνω από 90% — δουλεύεις σταθερά!'],
+ ['types5','🧩','Πολυτεχνίτης',2,s=>s.types>=5,s=>[s.types,5],'Πέντε διαφορετικά είδη παιχνιδιών!'],
+ ['subj3','📚','Τρία μαθήματα',2,s=>s.subjects>=3,s=>[s.subjects,3],'Εξασκήθηκες σε τρία διαφορετικά μαθήματα!'],
+ ['marathon','🏃','Μαραθώνιος',2,s=>s.maxDay>=3,s=>[s.maxDay,3],'Τρεις αποστολές την ίδια μέρα!'],
+ ['solo','🎯','Μόνος/η μου',2,s=>s.nohint90>=1,s=>[s.nohint90,1],'Πάνω από 90% χωρίς βοήθεια — η εξάσκηση έπιασε τόπο!'],
+ ['week5','🗓️','Γεμάτη εβδομάδα',2,s=>s.maxWeek>=5,s=>[s.maxWeek,5],'Πέντε αποστολές μέσα σε μία εβδομάδα!'],
+ ['climber','🧗','Ορειβάτης',2,s=>s.hard80>=1,s=>[s.hard80,1],'Πάνω από 80% σε δύσκολο επίπεδο — δεν φοβήθηκες την πρόκληση!'],
+ ['detective','🔍','Έμαθα από τα λάθη',2,s=>s.learned>=1,s=>[s.learned,1],'Κάτι που έκανες λάθος, τώρα το βρίσκεις σωστό ξανά και ξανά!'],
+ ['focus','🧘','Συγκέντρωση',2,s=>s.long>=1,s=>[s.long,1],'Δέκα λεπτά συγκεντρωμένος/η σε μία αποστολή!'],
+ ['patient','🔂','Υπομονή',2,s=>s.replay>=5,s=>[s.replay,5],'Πέντε φορές το ίδιο παιχνίδι — η επανάληψη φέρνει μάθηση!'],
+ ['helpok5','🤝','Η βοήθεια με βοηθά',2,s=>s.hintOk>=5,s=>[s.hintOk,5],'Πέντε φορές πήρες βοήθεια και τα κατάφερες!'],
+ ['twenty','🌟','Είκοσι αποστολές',3,s=>s.n>=20,s=>[s.n,20],'Είκοσι αποστολές — είσαι πραγματικός/ή μαθητής/τρια της επιμονής!'],
+ ['fifty','🏆','Πενήντα αποστολές',3,s=>s.n>=50,s=>[s.n,50],'Πενήντα! Κοίτα πόσο δρόμο έχεις κάνει.'],
+ ['hundred','👑','Εκατό αποστολές',3,s=>s.n>=100,s=>[s.n,100],'Εκατό αποστολές! Μοναδική επιμονή.'],
+ ['perfect5','💎','Πέντε τέλεια',3,s=>s.p100>=5,s=>[s.p100,5],'Πέντε φορές όλα σωστά — η δουλειά σου λάμπει!'],
+ ['streak7','☀️','Μια ολόκληρη εβδομάδα',3,s=>s.streak>=7,s=>[s.streak,7],'Επτά μέρες στη σειρά! Τέτοια συνέπεια σε πάει μακριά.'],
+ ['days20','📆','Είκοσι μέρες μάθησης',3,s=>s.days>=20,s=>[s.days,20],'Έμαθες κάτι σε είκοσι διαφορετικές μέρες!'],
+ ['weeks4','🗻','Τέσσερις εβδομάδες',3,s=>s.weekStreak>=4,s=>[s.weekStreak,4],'Κάθε εβδομάδα για έναν ολόκληρο μήνα!'],
+ ['types8','🎨','Δοκίμασα τα πάντα',3,s=>s.types>=8,s=>[s.types,8],'Οκτώ είδη παιχνιδιών — αγαπάς να δοκιμάζεις νέα πράγματα!'],
+ ['subj5','🎓','Πέντε μαθήματα',3,s=>s.subjects>=5,s=>[s.subjects,5],'Εξασκήθηκες σε πέντε μαθήματα!'],
+ ['steady','🏔️','Σταθερή πορεία',3,s=>s.avg10>=85,s=>[Math.round(s.avg10),85],'Μέσος όρος 85%+ στις τελευταίες 10 — δουλεύεις σταθερά και σωστά!'],
+ ['leap','🪜','Μεγάλο άλμα',3,s=>s.imp>=30,s=>[Math.round(s.imp),30],'Ανέβηκες 30+ μονάδες στο ίδιο παιχνίδι! Η εξάσκηση κάνει θαύματα.'],
+ ['master','🧠','Αστέρι του μαθήματος',3,s=>s.subjMaster,null,'Δέκα αποστολές σε ένα μάθημα με μέσο όρο πάνω από 85%!'],
+ ['lion','🦁','Λιοντάρι της επιμονής',3,s=>s.comebacks>=3,s=>[s.comebacks,3],'Τρεις φορές γύρισες από δύσκολη αρχή σε μεγάλη επιτυχία!'],
+ ['learned5','🔬','Ερευνητής των λαθών',3,s=>s.learned>=5,s=>[s.learned,5],'Πέντε έννοιες που σε δυσκόλευαν, τώρα τις ξέρεις!'],
+ ['helpok15','🌈','Μαθαίνω με βοήθεια',3,s=>s.hintOk>=15,s=>[s.hintOk,15],'Δεκαπέντε φορές η βοήθεια σε οδήγησε στην επιτυχία!']
+];
+/* ειδικά μετάλλια που δίνει ο/η παιδαγωγός */
+const AWARD_SET=[['🤗','Καλή συνεργασία'],['🎨','Δημιουργικότητα'],['🙏','Ευγένεια'],['👂','Προσεκτικός/ή ακροατής'],['🦋','Μεγάλη πρόοδος'],['🧩','Έλυσα δύσκολο πρόβλημα'],['📖','Αγάπη για το διάβασμα'],['⏰','Πάντα στην ώρα μου'],['🌻','Βοήθησα συμμαθητή'],['✍️','Ωραία γραφή'],['🗣️','Μίλησα με θάρρος'],['🌟','Αστέρι της εβδομάδας']];
+function medalsEarned(h){const s=medalStats(h);return new Set(MEDALS.filter(m=>{try{return m[4](s);}catch(e){return false;}}).map(m=>m[0]));}
+function medalsNew(before,after){return MEDALS.filter(m=>after.has(m[0])&&!before.has(m[0]));}
+function medalsHTML(h,awards){const s=medalStats(h);const got=medalsEarned(h);const A=awards||[];const tot=MEDALS.length;
+  const next=MEDALS.filter(m=>!got.has(m[0])&&m[5]).map(m=>{const[c,g]=m[5](s);return{m,c:Math.min(c,g),g,r:Math.min(c,g)/g};}).filter(x=>x.c>0||x.m[3]===1).sort((a,b)=>b.r-a.r||a.m[3]-b.m[3]).slice(0,3);
+  return`<div class="mdhead"><div class="mdcount"><b>${got.size+A.length}</b><span>μετάλλια</span></div><div class="mdbar"><i style="width:${Math.round(got.size/tot*100)}%"></i></div><div class="small">${got.size} από ${tot}${A.length?` · ${A.length} από τον/την δάσκαλο/α`:''}</div></div>
+   ${next.length?`<div class="mdnext"><b>Τα επόμενα που πλησιάζεις</b>${next.map(x=>`<div class="mdn"><span class="e">${x.m[1]}</span><div class="grow"><div class="small"><b>${esc(x.m[2])}</b> · ${MTIER[x.m[3]][1]}</div><div class="mdbar sm"><i style="width:${Math.round(x.r*100)}%"></i></div><div class="tiny">${x.g-x.c>0?`σου λείπουν ${x.g-x.c}`:''}</div></div></div>`).join('')}</div>`:''}
+   ${A.length?`<h4 class="mdt">🎖️ Από τον/την δάσκαλό σου</h4><div class="badges">${A.map(a=>`<div class="badge award" title="${esc(fmtShort(a.date))}"><div class="e">${a.e}</div>${esc(a.t)}</div>`).join('')}</div>`:''}
+   ${[1,2,3].map(t=>`<h4 class="mdt">${MTIER[t][1]} ${MTIER[t][0]} <span class="tiny">${MEDALS.filter(m=>m[3]===t&&got.has(m[0])).length}/${MEDALS.filter(m=>m[3]===t).length}</span></h4><div class="badges">${MEDALS.filter(m=>m[3]===t).map(m=>`<button type="button" class="badge ${MTIER[t][2]} ${got.has(m[0])?'':'off'}" data-medal="${m[0]}"><div class="e">${m[1]}</div>${esc(m[2])}</button>`).join('')}</div>`).join('')}
+   <p class="small" style="margin-top:12px">Τα μετάλλια δείχνουν τη <b>δική σου</b> προσπάθεια και πρόοδο — δεν είναι αγώνας με κανέναν. Πάτα ένα για να δεις πώς κερδίζεται.</p>`;}
+function medalInfo(key,h){const m=MEDALS.find(x=>x[0]===key);if(!m)return;const s=medalStats(h);const got=medalsEarned(h).has(key);const pr=m[5]?m[5](s):null;
+  const el=document.createElement('div');el.className='mdpop';el.innerHTML=`<div class="mdcard ${MTIER[m[3]][2]}"><div class="big ${got?'':'off'}">${m[1]}</div><h3>${esc(m[2])}</h3><div class="small">${MTIER[m[3]][1]} ${MTIER[m[3]][0]}</div><p>${got?esc(m[6]):'Πώς κερδίζεται: '+esc(medalHow(m))}</p>${!got&&pr?`<div class="mdbar"><i style="width:${Math.round(Math.min(pr[0],pr[1])/pr[1]*100)}%"></i></div><div class="tiny">${Math.min(pr[0],pr[1])} / ${pr[1]}</div>`:''}<button class="gbtn" style="margin-top:12px">Εντάξει</button></div>`;document.body.appendChild(el);el.onclick=e=>{if(e.target===el||e.target.closest('.gbtn'))el.remove();};}
+function medalHow(m){const k=m[0];return{first:'Τελείωσε μία αποστολή.',three:'Τελείωσε 3 αποστολές.',ok60:'Πέτυχε πάνω από 60% σε μια αποστολή.',brave:'Τελείωσε μια αποστολή ακόμη κι αν δυσκολευτείς.',askhelp:'Πάτα τη βοήθεια (💡) όταν κολλήσεις.',retry:'Παίξε ξανά ένα παιχνίδι.',explore:'Δοκίμασε 3 είδη παιχνιδιών.',twoday:'Εξασκήσου δύο μέρες στη σειρά.',morning:'Παίξε πριν τις 10 το πρωί.',evening:'Παίξε μετά τις 7 το βράδυ.',weekend:'Παίξε Σάββατο ή Κυριακή.',ten:'Τελείωσε 10 αποστολές.',perfect:'Βρες όλα σωστά σε μια αποστολή.',improve:'Ξαναπαίξε ένα παιχνίδι και ανέβα 15 μονάδες.',comeback:'Από κάτω από 60%, ξαναπροσπάθησε και φτάσε πάνω από 80%.',streak3:'Εξασκήσου 3 μέρες στη σειρά.',star3:'Πέτυχε 3 φορές πάνω από 90%.',types5:'Δοκίμασε 5 είδη παιχνιδιών.',subj3:'Εξασκήσου σε 3 μαθήματα.',marathon:'Κάνε 3 αποστολές την ίδια μέρα.',solo:'Πέτυχε πάνω από 90% χωρίς βοήθεια.',week5:'Κάνε 5 αποστολές μέσα σε μια εβδομάδα.',climber:'Πέτυχε πάνω από 80% σε δύσκολο επίπεδο.',detective:'Κάτι που έκανες λάθος, βρες το σωστά 3 φορές.',focus:'Μείνε 10 λεπτά σε μια αποστολή.',patient:'Παίξε 5 φορές το ίδιο παιχνίδι.',helpok5:'5 φορές πάρε βοήθεια και πέτυχε πάνω από 60%.',twenty:'Τελείωσε 20 αποστολές.',fifty:'Τελείωσε 50 αποστολές.',hundred:'Τελείωσε 100 αποστολές.',perfect5:'Βρες όλα σωστά 5 φορές.',streak7:'Εξασκήσου 7 μέρες στη σειρά.',days20:'Εξασκήσου σε 20 διαφορετικές μέρες.',weeks4:'Εξασκήσου κάθε εβδομάδα για 4 εβδομάδες.',types8:'Δοκίμασε 8 είδη παιχνιδιών.',subj5:'Εξασκήσου σε 5 μαθήματα.',steady:'Κράτα μέσο όρο 85% στις τελευταίες 10 αποστολές.',leap:'Ανέβα 30 μονάδες στο ίδιο παιχνίδι.',master:'Κάνε 10 αποστολές σε ένα μάθημα με μέσο όρο πάνω από 85%.',lion:'Κάνε 3 «μεγάλες επιστροφές».',learned5:'Μάθε 5 έννοιες που σε δυσκόλευαν.',helpok15:'15 φορές πάρε βοήθεια και πέτυχε.'}[k]||m[6];}
+/* γιορτή για νέο μετάλλιο */
+function medalCelebrate(list){if(!list||!list.length)return;let i=0;const show=()=>{if(i>=list.length)return;const m=list[i++];const el=document.createElement('div');el.className='mdpop new';
+  el.innerHTML=`<div class="mdcard ${MTIER[m[3]][2]}"><div class="tiny" style="font-weight:800;letter-spacing:.06em">ΝΕΟ ΜΕΤΑΛΛΙΟ!</div><div class="big">${m[1]}</div><h3>${esc(m[2])}</h3><div class="small">${MTIER[m[3]][1]} ${MTIER[m[3]][0]}</div><p>${esc(m[6])}</p><button class="gbtn" style="margin-top:12px">${i<list.length?'Επόμενο ➜':'Τέλεια! ✓'}</button></div>`;
+  document.body.appendChild(el);try{Sound.play('win');}catch(e){}el.onclick=e=>{if(e.target===el||e.target.closest('.gbtn')){el.remove();show();}};};setTimeout(show,700);}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-medal]');if(!b)return;const h=window.MEDAL_HIST||[];medalInfo(b.dataset.medal,h);});
+
+/* καρτέλα στο προφίλ μαθητή για τον/την παιδαγωγό */
+function medalTeacherCardHTML(s){const h=resultsOf(s.id);const got=medalsEarned(h);const A=s.awards||[];
+  return`<div class="card section"><div class="card-h"><h3>🏅 Μετάλλια</h3><span class="chip">${got.size}/${MEDALS.length}${A.length?' + '+A.length:''}</span></div>
+   <div class="mdmini">${MEDALS.filter(m=>got.has(m[0])).slice(-14).map(m=>`<span title="${esc(m[2])}">${m[1]}</span>`).join('')}${A.map(a=>`<span title="${esc(a.t)}">${a.e}</span>`).join('')}${!got.size&&!A.length?'<span class="small muted">Θα εμφανιστούν με τις πρώτες δραστηριότητες.</span>':''}</div>
+   <button class="btn sm" data-award="${s.id}" style="margin-top:10px">🎖️ Δώσε ειδικό μετάλλιο</button></div>`;}
+function awardDialog(sid){const st=getStudent(sid);if(!st)return;let sel=null;
+  const md=modal(`<h3 style="margin-top:0">🎖️ Ειδικό μετάλλιο για ${esc(stuName(st))}</h3><p class="small muted">Για κάτι που είδες εσύ: συνεργασία, θάρρος, πρόοδο. Το βλέπει στα μετάλλιά του/της.</p><div class="awgrid">${AWARD_SET.map(([e,t],i)=>`<button type="button" class="awb" data-aw="${i}"><span>${e}</span>${esc(t)}</button>`).join('')}</div>
+   <div class="field"><label class="f">Ή γράψε δικό σου</label><input class="in" id="awt" placeholder="π.χ. Τέλεια εργασία στα κλάσματα"></div>
+   ${(st.awards||[]).length?`<details class="field"><summary class="small">Όσα έχει πάρει (${st.awards.length})</summary><div class="list" style="margin-top:6px">${st.awards.map(a=>`<div class="rw static"><span class="ricon">${a.e}</span><span class="grow"><b>${esc(a.t)}</b><small>${fmtDate(a.date)}</small></span><button class="iconbtn" data-awx="${a.id}" aria-label="Αφαίρεση">${ic('x',15)}</button></div>`).join('')}</div></details>`:''}
+   <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Άκυρο</button><button class="btn pri" id="awok">Δώσε το μετάλλιο</button></div>`);
+  md.el.addEventListener('click',e=>{const b=e.target.closest('[data-aw]');if(b){sel=AWARD_SET[+b.dataset.aw];$$('[data-aw]',md.el).forEach(x=>x.classList.toggle('on',x===b));$('#awt',md.el).value='';}
+    const x=e.target.closest('[data-awx]');if(x){st.awards=st.awards.filter(a=>a.id!==x.dataset.awx);save();md.close();render();}});
+  $('#awok',md.el).onclick=()=>{const t=$('#awt',md.el).value.trim();const a=t?['🏅',t]:sel;if(!a)return toast('Διάλεξε ή γράψε μετάλλιο.','bad');st.awards=st.awards||[];st.awards.push({id:uid(),e:a[0],t:a[1],date:todayISO()});save();md.close();toast('Το μετάλλιο δόθηκε!','ok');render();};}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-award]');if(!b)return;e.preventDefault();awardDialog(b.dataset.award);});
+
 /* ===== Μπάρα κάτω από κάθε σειρά που κυλά δεξιά–αριστερά: δείχνει ότι υπάρχει κι άλλο ===== */
 const HS_SEL='.tabs,.seg,.tablewrap,.avscroll,.dstrip,.pvbar,.steps,.chips,.tmseg,[data-hs]';
 const HS=new WeakMap();
@@ -4607,6 +4722,7 @@ const HELP={
   ['Πάτημα σε μαθητή','Ανοίγει το προφίλ του: επισκόπηση, ταυτότητα, δραστηριότητες, πρόοδος, λάθη, αναφορές, ημερολόγιο, σημειώσεις.'],
   ['Κλείδωμα','Αν έχεις ορίσει κωδικό μαθητών (Ρυθμίσεις → Ασφάλεια), η ενότητα ζητά τον κωδικό για να ανοίξει.']]],
  student:['Προφίλ μαθητή','Όλα για έναν μαθητή σε καρτέλες.',[
+  ['Μετάλλια (κάρτα)','Όσα έχει κερδίσει ο μαθητής. Με το «Δώσε ειδικό μετάλλιο» του δίνεις εσύ ένα για κάτι που είδες (συνεργασία, θάρρος, πρόοδο) — το βλέπει στα μετάλλιά του.'],
   ['Σελίδα γονέα','Ιδιωτικός σύνδεσμος για τον γονέα: πρόγραμμα, παρουσίες, πρόοδος, αξιολογήσεις και (αν θέλεις) υπόλοιπο και πακέτο. Τα στοιχεία είναι μέσα στον σύνδεσμο — για ενημέρωση στέλνεις νέο.'],
   ['Αξιολογήσεις','Τεστ και διαγωνίσματα (στα 10, 20 ή 100), με γράφημα πορείας ανά μάθημα και μέσο όρο ανά τρίμηνο.'],
   ['Ενημέρωση και συναίνεση γονέα','Έντυπο PDF για υπογραφή, καταχώριση ημερομηνίας και επιλογών του γονέα, εξαγωγή στοιχείων του μαθητή.'],
@@ -4693,7 +4809,7 @@ const HELP={
   ['Μάθε → Εξασκήσου → Βελτιώσου → Γιόρτασε','Έτσι μαθαίνουμε: πρώτα γνωρίζεις κάτι, μετά παίζεις, διορθώνεις τα λάθη σου και χαίρεσαι την πρόοδό σου.'],
   ['Οι αποστολές μου','Ό,τι έχεις να κάνεις τώρα. Πάτα μία για να παίξεις.'],
   ['Η διαδρομή μου','Όσα έχεις ήδη κάνει και πώς τα πήγες.'],
-  ['Τα μετάλλιά μου','Τα μετάλλια που κέρδισες.'],
+  ['Τα μετάλλιά μου','42 μετάλλια σε τρεις δυσκολίες: 🥉 εύκολα (γρήγορες πρώτες επιτυχίες), 🥈 δύσκολα, 🥇 πολύ δύσκολα (μακρινοί στόχοι). Επιβραβεύουν κυρίως την προσπάθεια, την επιμονή, τη βοήθεια που ζητήθηκε και τη βελτίωση — όχι μόνο το «όλα σωστά». Πάνω φαίνονται τα 3 που πλησιάζεις· πάτα ένα μετάλλιο για να δεις πώς κερδίζεται.'],
   ['Έξοδος','Μόνο ο δάσκαλος βγαίνει από εδώ, με τον κωδικό του.']]]
 };
 const CARD_HELP={'Επικοινωνία γονέων':'student','Συνεδρίες & υπόλοιπο':'earnings:cards','Μαθησιακή ταυτότητα':'student-edit','Τι βλέπει η τεχνητή νοημοσύνη':['Τι βλέπει η τεχνητή νοημοσύνη','Αυτό στέλνεται για να προσαρμοστεί το υλικό. Ποτέ το όνομα, ποτέ τα τηλέφωνα ή τα email των γονέων.',[]],'Τι να δουλέψουμε':'student','Σήμερα':'agenda','Γρήγορες επιλογές':'dashboard','Χρώματα Ταμείου':'settings:appearance','Φόντο':'settings:appearance','Κλείδωμα μαθητών':'settings:security'};
