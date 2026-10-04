@@ -951,6 +951,16 @@ body.agdragging,body.agdragging *{user-select:none!important;-webkit-user-select
 .scols{display:flex;gap:6px;flex-wrap:wrap}.scols button{width:24px;height:24px;border-radius:50%;border:2px solid var(--paper);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;color:var(--ink3)}
 .scols button.on{box-shadow:0 0 0 2px var(--ink)}.scols button.none{background:var(--paper)}
 
+.dayhd{display:flex;align-items:center;gap:6px;margin:10px 0 8px;padding:8px 6px;border-radius:14px;background:var(--paper);border:1px solid var(--line)}
+.dayhd .dayt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:nowrap}
+.dayhd .dayt b{max-width:100%;font-family:var(--head);font-size:clamp(1.1rem,5.6vw,1.6rem);line-height:1.2;overflow:hidden;text-overflow:ellipsis;animation:dayin .22s ease-out}
+.dayhd .dayrel{flex:none;font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--lilac);color:var(--ink)}
+.dayhd.today .dayrel{background:var(--lilac-d);color:#fff}
+.dayhd.closed .dayt b{color:var(--bad)}
+.dayhd .dayarr{flex:none;display:grid;place-items:center;width:36px;height:44px;border-radius:12px;color:inherit;text-decoration:none}
+.dayhd .dayarr:active{background:var(--line)}
+@keyframes dayin{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
+
 /* ===== games ===== */
 .gwrap{position:fixed;inset:0;z-index:80;overflow:auto;display:flex;flex-direction:column;font-family:"Comfortaa","Commissioner",sans-serif}
 .gwrap.teen{font-family:"Commissioner",sans-serif}
@@ -1154,7 +1164,7 @@ body.agdragging,body.agdragging *{user-select:none!important;-webkit-user-select
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.18.1';
+const APP_VERSION='2.18.2';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -3404,6 +3414,7 @@ function viewAgenda2(r){const c=agCfg();const t=todayISO();const PV=providers();
    ${view==='list'?agListHTML(r):view==='month'?`${monthHTML(ym,sel)}<div class="card section" style="margin-top:14px"><div class="card-h"><h3>${WDAYS[wdOf(sel)]} ${fmtDate(sel)}</h3><a class="btn sm" href="#/agenda?view=day&d=${sel}">Ανάλυση ημέρας ${ic('right',14)}</a></div>${(()=>{const X=occ(sel,sel,{withCancel:true});const XB=blockOcc(sel,sel);const F=freeSlots(sel);return(X.length?`<div class="aglist">${X.map(o=>apptCard(o)).join('')}</div>`:'<p class="small muted" style="margin:0">Κανένα ραντεβού.</p>')+(XB.length?`<div class="aglist" style="margin-top:8px">${XB.map(blockChipHTML).join('')}</div>`:'')+(F.length?`<div class="small" style="margin-top:12px"><b>Ελεύθερες ώρες:</b> ${F.map(s=>`<button class="chipt" data-new="${sel}|${s}">${s}</button>`).join(' ')}</div>`:'');})()}</div>`
     :`<div class="kpis section"><div class="kpi"><div class="k">Ραντεβού εβδομάδας</div><div class="v sm">${LW.length}</div></div><div class="kpi"><div class="k">Ώρες μαθημάτων</div><div class="v sm">${hoursNum(mins)}</div></div><div class="kpi"><div class="k">Ελεύθερες ώρες</div><div class="v sm" style="color:var(--ok)">${freeN*c.step/60}</div></div><div class="kpi"><div class="k">Πάγιοι μαθητές</div><div class="v sm">${new Set(appts().filter(a=>a.kind!=='once'&&(!a.until||a.until>=t)).map(a=>a.sid)).size}</div></div></div>
      ${view==='day'?`${daystripHTML(sel,t)}
+       ${agDayHead(sel,t,nav)}
        <div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="small muted">${isClosed(sel)?`<b style="color:var(--bad)">Κλειστά${holidayOf(sel)?' — '+esc(holidayOf(sel)):''}</b> — τα πάγια αυτής της μέρας δεν εμφανίζονται.`:'Πάτα σε κενό σημείο για νέο ραντεβού εκείνη την ώρα.'}</span><button class="btn sm ghost" data-close-day="${sel}">${isClosed(sel)?'Άνοιγμα ημέρας':'Κλειστά αυτή τη μέρα'}</button></div>`:''}
      ${timelineHTML(view==='week'?days:[sel],LWa.concat(view==='day'&&!days.includes(sel)?occ(sel,sel,{withCancel:true}):[]))}`}`;
   $('#agNew').onclick=()=>apptDialog({date:sel,by});$('#agBlk').onclick=()=>blockDialog({date:sel,by});const lk=$('#agLock');if(lk)lk.onclick=agLockDialog;$('#agWait').onclick=waitlistDialog;const zo=$('#agZo');if(zo){zo.onclick=()=>agZoom(PPM/1.25);$('#agZi').onclick=()=>agZoom(PPM*1.25);}agGestures(view,nav);if(view==='list')agListBind();$$('[data-pvf]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('lumio-agstaff',b.dataset.pvf);}catch(e){}render();});$('#agCfg').onclick=agendaCfgDialog;$('#agPdf').onclick=()=>exportDialog('pdf',{sel,w,ym});$('#agXl').onclick=()=>exportDialog('xl',{sel,w,ym});
@@ -3427,6 +3438,10 @@ function daystripHTML(sel,t){const c=agCfg();const ym=sel.slice(0,7);const[Y,Mo]
     <div class="row" style="gap:6px">${sel!==t?`<a class="btn sm" href="#/agenda?view=day&d=${t}">${ic('calendar',14)} Σήμερα</a>`:''}${nf?`<button type="button" class="btn sm soft" data-new="${nf.date}|${nf.s}" title="Κλείσε ραντεβού στο πρώτο ελεύθερο κενό">${ic('plus',14)} Πρώτο κενό: ${nf.date===t?'σήμερα':WDAYS_S[wdOf(nf.date)]+' '+fmtShort(nf.date)} ${nf.s}</button>`:''}</div></div>
    <div class="dstrip" id="dstrip">${chips}</div>
    <div class="dstat tiny muted">${MONTHS[Mo-1]}: ${O.length} ραντεβού · ${busyD}/${workD} εργάσιμες με ραντεβού · ${fullD?`<b style="color:var(--bad)">${fullD} γεμάτες</b>`:'καμία γεμάτη'}</div>`;}
+function agDayHead(sel,t,nav){const dd=Math.round((new Date(sel+'T12:00')-new Date(t+'T12:00'))/864e5);const rel=dd===0?'Σήμερα':dd===1?'Αύριο':dd===-1?'Χθες':'';const y=+sel.slice(0,4);
+  return`<div class="dayhd ${dd===0?'today':''} ${isClosed(sel)?'closed':''}"><a class="dayarr" href="${nav[0]}" aria-label="Προηγούμενη μέρα">${ic('left',22)}</a>
+    <div class="dayt"><b>${WDAYS[wdOf(sel)]} ${+sel.slice(8)} ${MONTHS_G[+sel.slice(5,7)-1]}${y!==+t.slice(0,4)?' '+y:''}</b>${rel?`<span class="dayrel">${rel}</span>`:''}</div>
+    <a class="dayarr" href="${nav[2]}" aria-label="Επόμενη μέρα">${ic('right',22)}</a></div>`;}
 function nextFreeFrom(t){const now=nowMin();let d=t;for(let i=0;i<45;i++,d=addDays(d,1)){const F=freeSlots(d).filter(s=>i>0||tmin(s)>now);if(F.length)return{date:d,s:F[0]};}return null;}
 
 /* ---- αναδυόμενη λίστα επιλογής (μαθητές, προσωπικό) ---- */
