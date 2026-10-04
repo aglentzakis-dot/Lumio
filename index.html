@@ -1154,7 +1154,7 @@ body.agdragging,body.agdragging *{user-select:none!important;-webkit-user-select
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.18.0';
+const APP_VERSION='2.18.1';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -2176,6 +2176,7 @@ function render(){
   if(S.pendingRecovery)return viewRecoveryShow();
   if(S.studentMode)return StudentDevice.render();
   const pending=sessionStorage.getItem('pai-res');if(pending){sessionStorage.removeItem('pai-res');importResultLink(pending);}
+  window.AGPOS=null;if(/^#\/agenda/.test(S.curHash||'')&&/^#\/agenda/.test(location.hash)&&typeof agPosSave==='function')agPosSave();
   if(S.curHash!==location.hash){S.prevHash=S.curHash;S.curHash=location.hash;}
   const r=parseRoute();if(ALIAS[r.name]){const to=ALIAS[r.name];if(r.name==='programs'){go('calendar?tab=plans');return;}if(r.name==='program'){go('plan/'+r.id);return;}if(r.name==='material'){go('preview/'+r.id+(r.q.edit?'?edit=1':''));return;}r.name=to;}
   if(r.name==='org'){go('settings/business');return;}
@@ -2190,7 +2191,7 @@ function render(){
   $('#cTog').onclick=()=>{const o=!$('#cSub').classList.toggle('hidden');$('#cTog').classList.toggle('open',o);try{localStorage.setItem('lumio-cOpen',o?'1':'0');}catch(e){}};
   $('#logoutBtn').onclick=askLogout;$('#bell').onclick=showInbox;
   const V={dashboard:viewDashboard,students:viewStudents,student:viewStudent,'student-edit':viewStudentEdit,create:viewCreate,preview:viewPreview,games:viewGames,worksheets:viewWorksheets,materials:viewMaterials,reports:viewReports,report:viewReport,calendar:viewCalendar,plan:viewProgram,earnings:viewEarnings,sessions:viewSessions,agenda:viewAgenda,settings:viewSettings,profile:viewProfile}[r.name]||viewDashboard;
-  window.scrollTo(0,0);
+  if(!window.AGPOS)window.scrollTo(0,0);
   if(stuLocked)return StuLock.view();
   Promise.resolve(V(r)).catch(e=>{console.error(e);M().innerHTML=`<div class="card"><h2>Κάτι πήγε στραβά</h2><p class="muted">${esc(e.message)}</p><a class="btn" href="#/dashboard">Αρχική</a></div>`;});
 }
@@ -3409,7 +3410,8 @@ function viewAgenda2(r){const c=agCfg();const t=todayISO();const PV=providers();
   $$('.tl-col').forEach(col=>col.addEventListener('click',e=>{if(e.target.closest('.tl-ev')||col.classList.contains('off'))return;const y=e.clientY-col.getBoundingClientRect().top;const[rf,rt]=agRange();const m=rf+Math.floor(y/PPM/30)*30;apptDialog({date:col.dataset.col,s:tstr(Math.max(rf,Math.min(m,rt-30))),by});}));
   clearInterval(viewAgenda.tk);viewAgenda.tk=setInterval(()=>{if(!/^#\/agenda/.test(location.hash))return clearInterval(viewAgenda.tk);const n=$('.tl-now');if(n){const f=agRange()[0];n.style.top=Math.round((nowMin()-f)*PPM)+'px';}},60000);
   const ds=$('#dstrip');if(ds){const on=$('.dchip.on',ds);if(on)ds.scrollLeft=on.offsetLeft-ds.clientWidth/2+on.clientWidth/2;}
-  const sc=$('#tlScroll');if(sc){const[rf]=agRange();const nl=$('.tl-now');const target=nl?nowMin()-60:Math.max(rf,tmin(c.from)-30);sc.scrollTop=Math.max(0,(target-rf)*PPM);}}
+  const sc=$('#tlScroll');if(sc){const[rf]=agRange();const nl=$('.tl-now');const target=nl?nowMin()-60:Math.max(rf,tmin(c.from)-30);sc.scrollTop=Math.max(0,(target-rf)*PPM);}
+  agPosRestore();}
 
 
 /* ---- λωρίδα ημερών του μήνα (προβολή Ημέρα): κύλιση, αλλαγή μήνα, πληρότητα, πρώτο κενό ---- */
@@ -3700,11 +3702,16 @@ function undoBar(msg,snap){document.querySelectorAll('.undobar').forEach(x=>x.re
 
 /* ---- μεγέθυνση ---- */
 function agZoom(v,keepMin){const old=PPM;PPM=Math.max(.5,Math.min(3,v));try{localStorage.setItem('lumio-agzoom',String(PPM));}catch(e){}
-  const sc=$('#tlScroll');const[rf]=agRange();const mid=keepMin!=null?keepMin:(sc?rf+(sc.scrollTop+sc.clientHeight/2)/old:null);render();
+  const sc=$('#tlScroll');const[rf]=agRange();const mid=keepMin!=null?keepMin:(sc?rf+(sc.scrollTop+sc.clientHeight/2)/old:null);const y=window.scrollY;render();window.scrollTo(0,y);
   const sc2=$('#tlScroll');if(sc2&&mid!=null)sc2.scrollTop=Math.max(0,(mid-rf)*PPM-sc2.clientHeight/2);}
 
 /* ---- χειρονομίες: σύρσιμο ραντεβού, δημιουργία, αλλαγή διάρκειας, μεγέθυνση, αλλαγή ημέρας ---- */
-function agGestures(view,nav){const sc=$('#tlScroll');if(!sc)return;const body=$('.tl-body',sc);let st=null,pinch=null,swipe=null,suppress=false;
+/* κράτα τη θέση (σελίδα + ώρα) σε κάθε ξανασχεδίαση του ημερολογίου */
+function agPosSave(){const sc=document.getElementById('tlScroll');let min=null;if(sc){const[rf]=agRange();min=rf+sc.scrollTop/PPM;}
+  const ds=document.getElementById('dstrip');window.AGPOS={y:window.scrollY,min,ds:ds?ds.scrollLeft:null};}
+function agPosRestore(){const p=window.AGPOS;window.AGPOS=null;if(!p)return;const sc=$('#tlScroll');if(sc&&p.min!=null){const[rf]=agRange();sc.scrollTop=Math.max(0,(p.min-rf)*PPM);}
+  window.scrollTo(0,p.y);requestAnimationFrame(()=>window.scrollTo(0,p.y));}
+function agGestures(view,nav){const sc=$('#tlScroll');if(!sc)return;const body=$('.tl-body',sc);let st=null,pinch=null,swipe=null,suppress=false,multi=false;
   const cols=()=>[...body.querySelectorAll('.tl-col')];
   const colAt=x=>cols().find(c=>{const r=c.getBoundingClientRect();return x>=r.left-2&&x<=r.right+2;});
   const minAt=(y,col)=>{const[rf,rt]=agRange();const r=(col||cols()[0]).getBoundingClientRect();return Math.max(rf,Math.min(rt,rf+Math.round((y-r.top)/PPM/15)*15));};
@@ -3737,11 +3744,11 @@ function agGestures(view,nav){const sc=$('#tlScroll');if(!sc)return;const body=$
     return agMoveAppt(s0.ev.dataset.ap,nd,tstr(s0.ns),tstr(s0.ne));};
   body.addEventListener('pointerup',finish);body.addEventListener('pointercancel',()=>{if(st&&st.mode){if(st.g)st.g.remove();end();render();}else end();});
   /* δύο δάχτυλα: μεγέθυνση · ένα δάχτυλο οριζόντια: προηγούμενη/επόμενη */
-  sc.addEventListener('touchstart',e=>{if(e.touches.length===2){if(st){clearTimeout(st.timer);st=null;}const[a,b]=e.touches;const[rf]=agRange();const cy=(a.clientY+b.clientY)/2-body.getBoundingClientRect().top;pinch={d0:Math.abs(a.clientY-b.clientY)+Math.abs(a.clientX-b.clientX)*.3,p0:PPM,k:1,mid:rf+cy/PPM};body.style.transformOrigin=`50% ${cy}px`;}
-    else if(e.touches.length===1)swipe={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()};},{passive:true});
+  sc.addEventListener('touchstart',e=>{if(e.touches.length>=2){swipe=null;multi=true;if(st){clearTimeout(st.timer);st=null;}const[a,b]=e.touches;const[rf]=agRange();const cy=(a.clientY+b.clientY)/2-body.getBoundingClientRect().top;pinch={d0:Math.abs(a.clientY-b.clientY)+Math.abs(a.clientX-b.clientX)*.3,p0:PPM,k:1,mid:rf+cy/PPM};body.style.transformOrigin=`50% ${cy}px`;}
+    else if(e.touches.length===1&&!multi)swipe={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()};},{passive:true});
   sc.addEventListener('touchmove',e=>{if(pinch&&e.touches.length===2){e.preventDefault();const[a,b]=e.touches;const d=Math.abs(a.clientY-b.clientY)+Math.abs(a.clientX-b.clientX)*.3;pinch.k=Math.max(.5/pinch.p0,Math.min(3/pinch.p0,d/Math.max(20,pinch.d0)));body.style.transform=`scaleY(${pinch.k})`;}},{passive:false});
-  sc.addEventListener('touchend',e=>{if(pinch&&e.touches.length<2){const p=pinch;pinch=null;body.style.transform='';if(Math.abs(p.k-1)>.05)agZoom(p.p0*p.k,p.mid);return;}
-    if(swipe&&!document.body.classList.contains('agdragging')&&e.changedTouches.length){const t=e.changedTouches[0];const dx=t.clientX-swipe.x,dy=t.clientY-swipe.y;if(Math.abs(dx)>70&&Math.abs(dx)>2.2*Math.abs(dy)&&Date.now()-swipe.t<700){suppress=true;setTimeout(()=>suppress=false,400);window.AG_SUP=Date.now();location.hash=dx<0?nav[2]:nav[0];}}swipe=null;},{passive:true});}
+  sc.addEventListener('touchend',e=>{if(!e.touches.length)setTimeout(()=>multi=false,50);if(pinch&&e.touches.length<2){const p=pinch;pinch=null;swipe=null;body.style.transform='';suppress=true;window.AG_SUP=Date.now();setTimeout(()=>suppress=false,400);if(Math.abs(p.k-1)>.05)agZoom(p.p0*p.k,p.mid);return;}if(multi){swipe=null;return;}
+    if(swipe&&!document.body.classList.contains('agdragging')&&e.changedTouches.length){const t=e.changedTouches[0];const dx=t.clientX-swipe.x,dy=t.clientY-swipe.y;if(Math.abs(dx)>55&&Math.abs(dx)>1.4*Math.abs(dy)&&Date.now()-swipe.t<900){suppress=true;setTimeout(()=>suppress=false,400);window.AG_SUP=Date.now();location.hash=dx<0?nav[2]:nav[0];}}swipe=null;},{passive:true});}
 
 /* ---- εφαρμογή μετακίνησης ---- */
 function scopeAsk(title,dateTxt){return new Promise(res=>{const m=modal(`<h3 style="margin-top:0">${esc(title)}</h3><div class="stack" style="gap:8px"><button class="btn block" data-sc="once">${ic('calendar',16)} Μόνο ${esc(dateTxt)}</button><button class="btn pri block" data-sc="all">${ic('repeat',16)} Όλες τις φορές (πάγιο)</button></div>`,{onClose:()=>res(null),noHist:true,guard:false});m.el.addEventListener('click',e=>{const b=e.target.closest('[data-sc]');if(b){res(b.dataset.sc);m.close();}});});}
