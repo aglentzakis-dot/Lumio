@@ -1128,7 +1128,7 @@ button.tile-rn{cursor:pointer;font-family:inherit;z-index:1}button.tile-rn:hover
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.16.1';
+const APP_VERSION='2.16.3';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -3355,7 +3355,7 @@ function monthHTML(ym,sel){const c=agCfg();const[Y,Mo]=ym.split('-').map(Number)
   return`<div class="mgrid"><div class="mwd">${DAY_ORDER.map(d=>`<span>${WDAYS_S[d]}</span>`).join('')}</div><div class="mdays">${cells.map(d=>{const X=L.filter(o=>o.date===d);const off=!c.days.includes(wdOf(d))||isClosed(d);const out=d.slice(0,7)!==ym;
     const act=X.filter(o=>isLive(o)||isActive(o)).length;
     const XB=LB.filter(o=>o.date===d);const bar=off?'':`<div class="hbar" title="Ώρες εργασίας: πιασμένες και ελεύθερες">${slots.map(m=>{const n=X.filter(o=>o.st!=='cancel'&&tmin(o.s)<m+60&&m<tmin(o.e)).length;const bk=XB.find(o=>tmin(o.s)<m+60&&m<tmin(o.e));return bk&&!n?`<i class="hb" style="background:${blkColor(bk.blk)}"></i>`:`<i class="h${Math.min(n,3)}"></i>`;}).join('')}</div>`;
-    const la=out?{cls:'',sty:'',tip:''}:loadAttr(d);return`<a href="#/agenda?view=month&m=${ym}&d=${d}" style="${la.sty}" title="${la.tip}" class="mday ${la.cls} ${isClosed(d)&&!out?'closed':''} ${d===sel?'sel':''} ${d===today?'today':''} ${out?'out':''} ${off?'off':''}">${isClosed(d)&&!out?`<span class="mhol">${esc(holidayOf(d)||'Κλειστά')}</span>`:''}<div class="mtop"><b>${+d.slice(8)}</b>${X.filter(o=>o.st!=='cancel').length?`<span class="mcount ${act?'act':''}">${X.filter(o=>o.st!=='cancel').length}</span>`:''}</div>${bar}${out?'':day24HTML(d)}
+    const la=out?{cls:'',sty:'',tip:''}:loadAttr(d);return`<a href="#/agenda?view=day&d=${d}" style="${la.sty}" title="${la.tip}" class="mday ${la.cls} ${isClosed(d)&&!out?'closed':''} ${d===sel?'sel':''} ${d===today?'today':''} ${out?'out':''} ${off?'off':''}">${isClosed(d)&&!out?`<span class="mhol">${esc(holidayOf(d)||'Κλειστά')}</span>`:''}<div class="mtop"><b>${+d.slice(8)}</b>${X.filter(o=>o.st!=='cancel').length?`<span class="mcount ${act?'act':''}">${X.filter(o=>o.st!=='cancel').length}</span>`:''}</div>${bar}${out?'':day24HTML(d)}
      <div class="mev">${X.slice().sort((p,q)=>{const r=o=>isLive(o)?0:isActive(o)?1:2;return r(p)-r(q)||p.s.localeCompare(q.s);}).slice(0,3).sort((p,q)=>p.s.localeCompare(q.s)).map(o=>{const st=stOf(o.a.sid)||{};return`<span class="mchip ${apStateCls(o)}">${o.s} ${esc((stuName(st)||'').split(' ')[0])}</span>`;}).join('')}${X.length>3?`<span class="mmore">+${X.length-3} ακόμα</span>`:''}</div></a>`;}).join('')}</div></div>`;}
 
 /* ---- η σελίδα «Ραντεβού» ---- */
@@ -3586,9 +3586,8 @@ function blockChipHTML(o){const b=o.blk;return`<button type="button" class="appt
 function blockDialog({date,s,b,by}={}){const edit=!!b;const PV=providers();let pv=b?(b.by||'me'):(by||PV[0].id);let cat=b?b.cat:bcats()[0][0];let kind=b?b.kind:'weekly';let days=b?(b.days||[]).slice():[wdOf(date||todayISO())];const st0=b?b.s:(s||'09:00');
   const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">${edit?'Αλλαγή δέσμευσης':'Νέα δέσμευση'}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
    <p class="small muted" style="margin-top:0">Ώρες που δεν είσαι διαθέσιμος για ραντεβού — π.χ. τα μαθήματά σου στη σχολή ή μια δεύτερη δουλειά. Φαίνονται με δικό τους χρώμα και δεν προτείνονται ως ελεύθερες.</p>
-   <form id="bf"><div class="spread"><label class="f" style="margin:0">Τι είναι</label><button type="button" class="btn sm ghost" id="b-ed">${ic('edit',14)} Ετικέτες</button></div><div class="bcats field" id="b-cats" style="margin-top:6px">${bcats().map(([k,l,e,c])=>`<button type="button" class="bcat ${cat===k?'on':''}" data-bc="${k}" style="--bc:${c}"><span>${e}</span>${esc(l)}</button>`).join('')}</div>
+   <form id="bf">${PV.length>1||(b&&b.by)?`<label class="f">Ποιου είναι η δέσμευση</label><button type="button" class="pickbtn field" id="b-pv"></button>`:''}<div class="spread"><label class="f" style="margin:0">Τι είναι</label><button type="button" class="btn sm ghost" id="b-ed">${ic('edit',14)} Ετικέτες</button></div><div class="bcats field" id="b-cats" style="margin-top:6px">${bcats().map(([k,l,e,c])=>`<button type="button" class="bcat ${cat===k?'on':''}" data-bc="${k}" style="--bc:${c}"><span>${e}</span>${esc(l)}</button>`).join('')}</div>
     <div class="field"><label class="f" for="b-t">Τίτλος (προαιρετικό)</label><input class="in" id="b-t" name="title" value="${esc(b&&b.title||'')}" placeholder="π.χ. Στατιστική, Καφετέρια, Γυμναστήριο"></div>
-    ${PV.length>1?`<div class="field"><label class="f" for="b-p">Ποιου η δέσμευση</label><select class="in" id="b-p" name="pv">${PV.map(p=>opt(p.id,p.id==='me'?(S.user.name||'Εγώ')+' (εγώ)':p.name,pv)).join('')}</select></div>`:''}
     <div class="seg field" id="bk"><button type="button" data-bk="weekly" class="${kind==='weekly'?'on':''}">Κάθε εβδομάδα</button><button type="button" data-bk="once" class="${kind==='once'?'on':''}">Μία φορά</button></div>
     <div class="field" id="b-dw"><label class="f">Ποιες μέρες</label><div class="chips">${DAY_ORDER.map(d=>`<button type="button" class="chipt ${days.includes(d)?'on':''}" data-bd="${d}">${WDAYS_S[d]}</button>`).join('')}</div></div>
     <div class="field" id="b-ow"><label class="f" for="b-d">${kind==='once'?'Ημερομηνία':'Από'}</label><input class="in" type="date" id="b-d" name="date" required value="${b?b.date:date||todayISO()}"></div>
@@ -3599,16 +3598,18 @@ function blockDialog({date,s,b,by}={}){const edit=!!b;const PV=providers();let p
   const f=$('#bf',md.el);
   $('#b-ed',md.el).onclick=async()=>{await blockCatsEditor();$('#b-cats',md.el).innerHTML=bcats().map(([k,l,e,c])=>`<button type="button" class="bcat ${cat===k?'on':''}" data-bc="${k}" style="--bc:${c}"><span>${e}</span>${esc(l)}</button>`).join('');};
   const draw=()=>{$('#b-dw',md.el).style.display=kind==='weekly'?'':'none';$('#b-uw',md.el).style.display=kind==='weekly'?'':'none';$('#b-ow label',md.el).textContent=kind==='once'?'Ημερομηνία':'Από';
-    const d0=f.date.value;const chk=kind==='once'?[d0]:[...Array(14)].map((_,i)=>addDays(d0,i)).filter(d=>days.includes(wdOf(d)));const pid=f.pv?f.pv.value:pv;
+    const d0=f.date.value;const chk=kind==='once'?[d0]:[...Array(14)].map((_,i)=>addDays(d0,i)).filter(d=>days.includes(wdOf(d)));const pid=pv;
     const C=chk.flatMap(d=>occ(d,d,{by:pid})).filter(o=>tmin(o.s)<tmin(f.e.value)&&tmin(f.s.value)<tmin(o.e));
     $('#b-cf',md.el).innerHTML=C.length?`<div class="note small field" style="background:var(--pink)">${ic('alert',14)} Πέφτει πάνω σε ραντεβού: ${C.slice(0,4).map(o=>esc(stuName(stOf(o.a.sid)))+' '+WDAYS_S[wdOf(o.date)]+' '+o.s).join(', ')}${C.length>4?'…':''}. Μετακίνησέ τα ή άλλαξε τις ώρες.</div>`:'';};
+  const drawPv=()=>{const bt=$('#b-pv',md.el);if(!bt)return;const p=provById(pv);bt.innerHTML=`<i class="pvb" style="background:${p.color}">${provIni(p)}</i><span class="grow"><b>${esc(p.id==='me'?(S.user.name||'Εγώ')+' (εγώ)':p.name)}</b><small>${esc(roleName(p.role,p.custom))}</small></span>${ic('down',18)}`;};drawPv();
+  const bpv=$('#b-pv',md.el);if(bpv)bpv.onclick=async()=>{const L=PV.some(p=>p.id===pv)?PV:PV.concat(provById(pv));const r=await richPick({title:'Ποιου είναι η δέσμευση',sel:[pv],hint:'Οι ώρες της δέσμευσης δεν θα προτείνονται ως ελεύθερες για αυτό το άτομο.',items:L.map(p=>({id:p.id,label:p.id==='me'?(S.user.name||'Εγώ')+' (εγώ)':p.name,color:p.color,ini:provIni(p),sub:esc(roleName(p.role,p.custom))}))});if(r){pv=r[0];md.dirty();drawPv();draw();}};
   draw();f.addEventListener('input',draw);f.addEventListener('change',draw);
   md.el.addEventListener('click',e=>{const c=e.target.closest('[data-bc]');if(c){cat=c.dataset.bc;$$('[data-bc]',md.el).forEach(x=>x.classList.toggle('on',x===c));}
     const k=e.target.closest('[data-bk]');if(k){kind=k.dataset.bk;$$('[data-bk]',md.el).forEach(x=>x.classList.toggle('on',x===k));draw();}
     const d=e.target.closest('[data-bd]');if(d){const v=+d.dataset.bd;days=days.includes(v)?days.filter(x=>x!==v):days.concat(v);d.classList.toggle('on');draw();}});
   const del=$('#b-del',md.el);if(del)del.onclick=async()=>{if(!await confirmDlg(b.kind==='weekly'?'Διαγραφή της δέσμευσης για όλες τις εβδομάδες;':'Διαγραφή δέσμευσης;',{danger:true,ok:'Διαγραφή'}))return;S.data.blocks=blocks().filter(x=>x.id!==b.id);save();md.close();render();};
   f.onsubmit=e=>{e.preventDefault();const o=fd(f);if(tmin(o.e)<=tmin(o.s))return toast('Έλεγξε τις ώρες.','bad');if(kind==='weekly'&&!days.length)return toast('Διάλεξε τουλάχιστον μία μέρα.','bad');
-    const rec={cat,title:(o.title||'').trim(),by:(o.pv||pv)==='me'?undefined:(o.pv||pv),kind,date:o.date,days:kind==='weekly'?days.slice().sort():[],s:o.s,e:o.e,until:kind==='weekly'?(o.until||null):null};
+    const rec={cat,title:(o.title||'').trim(),by:pv==='me'?undefined:pv,kind,date:o.date,days:kind==='weekly'?days.slice().sort():[],s:o.s,e:o.e,until:kind==='weekly'?(o.until||null):null};
     if(edit)Object.assign(b,rec);else blocks().push({id:uid(),ex:{},created:new Date().toISOString(),...rec});save();md.close();toast(edit?'Η δέσμευση άλλαξε.':'Η δέσμευση μπήκε στο ημερολόγιο.','ok');render();};}
 function blockSheet(key){const[id,date]=key.split('|');const b=blocks().find(x=>x.id===id);if(!b)return;const c=blkCat(b);
   const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">Δέσμευση</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
@@ -3766,6 +3767,7 @@ const HELP={
   ['Πράσινες γραμμές και «+»','Ελεύθερη ώρα — πάτα για να κλείσεις ραντεβού ακριβώς εκεί.'],
   ['Πάτημα σε ραντεβού','Ήρθε (καταχώριση συνεδρίας), Απουσία, Μετακίνηση, Ακύρωση μόνο αυτή τη φορά, Αλλαγή, Τέλος πάγιου, και υπενθύμιση στον γονέα με SMS ή email. Πάτα πάνω στον μαθητή (κουτί με το μολύβι) για γρήγορη αλλαγή: ποιος κάνει το μάθημα, ώρα, σημείωση — μόνο για εκείνη τη μέρα ή για όλες τις φορές.'],
   ['Δέσμευση (κουμπί)','Ώρες που δεν είσαι διαθέσιμος — μάθημα σχολής, δεύτερη δουλειά, προσωπικό κ.ά. Μία φορά ή κάθε εβδομάδα σε όσες μέρες θέλεις. Φαίνονται ριγέ με το χρώμα της ετικέτας, δεν προτείνονται ως ελεύθερες και μετράνε στην πληρότητα. Με «Ετικέτες» αλλάζεις όνομα, εικονίδιο, χρώμα και σειρά ή προσθέτεις νέες.'],
+  ['Πάτημα σε μέρα του μήνα','Ανοίγει ολόκληρη η μέρα: ανάλυση ανά ώρα, νέο ραντεβού ή δέσμευση πατώντας σε κενό, αλλαγές σε κάθε ραντεβού, «Κλειστά αυτή τη μέρα». Με το «πίσω» γυρνάς στον μήνα.'],
   ['Λωρίδα 24ώρου','Η λεπτή μπάρα σε κάθε μέρα είναι ολόκληρο το 24ωρο: μωβ τα ραντεβού, με το χρώμα τους οι δεσμεύσεις — στην αναλογία της ώρας τους.'],
   ['Τι θα κάνουμε','Μέσα στο ραντεβού: διαλέγεις παιχνίδια ή ασκήσεις (δικά σου ή έτοιμα) για εκείνο το μάθημα ή για όλα τα μαθήματα του πάγιου. «Παίξε» τα ανοίγει για τον μαθητή και το αποτέλεσμα καταγράφεται. Μπαίνουν και από το «Νέο ραντεβού».'],
   ['Πρόοδος για τους γονείς','Από το ραντεβού ή από το προφίλ μαθητή: παρουσίες, δραστηριότητες, επιτυχία ανά μάθημα, δυνατά σημεία και τι θα δουλέψουμε — για το μάθημα, την εβδομάδα, τον μήνα, όλα ή από–έως. PDF, email, SMS ή κοινοποίηση, με δικό σου σχόλιο.'],
