@@ -983,6 +983,19 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 .packbar{display:flex;flex-direction:column;gap:6px;margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--lilac);font-size:.88rem}
 .packbar.low{background:var(--yellow)}.packbar .pbar{height:6px;border-radius:3px;background:rgba(255,255,255,.6);overflow:hidden}.packbar .pbar i{display:block;height:100%;background:var(--lilac-d)}
 
+.wsitems{display:grid;grid-template-columns:repeat(var(--wc),minmax(0,1fr));gap:14px 22px;padding-left:22px;margin:10px 0;font-size:1.05rem}
+.wsitems li{break-inside:avoid}.wsitems .wsa{color:var(--ok)}.wsitems .wsl{color:var(--ink3)}
+@media(max-width:600px){.wsprev .wsitems{grid-template-columns:repeat(min(var(--wc),2),minmax(0,1fr));font-size:.95rem}}
+.wsprev{max-height:52vh;overflow:auto;border:1px solid var(--line);border-radius:12px;margin-bottom:12px;background:#fff}.wsprev .report{box-shadow:none;border:0;margin:0}
+.achart{margin:6px 0 10px}.achart svg{width:100%;height:auto;color:var(--ink);display:block}
+.alegend{display:flex;flex-wrap:wrap;gap:10px;font-size:.8rem;color:var(--ink2)}.alegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.tterm{width:100%;font-size:.88rem}.tterm td,.tterm th{text-align:center}.tterm td:first-child,.tterm th:first-child{text-align:left}
+.ppage{max-width:760px;margin:0 auto;padding:18px 16px 40px}
+.pphead{display:flex;align-items:center;gap:12px;margin-bottom:14px}.pphead h1{margin:2px 0;font-family:var(--head);font-size:1.6rem}.pplogo svg,.pplogo img{width:46px;height:46px}
+.ppcard{margin-bottom:14px}.ppcard h3{margin-top:0;display:flex;align-items:center;gap:8px}
+.ppfoot{text-align:center;margin-top:18px}
+@media print{.ppage{padding:0}.ppcard{break-inside:avoid;box-shadow:none}}
+
 /* ===== games ===== */
 .gwrap{position:fixed;inset:0;z-index:80;overflow:auto;display:flex;flex-direction:column;font-family:"Comfortaa","Commissioner",sans-serif}
 .gwrap.teen{font-family:"Commissioner",sans-serif}
@@ -1186,7 +1199,7 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.22.0';
+const APP_VERSION='2.23.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -2203,6 +2216,7 @@ function sidebarHTML(sec,r){const cOpen=sec==='create'||localStorage.getItem('lu
 function render(){
   const h=location.hash;if(S.leave&&S.leave.hash!==h)S.leave=null;
   if(h.startsWith('#play=')){StudentLink.open(h.slice(6));return;}
+  if(h.startsWith('#parent=')){ParentPage.open(h.slice(8));return;}
   if(h.startsWith('#res=')){sessionStorage.setItem('pai-res',h.slice(5));history.replaceState(null,'','#/dashboard');}
   document.body.style.overflow='';document.body.onclick=null;document.body.classList.remove('drawer');document.body.classList.remove('on-tm');
   if(!S.user)return renderAuth();
@@ -2344,10 +2358,10 @@ function viewStudents(r){const all=myStudents();const q=r.q;
   $('#imp').onclick=importResultDialog;$('#sm').onclick=()=>startStudentMode();M().onclick=e=>{if(e.target.closest('#demo2'))loadDemo();};}
 
 /* ===== Προφίλ μαθητή ===== */
-const PROFILE_TABS=[['overview','Επισκόπηση'],['identity','Μαθησιακή ταυτότητα'],['activities','Δραστηριότητες'],['progress','Πρόοδος'],['mistakes','Λάθη'],['reports','Αναφορές'],['calendar','Ημερολόγιο'],['notes','Σημειώσεις']];
+const PROFILE_TABS=[['overview','Επισκόπηση'],['identity','Μαθησιακή ταυτότητα'],['activities','Δραστηριότητες'],['progress','Πρόοδος'],['assess','Αξιολογήσεις'],['mistakes','Λάθη'],['reports','Αναφορές'],['calendar','Ημερολόγιο'],['notes','Σημειώσεις']];
 function createForDialog(sid){const m=modal(`<div class="spread" style="margin-bottom:12px"><h3 style="margin:0">Δημιουργία για τον μαθητή</h3><button class="iconbtn" data-close>${ic('x',18)}</button></div><div class="list">${CREATE_TYPES.filter(t=>t[0]!=='material').map(([k,i,c,t,d])=>`<a class="rw" href="#/create/${k}?s=${sid}" data-close><span class="ricon ${c}">${ic(i,18)}</span><span class="grow"><b>${t}</b><small>${d}</small></span>${ic('right',18)}</a>`).join('')}</div>`);}
 function viewStudent(r){const s=getStudent(r.id);if(!s)return go('students');const tab=PROFILE_TABS.some(t=>t[0]===r.q.tab)?r.q.tab:'overview';const T=THEMES[themeFor(s)]||THEMES.neutral;const base='student/'+s.id;
-  M().innerHTML=`<div class="profile-head"><span class="av">${s.avatar||'🙂'}</span><div><h1>${esc(stuName(s))}</h1><div class="sub muted small">Κωδικός <b>${s.code}</b>${s.age?' · '+s.age+' ετών':''}${s.grade?' · '+esc(s.grade):''} · ${T.n}</div></div><div class="actions row"><a class="btn" href="#/student-edit/${s.id}">${ic('edit',16)} Επεξεργασία</a><button class="btn" id="prog">${ic('chart',16)} Πρόοδος για γονείς</button><button class="btn" id="smode">${ic('smile',16)} Λειτουργία μαθητή</button><button class="btn pri" id="cfor">${ic('plus',16)} Δημιουργία</button></div></div>
+  M().innerHTML=`<div class="profile-head"><span class="av">${s.avatar||'🙂'}</span><div><h1>${esc(stuName(s))}</h1><div class="sub muted small">Κωδικός <b>${s.code}</b>${s.age?' · '+s.age+' ετών':''}${s.grade?' · '+esc(s.grade):''} · ${T.n}</div></div><div class="actions row"><a class="btn" href="#/student-edit/${s.id}">${ic('edit',16)} Επεξεργασία</a><button class="btn" id="prog">${ic('chart',16)} Πρόοδος για γονείς</button><button class="btn" id="plink">${ic('link',16)} Σελίδα γονέα</button><button class="btn" id="smode">${ic('smile',16)} Λειτουργία μαθητή</button><button class="btn pri" id="cfor">${ic('plus',16)} Δημιουργία</button></div></div>
   ${tabsHTML(PROFILE_TABS,tab,base)}<div id="tb"></div>`;
   const tb=$('#tb');const rs=resultsOf(s.id);
   if(tab==='overview'){const r30=rs.filter(x=>x.date>=new Date(Date.now()-30*864e5).toISOString());const la=lastActivity(s.id);const subs=[...new Set([...Object.keys(s.levels||{}),...rs.map(x=>x.subject).filter(Boolean)])];const pend=S.data.assignments.filter(a=>a.studentId===s.id&&a.status!=='done');
@@ -2371,6 +2385,7 @@ function viewStudent(r){const s=getStudent(r.id);if(!s)return go('students');con
     tb.innerHTML=`<div class="seg" style="margin-bottom:16px">${[['results','Αποτελέσματα ('+rs.length+')'],['asg','Αναθέσεις ('+asg.length+')'],['mats','Υλικό ('+mats.length+')']].map(([k,l])=>`<a href="#/${base}?tab=activities&v=${k}" class="${v===k?'on':''}">${l}</a>`).join('')}</div>
     ${v==='results'?resultsList(rs.slice().reverse()):v==='asg'?(asg.length?`<div class="list">${asg.map(a=>{const m=S.data.materials.find(x=>x.id===a.materialId);return`<div class="rw static"><span class="ricon ${a.status==='done'?'g':'y'}">${ic(a.status==='done'?'check':'clock',18)}</span><span class="grow"><b>${esc(m?m.title:'(διαγραμμένο υλικό)')}</b><small>Ανατέθηκε ${fmtDate(a.created)}${a.doneAt?' · ολοκληρώθηκε '+fmtDate(a.doneAt):''}</small></span><span class="end">${m&&a.status!=='done'?`<button class="btn sm" data-link="${a.id}">${ic('link',15)}</button>`:''}<button class="iconbtn" data-unasg="${a.id}" aria-label="Αφαίρεση">${ic('x',16)}</button></span></div>`;}).join('')}</div>`:emptyHTML('send','Καμία ανάθεση','')):(mats.length?`<div class="list">${mats.map(m=>`<a class="rw" href="#/preview/${m.id}"><span class="ricon l">${ic(catOf(m)==='worksheet'?'file':'game',18)}</span><span class="grow"><b>${esc(m.title)}</b><small>${CAT_LABEL[catOf(m)]} · ${fmtDate(m.updated)}</small></span>${ic('right',18)}</a>`).join('')}</div>`:emptyHTML('layers','Δεν υπάρχει υλικό για αυτόν τον μαθητή','',`<button class="btn pri" id="cfor2">${ic('plus',16)} Δημιουργία</button>`))}`;}
   if(tab==='progress')tb.innerHTML=progressStudentHTML(s,r.q.c||'month',`${base}?tab=progress`);
+  if(tab==='assess')tb.innerHTML=assessTabHTML(s);
   if(tab==='mistakes')tb.innerHTML=mistakesHTML(s);
   if(tab==='reports'){const reps=S.data.reports.filter(x=>x.studentId===s.id).sort((a,b)=>b.month.localeCompare(a.month));
     tb.innerHTML=`<div class="card section"><form id="rf" class="row"><label class="f" style="margin:0">Μήνας</label><select class="in sm" name="m">${lastMonths(12).map((m,i)=>opt(m,MONTHS[+m.slice(5)-1]+' '+m.slice(0,4),lastMonths(12)[1])).join('')}</select><button class="btn pri sm">${ic('file',15)} Δημιουργία αναφοράς</button></form></div>
@@ -2381,7 +2396,7 @@ function viewStudent(r){const s=getStudent(r.id);if(!s)return go('students');con
     <div class="card"><div class="card-h"><h3>Ημερολόγιο παρατηρήσεων</h3></div><form id="nf"><textarea class="in" name="t" required placeholder="Νέα παρατήρηση, π.χ. «Σήμερα συγκεντρώθηκε πολύ καλύτερα στα προβλήματα»" style="min-height:70px"></textarea><button class="btn sm" style="margin-top:8px">${ic('plus',15)} Προσθήκη</button></form><div class="notelog" style="margin-top:14px">${s.noteLog.slice().reverse().map(n=>`<div class="n"><small><span>${fmtDate(n.date)}</span><button class="iconbtn" style="width:24px;height:24px" data-dn="${n.id}" aria-label="Διαγραφή">${ic('x',13)}</button></small>${esc(n.text)}</div>`).join('')||'<p class="muted small">Καμία παρατήρηση ακόμη.</p>'}</div></div></div>`;
     $('#gns').onclick=()=>{s.notes=$('#gn').value;save();toast('Αποθηκεύτηκε.','ok');};$('#nf').onsubmit=e=>{e.preventDefault();s.noteLog.push({id:uid(),date:new Date().toISOString(),text:fd(e.target).t});save();render();};}
   M().onclick=e=>{const rr=e.target.closest('[data-res]');if(rr)showResult(rr.dataset.res);const l=e.target.closest('[data-link]');if(l)shareAssignment(l.dataset.link);const u=e.target.closest('[data-unasg]');if(u){S.data.assignments=S.data.assignments.filter(x=>x.id!==u.dataset.unasg);save();render();}const dn=e.target.closest('[data-dn]');if(dn){s.noteLog=s.noteLog.filter(x=>x.id!==dn.dataset.dn);save();render();}if(e.target.closest('#cfor2'))createForDialog(s.id);};
-  $('#cfor').onclick=()=>createForDialog(s.id);$('#prog').onclick=()=>progressDialog(s.id);$('#smode').onclick=()=>startStudentMode(s.id);}
+  $('#cfor').onclick=()=>createForDialog(s.id);$('#prog').onclick=()=>progressDialog(s.id);$('#plink').onclick=()=>parentLinkDialog(s.id);$('#smode').onclick=()=>startStudentMode(s.id);}
 function lastMonths(n){const o=[];for(let i=0;i<n;i++){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-i);o.push(isoDate(d).slice(0,7));}return o;}
 function makeReport(s,month){let rep=S.data.reports.find(x=>x.studentId===s.id&&x.month===month);if(rep){rep.data=computeReport(s,month);rep.created=new Date().toISOString();}else{rep={id:uid(),studentId:s.id,month,created:new Date().toISOString(),data:computeReport(s,month),comment:''};S.data.reports.push(rep);}save();return rep;}
 
@@ -2604,8 +2619,8 @@ function viewGames(r){const cat=GAME_CATS.some(c=>c[0]===r.q.c)?r.q.c:'all';cons
   M().onclick=e=>{const p=e.target.closest('[data-play]');if(p){const m=S.data.materials.find(x=>x.id===p.dataset.play);if(!((m.content.items||[]).length||(m.content.pairs||[]).length||(m.content.cards||[]).length))return toast('Αυτή η δραστηριότητα δεν έχει ερωτήσεις για παιχνίδι — άνοιξέ την για προβολή.');playGame(m,{student:m.studentId&&getStudent(m.studentId),support:m.support,preview:true,band:m.ageBand});}const d=e.target.closest('[data-dup]');if(d)duplicateMat(S.data.materials.find(x=>x.id===d.dataset.dup),false);};}
 function viewWorksheets(r){const all=myMaterials().filter(m=>catOf(m)==='worksheet');
   M().innerHTML=`${pageHead('Φύλλα εργασίας','Όλα τα φύλλα εργασίας, έτοιμα για εκτύπωση',`<a class="btn pri" href="#/create/worksheet">${ic('plus',17)} Νέο φύλλο εργασίας</a>`)}
-  ${all.length?libToolbar(all,r.q)+'<div id="ll"></div>':emptyHTML('file','Δεν υπάρχουν ακόμη φύλλα εργασίας','Δημιούργησε φύλλο εργασίας με έκδοση μαθητή και έκδοση απαντήσεων.',`<a class="btn pri" href="#/create/worksheet">${ic('plus',16)} Νέο φύλλο εργασίας</a>`)}`;
-  if(!all.length)return;
+  ${all.length?libToolbar(all,r.q)+'<div id="ll"></div>':emptyHTML('file','Δεν υπάρχουν ακόμη φύλλα εργασίας','Δημιούργησε φύλλο εργασίας με έκδοση μαθητή και έκδοση απαντήσεων.',`<a class="btn pri" href="#/create/worksheet">${ic('plus',16)} Νέο φύλλο εργασίας</a>`)}${readySheetsHTML()}`;
+  bindReadySheets(M());if(!all.length)return;
   const draw=()=>{const L=libFilter(all);$('#ll').innerHTML=L.length?`<div class="list">${L.map(m=>{const st=m.studentId&&getStudent(m.studentId);return`<div class="rw" data-open="${m.id}"><span class="ricon b">${ic('file',18)}</span><span class="grow"><b>${esc(m.title)}</b><small>${esc(m.subject||'Χωρίς μάθημα')}${st?' · '+esc(stuName(st)):''} · ${(m.content.items||[]).length} ασκήσεις · ${LEVEL_N(m.level)} · ${fmtDate(m.created)}</small></span><span class="end"><button class="btn sm" data-pdf="${m.id}">${ic('download',15)} PDF</button><button class="iconbtn" data-act="${m.id}" aria-label="Ενέργειες">${ic('more',18)}</button></span></div>`;}).join('')}</div>`:emptyHTML('search','Τίποτα με αυτά τα φίλτρα','');};
   draw();$$('.toolbar input,.toolbar select').forEach(e=>e.oninput=draw);
   M().onclick=e=>{const get=id=>S.data.materials.find(x=>x.id===id);const p=e.target.closest('[data-pdf]');if(p){e.stopPropagation();return pdfChoice(get(p.dataset.pdf));}const a=e.target.closest('[data-act]');if(a){e.stopPropagation();return wsActions(get(a.dataset.act));}const o=e.target.closest('[data-open]');if(o)go('preview/'+o.dataset.open);};}
@@ -4276,6 +4291,134 @@ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest
   if(t.dataset.pack!==undefined)packDialog(t.dataset.pack);else if(t.dataset.owe!==undefined)oweDialog(t.dataset.owe||null);
   else if(t.dataset.packmsg){const st=stOf(t.dataset.packmsg)||{};const ph=(st.contacts||[]).find(c=>c.phone);const txt=packMsg(t.dataset.packmsg);if(ph)location.href=smsHref(ph.phone,txt);else if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>toast('Αντιγράφηκε το μήνυμα (δεν υπάρχει τηλέφωνο γονέα).','ok'));}},true);
 
+/* ===== Αξιολογήσεις ανά τρίμηνο & σελίδα γονέα ===== */
+function assess(){return S.data.assess=S.data.assess||[];}
+function assessOf(sid){return assess().filter(a=>a.sid===sid).sort((a,b)=>a.date.localeCompare(b.date));}
+function schoolYear(d){const y=+d.slice(0,4),m=+d.slice(5,7);const Y=m>=9?y:y-1;return`${Y}–${String(Y+1).slice(2)}`;}
+function termOf(d){const m=+d.slice(5,7);return m>=9&&m<=11?1:m===12||m<=2?2:m<=6?3:0;}
+const TERM_N=['Καλοκαίρι','Α΄ τρίμηνο','Β΄ τρίμηνο','Γ΄ τρίμηνο'];
+const aPct=a=>a.max?Math.round(a.score/a.max*1000)/10:0;
+const ACOL=['#7462B4','#3A8A61','#C77A4E','#4E7FB8','#C0627F','#B98A1E'];
+function assessChartSVG(L){if(L.length<1)return'';const subs=[...new Set(L.map(a=>a.subject||'Γενικά'))].slice(0,6);const W=640,H=220,pl=34,pr=12,pt=12,pb=26;
+  const d0=new Date(L[0].date+'T12:00').getTime(),d1=Math.max(d0+864e5*7,new Date(L[L.length-1].date+'T12:00').getTime());const X=d=>pl+(new Date(d+'T12:00').getTime()-d0)/(d1-d0)*(W-pl-pr),Y=p=>pt+(100-p)/100*(H-pt-pb);
+  const grid=[0,25,50,75,100].map(p=>`<line x1="${pl}" x2="${W-pr}" y1="${Y(p)}" y2="${Y(p)}" stroke="currentColor" stroke-opacity=".12"/><text x="${pl-6}" y="${Y(p)+4}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity=".55">${p}</text>`).join('');
+  const lines=subs.map((s,i)=>{const P=L.filter(a=>(a.subject||'Γενικά')===s);const c=ACOL[i];return`<polyline fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${P.map(a=>X(a.date).toFixed(1)+','+Y(aPct(a)).toFixed(1)).join(' ')}"/>${P.map(a=>`<circle cx="${X(a.date).toFixed(1)}" cy="${Y(aPct(a)).toFixed(1)}" r="4" fill="${c}"><title>${esc(s)} · ${fmtShort(a.date)} · ${a.score}/${a.max}</title></circle>`).join('')}`;}).join('');
+  const tl=[L[0].date,L[L.length-1].date].filter((x,i,a)=>a.indexOf(x)===i).map(d=>`<text x="${X(d)}" y="${H-6}" text-anchor="${d===L[0].date?'start':'end'}" font-size="11" fill="currentColor" fill-opacity=".55">${fmtShort(d)}</text>`).join('');
+  return`<div class="achart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Πορεία βαθμών">${grid}${lines}${tl}</svg><div class="alegend">${subs.map((s,i)=>`<span><i style="background:${ACOL[i]}"></i>${esc(s)}</span>`).join('')}</div></div>`;}
+function termTableHTML(L){if(!L.length)return'';const yrs=[...new Set(L.map(a=>schoolYear(a.date)))];const y=yrs[yrs.length-1];const Ly=L.filter(a=>schoolYear(a.date)===y);const subs=[...new Set(Ly.map(a=>a.subject||'Γενικά'))];
+  const cell=(s,t)=>{const P=Ly.filter(a=>(a.subject||'Γενικά')===s&&termOf(a.date)===t);return P.length?Math.round(avg(P.map(aPct)))+'%':'—';};
+  return`<table class="t tterm"><tr><th>${y}</th>${[1,2,3].map(t=>`<th>${TERM_N[t]}</th>`).join('')}</tr>${subs.map(s=>`<tr><td><b>${esc(s)}</b></td>${[1,2,3].map(t=>`<td>${cell(s,t)}</td>`).join('')}</tr>`).join('')}</table>`;}
+function assessTabHTML(s){const L=assessOf(s.id);
+  return`<div class="card section"><div class="card-h"><h3>${ic('chart',17)} Αξιολογήσεις</h3><button class="btn sm pri" data-asn="${s.id}">${ic('plus',15)} Νέα αξιολόγηση</button></div>
+   ${L.length?`${assessChartSVG(L)}${termTableHTML(L)}<div class="list" style="margin-top:12px">${L.slice().reverse().map(a=>`<div class="rw static wrapm"><span class="ricon ${aPct(a)>=85?'g':aPct(a)>=60?'y':'r'}"><b style="font-size:.8rem">${Math.round(aPct(a))}</b></span><span class="grow"><b>${esc(a.title||'Τεστ')} · ${a.score}/${a.max}</b><small>${esc(a.subject||'Γενικά')} · ${fmtDate(a.date)} · ${TERM_N[termOf(a.date)]}${a.note?' · '+esc(a.note):''}</small></span><span class="end"><button class="iconbtn" data-ase="${a.id}" aria-label="Αλλαγή">${ic('edit',16)}</button></span></div>`).join('')}</div>`
+    :`<p class="small muted">Κατέγραψε τεστ και διαγωνίσματα — του φροντιστηρίου ή του σχολείου. Θα βλέπεις την πορεία ανά μάθημα και τον μέσο όρο ανά τρίμηνο, και θα μπαίνουν στην ενημέρωση των γονέων.</p>`}</div>`;}
+function assessDialog(sid,a0){const st=stOf(sid)||{};const subs=[...new Set(String(st.subjects||'').split(/[,;]/).map(x=>x.trim()).filter(Boolean).concat(assessOf(sid).map(a=>a.subject).filter(Boolean)))];const a=a0||{date:todayISO(),subject:subs[0]||'',title:'',score:'',max:(assessOf(sid).slice(-1)[0]||{}).max||20,note:''};
+  const md=modal(`<h3 style="margin-top:0">${a0?'Αλλαγή αξιολόγησης':'Νέα αξιολόγηση'} — ${esc(stuName(st))}</h3>
+   <div class="grid g2" style="gap:10px"><div class="field"><label class="f">Ημερομηνία</label><input class="in" type="date" id="asd" value="${a.date}"></div><div class="field"><label class="f">Μάθημα</label><input class="in" id="ass" list="asl" value="${esc(a.subject||'')}"><datalist id="asl">${subs.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></div></div>
+   <div class="field"><label class="f">Τίτλος</label><input class="in" id="ast" value="${esc(a.title||'')}" placeholder="π.χ. Διαγώνισμα κεφ. 3, Τεστ σχολείου"></div>
+   <div class="grid g2" style="gap:10px"><div class="field"><label class="f">Βαθμός</label><input class="in" type="number" step="0.1" min="0" id="asc" value="${a.score}"></div><div class="field"><label class="f">Με άριστα</label><select class="in" id="asm">${[10,20,100].map(v=>opt(v,'στα '+v,String(a.max))).join('')}</select></div></div>
+   <div class="field"><label class="f">Σημείωση</label><input class="in" id="asn" value="${esc(a.note||'')}" placeholder="προαιρετικό"></div>
+   <div class="row" style="justify-content:space-between">${a0?`<button class="btn danger sm" id="asx">${ic('trash',15)} Διαγραφή</button>`:'<span></span>'}<span class="row"><button class="btn" data-close>Άκυρο</button><button class="btn pri" id="asok">${ic('check',16)} Αποθήκευση</button></span></div>`);
+  $('#asok',md.el).onclick=()=>{const sc=parseFloat($('#asc',md.el).value),mx=+$('#asm',md.el).value;if(isNaN(sc)||sc<0||sc>mx)return toast(`Ο βαθμός πρέπει να είναι από 0 έως ${mx}.`,'bad');
+    const o={id:a0?a0.id:uid(),sid,date:$('#asd',md.el).value||todayISO(),subject:$('#ass',md.el).value.trim(),title:$('#ast',md.el).value.trim(),score:sc,max:mx,note:$('#asn',md.el).value.trim()};
+    if(a0)Object.assign(assess().find(x=>x.id===a0.id),o);else assess().push(o);save();md.close();toast('Αποθηκεύτηκε.','ok');render();};
+  const x=$('#asx',md.el);if(x)x.onclick=async()=>{if(!await confirmDlg('Διαγραφή αυτής της αξιολόγησης;',{danger:true,ok:'Διαγραφή'}))return;S.data.assess=assess().filter(y=>y.id!==a0.id);save();md.close();render();};}
+document.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest('[data-asn],[data-ase]');if(!n)return;e.preventDefault();if(n.dataset.asn)assessDialog(n.dataset.asn);else{const a=assess().find(x=>x.id===n.dataset.ase);if(a)assessDialog(a.sid,a);}});
+
+/* ---- σελίδα γονέα: τα στοιχεία ταξιδεύουν μέσα στον σύνδεσμο (μετά το #) ---- */
+async function parentPayload(sid,{months=3,fin=true}={}){const st=stOf(sid)||{};const B=biz();const P=S.data.profile||{};const t=todayISO();const from=addDays(t,-30*months);
+  const pd=progressData(sid,from,t);const up=occ(t,addDays(t,28),{sid,by:''}).filter(o=>o.st==='').slice(0,12).map(o=>[o.date,o.s,o.e]);
+  const rec=pd.L.slice(-10).reverse().map(o=>{const rs=pd.rs.filter(r=>r.date.slice(0,10)===o.date);return[o.date,o.st||'',rs.map(r=>r.title+' '+r.pct+'%').join(', ')||apptMats(o.a,o.date).map(m=>m.title).join(', ')];});
+  const o={v:1,n:stuName(st),av:st.avatar||'🙂',g:st.grade||'',b:B.name||S.meta.org||'',t:S.user.name,ph:P.phone||'',em:P.email||'',gen:t,mo:months,
+    att:pd.att,up,rec,pr:{avg:pd.avg,min:pd.minutes,n:pd.rs.length,sub:pd.bySubject.map(x=>[x.k,x.avg,x.n]),ok:pd.strong.map(c=>c.c),wk:pd.weak.map(c=>c.c)},
+    as:assessOf(sid).slice(-20).map(a=>[a.date,a.subject||'',a.title||'',a.score,a.max])};
+  if(fin&&S.earn){const b=balanceOf(sid);const pk=packActive(sid);o.fin={bal:b.sum,n:b.n};if(pk)o.fin.pk=[pk.n,packLeft(pk)];}
+  return o;}
+function parentLinkDialog(sid){const st=stOf(sid)||{};const md=modal(`<div class="spread" style="margin-bottom:6px"><h3 style="margin:0">${ic('link',18)} Σελίδα γονέα</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
+   ${consentWarn(st,'parent')}<p class="small muted" style="margin-top:0">Ένας ιδιωτικός σύνδεσμος που ανοίγει μια σελίδα με το πρόγραμμα, τις παρουσίες, την πρόοδο και τις αξιολογήσεις του παιδιού — χωρίς λογαριασμό. Τα στοιχεία είναι <b>μέσα στον σύνδεσμο</b> και δεν περνούν από κανέναν διακομιστή. Είναι «φωτογραφία» της στιγμής: για ενημέρωση, στείλε νέο σύνδεσμο.</p>
+   <div class="seg field" id="plm">${[[1,'Τελευταίος μήνας'],[3,'3 μήνες'],[12,'Χρονιά']].map(([v,l])=>`<button type="button" data-plm="${v}" class="${v===3?'on':''}">${l}</button>`).join('')}</div>
+   ${S.earn?`<label class="check field"><input type="checkbox" id="plf" checked> <span>Να φαίνονται υπόλοιπο και πακέτο</span></label>`:`<p class="tiny muted">Το Ταμείο είναι κλειδωμένο — η σελίδα δεν θα δείχνει οικονομικά.</p>`}
+   <div class="actgrid"><button class="btn" id="plv">${ic('eye',16)}<span>Προεπισκόπηση</span></button><button class="btn" id="plc">${ic('copy',16)}<span>Αντιγραφή συνδέσμου</span></button>${(st.contacts||[]).some(c=>c.phone)?`<button class="btn" id="pls">${ic('l-message-square',16)}<span>SMS</span></button><button class="btn" id="plw"><span>WhatsApp</span></button>`:''}${(st.contacts||[]).some(c=>c.email)?`<button class="btn" id="ple">${ic('send',16)}<span>Email</span></button>`:''}${navigator.share?`<button class="btn" id="plsh">${ic('upload',16)}<span>Κοινοποίηση</span></button>`:''}</div>`,{wide:true});
+  let months=3;md.el.addEventListener('click',e=>{const b=e.target.closest('[data-plm]');if(b){months=+b.dataset.plm;$$('[data-plm]',md.el).forEach(x=>x.classList.toggle('on',x===b));}});
+  const link=async()=>{const p=await parentPayload(sid,{months,fin:!!($('#plf',md.el)&&$('#plf',md.el).checked)});return location.origin+location.pathname+'#parent='+await packLink(p);};
+  const msg=u=>`Καλησπέρα! Εδώ βλέπετε το πρόγραμμα και την πρόοδο του/της ${stuName(st)}: ${u}`;
+  const ph=(st.contacts||[]).find(c=>c.phone),em=(st.contacts||[]).filter(c=>c.email);
+  $('#plv',md.el).onclick=async()=>window.open(await link(),'_blank');
+  $('#plc',md.el).onclick=async()=>{const u=await link();try{await navigator.clipboard.writeText(u);toast('Ο σύνδεσμος αντιγράφηκε.','ok');}catch(e){promptDlg('Αντίγραψε τον σύνδεσμο',{value:u});}};
+  const s=$('#pls',md.el);if(s)s.onclick=async()=>{location.href=smsHref(ph.phone,msg(await link()));};
+  const w=$('#plw',md.el);if(w)w.onclick=async()=>window.open(waHref(ph.phone,msg(await link())),'_blank');
+  const m=$('#ple',md.el);if(m)m.onclick=async()=>{location.href=`mailto:${em.map(c=>c.email).join(',')}?subject=${encodeURIComponent('Πρόγραμμα και πρόοδος — '+stuName(st))}&body=${encodeURIComponent(msg(await link()))}`;};
+  const sh=$('#plsh',md.el);if(sh)sh.onclick=async()=>{try{await navigator.share({title:'Πρόοδος '+stuName(st),text:msg(''),url:await link()});}catch(e){}};}
+const ParentPage={async open(str){let P;try{P=await unpackLink(str);if(!P||P.v!==1)throw 0;}catch(e){document.body.innerHTML=`<div class="auth"><div class="card" style="text-align:center"><span class="logo">${LOGO}</span><h2>Ο σύνδεσμος δεν είναι έγκυρος</h2><p class="muted">Ζητήστε νέο σύνδεσμο από τον/την παιδαγωγό.</p></div></div>`;return;}
+  document.title=P.n+' — LUMIO';const stt={done:'Ήρθε',absent:'Απουσία',cancel:'Ακυρώθηκε','':'—'};const A=P.as.map(x=>({date:x[0],subject:x[1],title:x[2],score:x[3],max:x[4]}));
+  document.body.innerHTML=`<div class="ppage"><header class="pphead"><span class="pplogo">${LOGO}</span><div class="grow"><div class="tiny muted">${esc(P.b||'LUMIO')}</div><h1>${esc(P.av)} ${esc(P.n)}</h1><div class="small muted">${P.g?esc(P.g)+' · ':''}Ενημέρωση ${fmtDate(P.gen)}</div></div><button class="iconbtn noprint" onclick="print()" aria-label="Εκτύπωση">${ic('printer',20)}</button></header>
+   ${P.fin?`<div class="card ppcard"><h3>${ic('wallet',17)} Οικονομικά</h3><div class="kpis k3"><div class="kpi"><div class="k">Υπόλοιπο</div><div class="v sm" style="color:${P.fin.bal?'var(--bad)':'var(--ok)'}">${P.fin.bal?fmtEur(P.fin.bal):'Εξοφλημένο'}</div>${P.fin.n?`<div class="d">${P.fin.n} ${P.fin.n===1?'συνεδρία':'συνεδρίες'}</div>`:''}</div>${P.fin.pk?`<div class="kpi"><div class="k">Πακέτο</div><div class="v sm">${P.fin.pk[1]} από ${P.fin.pk[0]}</div><div class="d">μαθήματα απομένουν</div></div>`:''}</div></div>`:''}
+   <div class="card ppcard"><h3>${ic('calendar',17)} Επόμενα μαθήματα</h3>${P.up.length?`<div class="list">${P.up.map(([d,s,e])=>`<div class="rw static"><span class="grow"><b>${WDAYS[wdOf(d)]} ${fmtShort(d)}</b><small>${s}–${e}</small></span></div>`).join('')}</div>`:'<p class="small muted">Δεν υπάρχουν προγραμματισμένα μαθήματα τις επόμενες 4 εβδομάδες.</p>'}</div>
+   <div class="card ppcard"><h3>${ic('chart',17)} Πρόοδος — ${P.mo===1?'τελευταίος μήνας':P.mo===12?'τελευταίος χρόνος':'τελευταίοι '+P.mo+' μήνες'}</h3>
+    <div class="kpis"><div class="kpi"><div class="k">Μαθήματα</div><div class="v sm">${P.att.done}${P.att.total?'/'+P.att.total:''}</div>${P.att.absent?`<div class="d">${P.att.absent} απουσίες</div>`:''}</div><div class="kpi"><div class="k">Δραστηριότητες</div><div class="v sm">${P.pr.n}</div></div><div class="kpi"><div class="k">Μέση επιτυχία</div><div class="v sm">${P.pr.avg!=null?P.pr.avg+'%':'—'}</div></div><div class="kpi"><div class="k">Εξάσκηση</div><div class="v sm">${P.pr.min}΄</div></div></div>
+    ${P.pr.sub.length?`<div style="margin-top:10px">${P.pr.sub.map(([k,a,n])=>`<div style="margin-bottom:8px"><div class="spread small"><span>${esc(k)}</span><span class="muted">${n} · <b style="color:var(--ink)">${a}%</b></span></div><div class="bar"><i style="width:${a}%;background:${a>=85?'var(--ok)':a>=60?'var(--yellow-d)':'var(--pink-d)'}"></i></div></div>`).join('')}</div>`:''}
+    ${P.pr.ok.length?`<p class="small">✅ Πολύ καλά σε: ${P.pr.ok.map(esc).join(', ')}</p>`:''}${P.pr.wk.length?`<p class="small">🎯 Δουλεύουμε: ${P.pr.wk.map(esc).join(', ')}</p>`:''}</div>
+   ${A.length?`<div class="card ppcard"><h3>${ic('target',17)} Αξιολογήσεις</h3>${assessChartSVG(A)}${termTableHTML(A)}<div class="list" style="margin-top:10px">${A.slice().reverse().map(a=>`<div class="rw static"><span class="grow"><b>${esc(a.title||'Τεστ')} · ${a.score}/${a.max}</b><small>${esc(a.subject||'')} · ${fmtDate(a.date)}</small></span></div>`).join('')}</div></div>`:''}
+   ${P.rec.length?`<div class="card ppcard"><h3>${ic('history',17)} Πρόσφατα μαθήματα</h3><table class="t"><tr><th>Ημ/νία</th><th>Κατάσταση</th><th>Τι κάναμε</th></tr>${P.rec.map(([d,s,w])=>`<tr><td>${fmtShort(d)}</td><td>${stt[s]||'—'}</td><td>${esc(w||'—')}</td></tr>`).join('')}</table></div>`:''}
+   <footer class="ppfoot small muted">${esc(P.t)}${P.ph?` · <a href="tel:${telLink(P.ph)}">${esc(P.ph)}</a>`:''}${P.em?` · <a href="mailto:${esc(P.em)}">${esc(P.em)}</a>`:''}<div class="tiny" style="margin-top:6px">Ιδιωτική σελίδα — μην προωθείτε τον σύνδεσμο. Δημιουργήθηκε με το LUMIO.</div></footer></div>`;}};
+
+/* ===== Έτοιμα φύλλα εργασίας για εκτύπωση (με λύσεις) ===== */
+function rng(seed){let s=seed>>>0||1;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+const RI=(r,a,b)=>a+Math.floor(r()*(b-a+1));
+function shuffleR(r,a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const numEl=x=>String(x).replace('.',',');
+function genN(n,f){const out=[],seen=new Set();let g=0;while(out.length<n&&g++<n*40){const it=f();if(seen.has(it.q))continue;seen.add(it.q);out.push(it);}return out;}
+const WS_PLURAL=[['το σπίτι','τα σπίτια'],['ο δρόμος','οι δρόμοι'],['η μέρα','οι μέρες'],['το παιδί','τα παιδιά'],['ο φίλος','οι φίλοι'],['η θάλασσα','οι θάλασσες'],['το βιβλίο','τα βιβλία'],['ο πατέρας','οι πατέρες'],['η μητέρα','οι μητέρες'],['το δέντρο','τα δέντρα'],['η τάξη','οι τάξεις'],['ο μαθητής','οι μαθητές'],['το λουλούδι','τα λουλούδια'],['η πόλη','οι πόλεις'],['ο ουρανός','οι ουρανοί'],['το μολύβι','τα μολύβια'],['η καρέκλα','οι καρέκλες'],['ο χειμώνας','οι χειμώνες'],['η φωνή','οι φωνές'],['το παράθυρο','τα παράθυρα']];
+const WS_VERBS=[['γράφω','έγραψα','θα γράψω'],['διαβάζω','διάβασα','θα διαβάσω'],['παίζω','έπαιξα','θα παίξω'],['τρέχω','έτρεξα','θα τρέξω'],['ακούω','άκουσα','θα ακούσω'],['λύνω','έλυσα','θα λύσω'],['πλένω','έπλυνα','θα πλύνω'],['κλείνω','έκλεισα','θα κλείσω'],['ανοίγω','άνοιξα','θα ανοίξω'],['αγοράζω','αγόρασα','θα αγοράσω'],['ζωγραφίζω','ζωγράφισα','θα ζωγραφίσω'],['κολυμπώ','κολύμπησα','θα κολυμπήσω'],['περπατώ','περπάτησα','θα περπατήσω'],['φτιάχνω','έφτιαξα','θα φτιάξω'],['χτίζω','έχτισα','θα χτίσω'],['ταξιδεύω','ταξίδεψα','θα ταξιδέψω'],['δένω','έδεσα','θα δέσω'],['σπρώχνω','έσπρωξα','θα σπρώξω']];
+const WS_ANT=[['μεγάλος','μικρός'],['ψηλός','κοντός'],['ζεστός','κρύος'],['γρήγορος','αργός'],['χαρούμενος','λυπημένος'],['καινούριος','παλιός'],['ανοιχτός','κλειστός'],['γεμάτος','άδειος'],['το φως','το σκοτάδι'],['η μέρα','η νύχτα'],['πάνω','κάτω'],['μέσα','έξω'],['η αρχή','το τέλος'],['πλούσιος','φτωχός'],['δυνατός','αδύναμος'],['εύκολος','δύσκολος'],['νωρίς','αργά'],['βαρύς','ελαφρύς'],['φαρδύς','στενός'],['ήσυχος','θορυβώδης']];
+const WS_WORDS=['αγκαλιά','βάρκα','γάτα','δάσος','ελιά','ζάχαρη','ήλιος','θάλασσα','ιστός','καρπούζι','λεμόνι','μήλο','νερό','ομπρέλα','πορτοκάλι','ρόδι','σπίτι','τυρί','ύπνος','φεγγάρι','χιόνι','ψωμί','ωκεανός','αστέρι','βουνό','δελφίνι','καράβι','μολύβι','πεταλούδα','σχολείο'];
+const WS_EN=[['κόκκινο','red'],['μπλε','blue'],['πράσινο','green'],['κίτρινο','yellow'],['μαύρο','black'],['άσπρο','white'],['σκύλος','dog'],['γάτα','cat'],['άλογο','horse'],['πουλί','bird'],['ψάρι','fish'],['αγελάδα','cow'],['λιοντάρι','lion'],['ελέφαντας','elephant'],['μήλο','apple'],['σπίτι','house'],['βιβλίο','book'],['ήλιος','sun'],['νερό','water'],['σχολείο','school']];
+const EN_NUM=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+const READY_SHEETS=[
+ {id:'m-add10',g:'Α΄',s:'Μαθηματικά',t:'Προσθέσεις έως το 10',i:'Κάνε τις προσθέσεις.',c:4,f:r=>genN(24,()=>{const a=RI(r,0,10),b=RI(r,0,10-a);return{q:`${a} + ${b} =`,a:a+b};})},
+ {id:'m-sub10',g:'Α΄',s:'Μαθηματικά',t:'Αφαιρέσεις έως το 10',i:'Κάνε τις αφαιρέσεις.',c:4,f:r=>genN(24,()=>{const a=RI(r,1,10),b=RI(r,0,a);return{q:`${a} − ${b} =`,a:a-b};})},
+ {id:'m-as20',g:'Α΄–Β΄',s:'Μαθηματικά',t:'Προσθέσεις και αφαιρέσεις έως το 20',i:'Υπολόγισε.',c:4,f:r=>genN(24,()=>{if(r()<.5){const a=RI(r,2,18),b=RI(r,1,20-a);return{q:`${a} + ${b} =`,a:a+b};}const a=RI(r,5,20),b=RI(r,1,a);return{q:`${a} − ${b} =`,a:a-b};})},
+ {id:'m-add2',g:'Β΄',s:'Μαθηματικά',t:'Πρόσθεση διψήφιων με κρατούμενο',i:'Κάνε τις προσθέσεις (κάθετα στο τετράδιο αν χρειαστεί).',c:3,f:r=>genN(18,()=>{let a,b;do{a=RI(r,11,79);b=RI(r,11,99-a);}while((a%10)+(b%10)<10);return{q:`${a} + ${b} =`,a:a+b};})},
+ {id:'m-sub2',g:'Β΄',s:'Μαθηματικά',t:'Αφαίρεση διψήφιων με δανεικό',i:'Κάνε τις αφαιρέσεις.',c:3,f:r=>genN(18,()=>{let a,b;do{a=RI(r,21,99);b=RI(r,11,a-1);}while((a%10)>=(b%10));return{q:`${a} − ${b} =`,a:a-b};})},
+ {id:'m-tt25',g:'Β΄–Γ΄',s:'Μαθηματικά',t:'Προπαίδεια του 2 έως του 5',i:'Γράψε το γινόμενο.',c:4,f:r=>genN(24,()=>{const a=RI(r,2,5),b=RI(r,1,10);return{q:`${a} × ${b} =`,a:a*b};})},
+ {id:'m-tt69',g:'Γ΄',s:'Μαθηματικά',t:'Προπαίδεια του 6 έως του 9',i:'Γράψε το γινόμενο.',c:4,f:r=>genN(24,()=>{const a=RI(r,6,9),b=RI(r,1,10);return{q:`${a} × ${b} =`,a:a*b};})},
+ {id:'m-div',g:'Γ΄',s:'Μαθηματικά',t:'Διαιρέσεις της προπαίδειας',i:'Κάνε τις διαιρέσεις.',c:4,f:r=>genN(24,()=>{const b=RI(r,2,9),q=RI(r,1,10);return{q:`${b*q} : ${b} =`,a:q};})},
+ {id:'m-mul21',g:'Δ΄',s:'Μαθηματικά',t:'Πολλαπλασιασμός διψήφιου επί μονοψήφιο',i:'Κάνε τους πολλαπλασιασμούς.',c:3,f:r=>genN(18,()=>{const a=RI(r,12,98),b=RI(r,2,9);return{q:`${a} × ${b} =`,a:a*b};})},
+ {id:'m-divr',g:'Δ΄',s:'Μαθηματικά',t:'Διαίρεση με υπόλοιπο',i:'Βρες το πηλίκο (π) και το υπόλοιπο (υ).',c:2,f:r=>genN(16,()=>{const b=RI(r,3,9),q=RI(r,4,19),u=RI(r,1,b-1);return{q:`${b*q+u} : ${b} = π …… υ ……`,a:`π ${q}, υ ${u}`};})},
+ {id:'m-dec',g:'Ε΄',s:'Μαθηματικά',t:'Πρόσθεση και αφαίρεση δεκαδικών',i:'Υπολόγισε.',c:3,f:r=>genN(18,()=>{const a=RI(r,10,999)/10,b=RI(r,10,999)/100;const p=r()<.5||a<b;const x=p?Math.round((a+b)*100)/100:Math.round((a-b)*100)/100;return{q:`${numEl(a)} ${p?'+':'−'} ${numEl(b)} =`,a:numEl(x)};})},
+ {id:'m-frac',g:'Ε΄',s:'Μαθηματικά',t:'Απλοποίηση κλασμάτων',i:'Απλοποίησε το κλάσμα όσο γίνεται.',c:3,f:r=>genN(18,()=>{let n,d;do{n=RI(r,1,9);d=RI(r,n+1,12);}while(gcd(n,d)!==1);const k=RI(r,2,9);return{q:`${n*k}/${d*k} =`,a:`${n}/${d}`};})},
+ {id:'m-pct',g:'ΣΤ΄',s:'Μαθηματικά',t:'Ποσοστά',i:'Υπολόγισε.',c:2,f:r=>genN(16,()=>{const p=[10,20,25,50,75,5,30,40][RI(r,0,7)];const b=RI(r,1,20)*20;return{q:`Το ${p}% του ${b} =`,a:numEl(b*p/100)};})},
+ {id:'m-ord',g:'ΣΤ΄',s:'Μαθηματικά',t:'Προτεραιότητα πράξεων',i:'Κάνε πρώτα τους πολλαπλασιασμούς, τις διαιρέσεις και ό,τι είναι σε παρένθεση.',c:2,f:r=>genN(14,()=>{const a=RI(r,2,9),b=RI(r,2,9),c=RI(r,2,9);const k=RI(r,0,3);
+   if(k===0)return{q:`${a} + ${b} × ${c} =`,a:a+b*c};if(k===1)return{q:`(${a} + ${b}) × ${c} =`,a:(a+b)*c};if(k===2)return{q:`${a*c} : ${c} + ${b} =`,a:a+b};return{q:`${a} × ${b} − ${c} =`,a:a*b-c};})},
+ {id:'m-int',g:'Α΄ Γυμν.',s:'Μαθηματικά',t:'Πράξεις με ακέραιους',i:'Υπολόγισε (προσοχή στα πρόσημα).',c:3,f:r=>genN(18,()=>{const a=RI(r,-15,15),b=RI(r,-15,15);const p=r()<.5;const B=b<0?`(${b})`:b;return{q:`${a} ${p?'+':'−'} ${B} =`,a:p?a+b:a-b};})},
+ {id:'m-eq',g:'Α΄–Β΄ Γυμν.',s:'Μαθηματικά',t:'Εξισώσεις πρώτου βαθμού',i:'Λύσε την εξίσωση.',c:2,f:r=>genN(14,()=>{const x=RI(r,-9,12),a=RI(r,2,9),b=RI(r,-20,20);const B=b===0?'':b>0?` + ${b}`:` − ${-b}`;return{q:`${a}x${B} = ${a*x+b}`,a:`x = ${x}`};})},
+ {id:'g-plu',g:'Α΄–Β΄',s:'Γλώσσα',t:'Από τον ενικό στον πληθυντικό',i:'Γράψε τον πληθυντικό με το άρθρο.',c:2,f:r=>shuffleR(r,WS_PLURAL).slice(0,14).map(([a,b])=>({q:`${a} → ……………`,a:b}))},
+ {id:'g-abc',g:'Β΄–Γ΄',s:'Γλώσσα',t:'Αλφαβητική σειρά',i:'Γράψε τις λέξεις με αλφαβητική σειρά.',c:1,f:r=>genN(8,()=>{const w=shuffleR(r,WS_WORDS).slice(0,5);return{q:w.join(' · '),a:w.slice().sort((x,y)=>x.localeCompare(y,'el')).join(', ')};})},
+ {id:'g-verb',g:'Γ΄–Δ΄',s:'Γλώσσα',t:'Χρόνοι ρημάτων',i:'Συμπλήρωσε τον αόριστο και τον στιγμιαίο μέλλοντα.',c:1,f:r=>shuffleR(r,WS_VERBS).slice(0,12).map(([a,b,c])=>({q:`Σήμερα ${a} · Χθες …………… · Αύριο ……………`,a:`${b} · ${c}`}))},
+ {id:'g-ant',g:'Γ΄–Ε΄',s:'Γλώσσα',t:'Αντίθετα',i:'Γράψε το αντίθετο.',c:2,f:r=>shuffleR(r,WS_ANT).slice(0,16).map(([a,b])=>r()<.5?{q:`${a} ↔ ……………`,a:b}:{q:`${b} ↔ ……………`,a:a})},
+ {id:'e-num',g:'Αρχάριοι',s:'Αγγλικά',t:'Numbers 1–20',i:'Γράψε τον αριθμό με λέξεις στα αγγλικά.',c:3,f:r=>shuffleR(r,[...Array(20)].map((_,i)=>i+1)).slice(0,15).map(n=>({q:`${n} = ……………`,a:EN_NUM[n]}))},
+ {id:'e-voc',g:'Αρχάριοι',s:'Αγγλικά',t:'Χρώματα, ζώα και πράγματα',i:'Γράψε τη λέξη στα αγγλικά.',c:2,f:r=>shuffleR(r,WS_EN).slice(0,16).map(([a,b])=>({q:`${a} → ……………`,a:b}))}
+];
+function sheetHTML(def,items,ans){const B=biz();return`<div class="report wsheet"><div class="rh">${LOGO}<div style="flex:1"><h2 style="margin:0">${esc(def.t)}${ans?' — Λύσεις':''}</h2><div class="small muted">${esc(def.s)} · ${esc(def.g)}${B.name?' · '+esc(B.name):''}</div></div></div>
+  ${ans?'':`<p class="small" style="margin:6px 0 12px">Όνομα: ……………………………………… &nbsp; Ημερομηνία: ………………</p>`}<p><b>${esc(def.i)}</b></p>
+  <ol class="wsitems" style="--wc:${def.c}">${items.map(it=>`<li><span>${esc(it.q)}</span>${ans?` <b class="wsa">${esc(String(it.a))}</b>`:def.c>1&&/=$/.test(it.q)?' <span class="wsl">……</span>':''}</li>`).join('')}</ol></div>`;}
+function readySheetsHTML(){const gs=[...new Set(READY_SHEETS.map(d=>d.s))];
+  return`<section class="section"><div class="section-h"><h2>${ic('printer',18)} Έτοιμα για εκτύπωση</h2><span class="small muted">${READY_SHEETS.length} φύλλα · κάθε φορά νέες ασκήσεις · με λύσεις</span></div>
+   <div class="chips field" id="rsf"><button class="chipt on" data-rsf="">Όλα</button>${gs.map(g=>`<button class="chipt" data-rsf="${esc(g)}">${esc(g)}</button>`).join('')}</div>
+   <div class="list" id="rsl">${READY_SHEETS.map(d=>`<button class="rw" data-rs="${d.id}" data-rss="${esc(d.s)}"><span class="ricon b">${ic(d.s==='Μαθηματικά'?'l-calculator':d.s==='Αγγλικά'?'l-languages':'l-spell-check',18)}</span><span class="grow"><b>${esc(d.t)}</b><small>${esc(d.s)} · ${esc(d.g)}</small></span>${ic('right',16)}</button>`).join('')}</div></section>`;}
+function bindReadySheets(root){root.addEventListener('click',e=>{const f=e.target.closest('[data-rsf]');if(f){$$('[data-rsf]',root).forEach(x=>x.classList.toggle('on',x===f));$$('[data-rss]',root).forEach(x=>x.style.display=!f.dataset.rsf||x.dataset.rss===f.dataset.rsf?'':'none');return;}
+  const b=e.target.closest('[data-rs]');if(b)readySheetDialog(READY_SHEETS.find(d=>d.id===b.dataset.rs));});}
+function readySheetDialog(def){let seed=Date.now()%100000;let items=def.f(rng(seed));
+  const md=modal(`<div class="spread" style="margin-bottom:8px"><h3 style="margin:0">${esc(def.t)}</h3><button class="iconbtn" data-close aria-label="Κλείσιμο">${ic('x',18)}</button></div>
+   <div class="row field" style="gap:6px"><button class="btn sm" id="rsn">${ic('refresh',15)} Νέες ασκήσεις</button><button class="btn sm" id="rsa">${ic('eye',15)} Λύσεις</button></div><div class="wsprev" id="rsp"></div>
+   <div class="actgrid"><button class="btn pri" id="rsp1">${ic('download',16)}<span>PDF μαθητή</span></button><button class="btn" id="rsp2">${ic('download',16)}<span>PDF με λύσεις</span></button><button class="btn" id="rspr">${ic('printer',16)}<span>Εκτύπωση</span></button></div>`,{wide:true});
+  let ans=false;const draw=()=>{$('#rsp',md.el).innerHTML=sheetHTML(def,items,ans);$('#rsa',md.el).classList.toggle('on',ans);};draw();
+  $('#rsn',md.el).onclick=()=>{seed=(seed*7+13)%100000;items=def.f(rng(seed));draw();};$('#rsa',md.el).onclick=()=>{ans=!ans;draw();};
+  const pdf=async a=>{const el=document.createElement('div');el.style.cssText='position:fixed;left:-9999px;top:0;width:794px';el.innerHTML=sheetHTML(def,items,a);document.body.appendChild(el);try{await makePDF(el.firstElementChild,`fyllo-${def.id}${a?'-luseis':''}.pdf`);toast('Το PDF κατέβηκε.','ok');}catch(e){toast('Δεν φτιάχτηκε το PDF — χρειάζεται σύνδεση στο διαδίκτυο.','bad');}el.remove();};
+  $('#rsp1',md.el).onclick=()=>pdf(false);$('#rsp2',md.el).onclick=()=>pdf(true);
+  $('#rspr',md.el).onclick=()=>{const w=window.open('','_blank');if(!w)return toast('Ο περιηγητής μπλόκαρε το νέο παράθυρο.','bad');const css=[...document.querySelectorAll('style')].map(s=>s.outerHTML).join('');w.document.write(`<!doctype html><html lang="el"><head><meta charset="utf-8"><title>${esc(def.t)}</title>${css}<style>body{background:#fff}.wsheet{page-break-after:always;box-shadow:none;border:0}</style></head><body>${sheetHTML(def,items,false)}${sheetHTML(def,items,true)}</body></html>`);w.document.close();setTimeout(()=>{w.focus();w.print();},400);};}
+
 /* ===== Βοήθεια: διακριτικό «!» δίπλα σε τίτλους — εξηγεί κάθε κουμπί της σελίδας ===== */
 const HELP={
  dashboard:['Αρχική','Η πρώτη σελίδα: τι έχεις σήμερα και γρήγορη πρόσβαση σε όλα.',[
@@ -4302,6 +4445,9 @@ const HELP={
   ['Δέσμευση (κουμπί)','Ώρες που δεν είσαι διαθέσιμος — μάθημα σχολής, δεύτερη δουλειά, προσωπικό κ.ά. Μία φορά ή κάθε εβδομάδα σε όσες μέρες θέλεις. Φαίνονται ριγέ με το χρώμα της ετικέτας, δεν προτείνονται ως ελεύθερες και μετράνε στην πληρότητα. Με «Ετικέτες» αλλάζεις όνομα, εικονίδιο, χρώμα και σειρά ή προσθέτεις νέες.'],
   ['Πάτημα σε μέρα του μήνα','Ανοίγει ολόκληρη η μέρα: ανάλυση ανά ώρα, νέο ραντεβού ή δέσμευση πατώντας σε κενό, αλλαγές σε κάθε ραντεβού, «Κλειστά αυτή τη μέρα». Με το «πίσω» γυρνάς στον μήνα.'],
   ['24ωρο / κλείδωμα ωρών','Στην Ημέρα και την Εβδομάδα φαίνεται όλο το 24ωρο — κυλάς πάνω–κάτω με το δάχτυλο μέσα στο πρόγραμμα· ανοίγει στην τρέχουσα ώρα ή στην αρχή του ωραρίου. Το κουμπί «24ωρο» κλειδώνει την προβολή σε όποιες ώρες θέλεις (π.χ. 08–14). Ό,τι πέφτει εκτός φαίνεται με «↑ πριν» / «↓ μετά». Οι ώρες εκτός ωραρίου είναι ριγέ.'],
+  ['Υπενθυμίσεις','Μηνύματα στους γονείς για σήμερα, αύριο ή όποια μέρα θέλεις, με κείμενο που αλλάζεις μία φορά. SMS, WhatsApp, Viber ή email — σημειώνεται τι στάλθηκε.'],
+  ['Αντιγραφή εβδομάδας','Στην Εβδομάδα: περνά τα ραντεβού μίας φοράς σε άλλη εβδομάδα και σου δείχνει όσα πέφτουν πάνω σε άλλα.'],
+  ['Στο ημερολόγιο κινητού','Μέσα σε ραντεβού ή από τις Ρυθμίσεις → Ειδοποιήσεις: αρχείο για το ημερολόγιο Google/Apple με ειδοποίηση πριν.'],
   ['Σύρσιμο ραντεβού','Κράτα πατημένο ένα ραντεβού ή μια δέσμευση (με ποντίκι απλώς σύρε) και μετακίνησέ το σε άλλη ώρα ή μέρα — κουμπώνει ανά 15 λεπτά. Τράβα την κάτω άκρη για να αλλάξεις τη διάρκεια. Στα πάγια ρωτάει: μόνο αυτή τη φορά ή όλα.'],
   ['Νέο με σύρσιμο','Κράτα πατημένο σε κενό σημείο και σύρε προς τα κάτω: ανοίγει νέο ραντεβού με αυτή ακριβώς την ώρα.'],
   ['Μεγέθυνση (− +)','Αλλάζει πόσο ψηλή είναι κάθε ώρα. Στο κινητό γίνεται και με δύο δάχτυλα (τσίμπημα).'],
@@ -4322,6 +4468,10 @@ const HELP={
   ['Πάτημα σε μαθητή','Ανοίγει το προφίλ του: επισκόπηση, ταυτότητα, δραστηριότητες, πρόοδος, λάθη, αναφορές, ημερολόγιο, σημειώσεις.'],
   ['Κλείδωμα','Αν έχεις ορίσει κωδικό μαθητών (Ρυθμίσεις → Ασφάλεια), η ενότητα ζητά τον κωδικό για να ανοίξει.']]],
  student:['Προφίλ μαθητή','Όλα για έναν μαθητή σε καρτέλες.',[
+  ['Σελίδα γονέα','Ιδιωτικός σύνδεσμος για τον γονέα: πρόγραμμα, παρουσίες, πρόοδος, αξιολογήσεις και (αν θέλεις) υπόλοιπο και πακέτο. Τα στοιχεία είναι μέσα στον σύνδεσμο — για ενημέρωση στέλνεις νέο.'],
+  ['Αξιολογήσεις','Τεστ και διαγωνίσματα (στα 10, 20 ή 100), με γράφημα πορείας ανά μάθημα και μέσο όρο ανά τρίμηνο.'],
+  ['Ενημέρωση και συναίνεση γονέα','Έντυπο PDF για υπογραφή, καταχώριση ημερομηνίας και επιλογών του γονέα, εξαγωγή στοιχείων του μαθητή.'],
+  ['Πακέτο / Ειδοποίηση οφειλής','Στην κάρτα «Συνεδρίες & υπόλοιπο»: νέο πακέτο μαθημάτων, μήνυμα για το πακέτο, ειδοποίηση οφειλής στον γονέα.'],
   ['Επεξεργασία','Αλλάζεις στοιχεία, γονείς, μαθήματα και μαθησιακή ταυτότητα.'],
   ['Λειτουργία μαθητή','Δίνεις τη συσκευή στο παιδί: βλέπει μόνο τις δικές του αποστολές. Για έξοδο χρειάζεται ο δικός σου κωδικός.'],
   ['Δημιουργία','Φτιάχνεις παιχνίδι, φύλλο ή δραστηριότητα ειδικά για αυτόν τον μαθητή.'],
@@ -4353,13 +4503,15 @@ const HELP={
   ['Ανάθεση','Το στέλνεις στον μαθητή με σύνδεσμο ή στη λειτουργία μαθητή.'],
   ['PDF','Εκτύπωση με ή χωρίς απαντήσεις, με το υδατογράφημά σου.']]],
  games:['Τα παιχνίδια μου','Όλα τα παιχνίδια και οι ασκήσεις που έφτιαξες.',[['Φίλτρα','Ανά είδος, μαθητή ή αναζήτηση.'],['Πάτημα','Ανοίγει την προεπισκόπηση για έλεγχο, αλλαγές και ανάθεση.']]],
- worksheets:['Φύλλα εργασίας','Έτοιμα για εκτύπωση φύλλα, με φύλλο απαντήσεων.',[['PDF','Κατεβάζεις φύλλο μαθητή ή απαντήσεων, με υδατογράφημα.'],['Πάτημα','Προεπισκόπηση, αλλαγές, ανάθεση.']]],
+ worksheets:['Φύλλα εργασίας','Έτοιμα για εκτύπωση φύλλα, με φύλλο απαντήσεων.',[['Έτοιμα για εκτύπωση','22 φύλλα (Μαθηματικά από Α΄ Δημοτικού έως Γυμνάσιο, Γλώσσα, Αγγλικά). Κάθε «Νέες ασκήσεις» φτιάχνει άλλους αριθμούς ή λέξεις· βγαίνει PDF μαθητή και PDF με λύσεις.'],['PDF','Κατεβάζεις φύλλο μαθητή ή απαντήσεων, με υδατογράφημα.'],['Πάτημα','Προεπισκόπηση, αλλαγές, ανάθεση.']]],
  materials:['Υλικό','Τα δικά σου αρχεία: σελίδες βιβλίων, PDF, φωτογραφίες, σημειώσεις.',[['Ανέβασμα','Προσθέτεις αρχείο ή φωτογραφία.'],['Μετατροπή','Από οποιοδήποτε υλικό φτιάχνεις παιχνίδι, φύλλο, κουίζ ή κάρτες.']]],
  reports:['Πρόοδος & αναφορές','Πώς πάνε οι μαθητές σου.',[['Καρτέλες','Επισκόπηση, δεξιότητες, μαθήματα, λάθη και μηνιαίες αναφορές.'],['Μηνιαίες αναφορές','Φτιάχνονται μόνες τους στην αρχή κάθε μήνα· τις στέλνεις στους γονείς ως PDF.']]],
  report:['Αναφορά','Η μηνιαία αναφορά ενός μαθητή.',[['PDF','Κατεβάζεις την αναφορά για τους γονείς, με το υδατογράφημά σου.']]],
  calendar:['Ημερολόγιο','Όλα μαζί σε ημερολόγιο μήνα: ραντεβού, δραστηριότητες, νέο υλικό, προγραμματισμένα και συνεδρίες.',[['Χρωματιστά κουμπιά','Ανάβουν/σβήνουν κάθε είδος.'],['Πάτημα σε μέρα','Βλέπεις τι έγινε ή τι έχεις εκείνη τη μέρα.'],['Προγράμματα','Τα εκπαιδευτικά προγράμματα εβδομάδων.']]],
  plan:['Εκπαιδευτικό πρόγραμμα','Στόχοι και συνεδρίες ανά εβδομάδα.',[['Ολοκληρωμένες','Σημειώνονται μόνες τους όταν το παιδί παίξει το αντίστοιχο υλικό.'],['PDF','Εκτύπωση του προγράμματος.']]],
  earnings:['Ταμείο','Τα οικονομικά σου, ορατά μόνο με το PIN σου.',[
+  ['Πακέτα μαθημάτων','Ο γονέας πληρώνει μαζί π.χ. 8 μαθήματα. Κάθε «Ήρθε — καταχώριση» αφαιρεί ένα χωρίς νέα χρέωση· σε ειδοποιεί όταν μένουν 2, 1 ή τελειώσει.'],
+  ['Ειδοποιήσεις οφειλών','Στις «Καρτέλες μαθητών»: ποιοι χρωστούν, με έτοιμο μήνυμα (ημερομηνίες, ποσά, σύνολο, IBAN) για SMS, WhatsApp, Viber ή email.'],
   ['Ταμείο / Συνεδρίες / Καρτέλες μαθητών','Οι τρεις ενότητες: το ταμείο (έσοδα–έξοδα), οι συνεδρίες, και η σταθερή καρτέλα κάθε μαθητή.'],
   ['Εργασία | Προσωπικά','Δύο χωριστά ταμεία. Στην «Εργασία» μπαίνουν μόνες τους οι πληρωμένες συνεδρίες.'],
   ['+ Έσοδο / + Έξοδο','Καταχώριση κίνησης με κατηγορία και υποκατηγορία.'],
@@ -4390,7 +4542,9 @@ const HELP={
  'settings:watermark':['Υδατογράφημα','Μπαίνει σε κάθε σελίδα όλων των PDF.',[['Λογότυπο / Εικόνα / Κείμενο','Τι θα φαίνεται.'],['Διαφάνεια, μέγεθος, γωνία','Πόσο έντονο, πόσο μεγάλο, με πόση κλίση.'],['Επανάληψη','Μοτίβο σε όλη τη σελίδα αντί για ένα σήμα.'],['Θέση και ύψος','Μετακινείς το σήμα στη σελίδα. Η προεπισκόπηση δείχνει το αποτέλεσμα.']]],
  'settings:backup':['Αντίγραφα ασφαλείας','Κοινός φάκελος με τις άλλες εφαρμογές σου, ένα αρχείο ανά ημέρα, κρυπτογραφημένο.',[['Επιλογή φακέλου','Μία φορά — μετά τα αντίγραφα γίνονται μόνα τους.'],['Επαναφορά','Από τα 10 νεότερα αντίγραφα ή από αρχείο.']]],
  'settings:ai':['Τεχνητή νοημοσύνη','Δωρεάν κλειδί, χωρίς κάρτα, για να φτιάχνει υλικό.',[['Κλειδί','openrouter.ai → εγγραφή → Keys → Create key.'],['Δοκιμή σύνδεσης','Ελέγχει ότι δουλεύει.']]],
- 'settings:notifications':['Ειδοποιήσεις','Τι σου εμφανίζεται στο καμπανάκι.',[]],
+ 'settings:notifications':['Ειδοποιήσεις','Τι σου εμφανίζεται στο καμπανάκι.',[['Πριν από κάθε ραντεβού','Ειδοποίηση 5–30 λεπτά πριν, όσο το LUMIO είναι ανοιχτό. Για σίγουρη ειδοποίηση με κλειστή εφαρμογή, βάλε το πρόγραμμα στο ημερολόγιο του κινητού.']]],
+ 'settings:sync':['Συγχρονισμός συσκευών','Ίδια δεδομένα σε όλες τις συσκευές σου, μέσω του δικού σου Google Drive, κρυπτογραφημένα.',[['Συννεφάκι πάνω δεξιά','Πράσινο: συγχρονισμένο. Πορτοκαλί: χρειάζεται σύνδεση με Google (πάτα το). Κόκκινο: σφάλμα — πάτα για λεπτομέρειες.'],['Νέα συσκευή','Πριν φτιάξεις λογαριασμό: «Σύνδεση» → «Φέρε τα δεδομένα από το Google Drive», μετά συνδέσου με τον ίδιο κωδικό.']]],
+ 'settings:legal':['Όροι & απόρρητο','Οι όροι χρήσης, η πολιτική απορρήτου και ένας οδηγός για να είσαι εντάξει με τον νόμο για τα δεδομένα των παιδιών.',[]],
  'settings:privacy':['Ιδιωτικότητα','Πώς προστατεύονται τα δεδομένα των μαθητών.',[['Εξαγωγή','Όλα τα δεδομένα σε αρχείο.'],['Διαγραφή όλων','Οριστικά, με τον κωδικό σου.']]],
  profile:['Το προφίλ μου','Τα δικά σου στοιχεία.',[['Φωτογραφία','Φαίνεται στο μενού.'],['Στοιχεία αποδείξεων','ΑΦΜ, διεύθυνση, τηλέφωνο — μπαίνουν στις αποδείξεις και στις αναφορές.']]],
  kid:['Η σελίδα μου','Εδώ βρίσκεις τα παιχνίδια και τις ασκήσεις που σου ετοίμασε ο δάσκαλος ή η δασκάλα σου.',[
