@@ -1025,6 +1025,13 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 .sc-meta{font-size:.8rem;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sc-prog{display:flex;align-items:center;gap:8px}.sc-prog .bar{flex:1;height:5px}.sc-pv{font-size:.76rem;font-weight:700;min-width:30px;text-align:right}
 .sc-last{font-size:.7rem;color:var(--ink3)}
+.lpin.pl-main span{background:var(--ink);color:#fff;border-color:var(--ink);border-radius:8px 8px 8px 2px}
+.lpin.pl-branch span{background:var(--lilac);color:var(--lilac-d);border-color:var(--lilac-d)}
+.lpin.pl-home span{background:var(--mint);border-color:var(--ok)}
+.lpin.pl-other span{background:var(--yellow);border-color:var(--yellow-d)}
+.mlegend{display:flex;flex-wrap:wrap;gap:12px;font-size:.78rem;color:var(--ink2);margin:0 0 8px}.mlegend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-2px;border:2px solid}
+.lg-main{background:var(--ink);border-color:var(--ink)!important}.lg-branch{background:var(--lilac);border-color:var(--lilac-d)!important}.lg-home{background:var(--mint);border-color:var(--ok)!important}.lg-other{background:var(--yellow);border-color:var(--yellow-d)!important}.lg-stu{background:var(--paper);border-color:var(--lilac-d)!important;border-radius:50%!important}
+.plic.pl-main{background:var(--ink);color:#fff}.plic.pl-branch{background:var(--lilac);color:var(--lilac-d)}.plic.pl-home{background:var(--mint)}.plic.pl-other{background:var(--yellow)}
 
 /* ===== games ===== */
 .gwrap{position:fixed;inset:0;z-index:80;overflow:auto;display:flex;flex-direction:column;font-family:"Comfortaa","Commissioner",sans-serif}
@@ -1229,7 +1236,7 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.24.0';
+const APP_VERSION='2.25.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -2828,7 +2835,11 @@ const SET={
  async business(el){const B=biz();const adm=isAdmin();
   if(adm){let ch=0;S.meta.users.filter(u=>u.id!==S.user.id&&!B.staff.some(x=>x.uid===u.id)).forEach(u=>{B.staff.push({id:uid(),uid:u.id,name:u.name,role:'teacher',appts:true,color:STAFF_COLORS[(B.staff.length+1)%STAFF_COLORS.length],email:u.email||'',phone:'',created:new Date().toISOString()});ch=1;});if(ch)save();}const c=agCfg();const PV=providers();const hrs=Math.max(0,tmin(c.to)-tmin(c.from))/60;
   const row=(x,me)=>{const p=me?provById('me'):x;return`<div class="staffrow"><i class="pvb" style="background:${p.color}">${provIni(me?{id:'me'}:x)}</i><div class="grow"><b>${esc(me?(S.user.name||'Εγώ')+' (εγώ)':x.name)}</b><div class="small muted">${esc(roleName(me?B.meRole:x.role,me?B.meCustom:x.custom))}${!me&&x.phone?' · '+esc(x.phone):''}</div><div class="row" style="margin-top:4px;gap:4px">${(me?B.meTeaches:x.appts)?`<span class="chip ok">${ic('calendar',13)} Κάνει ραντεβού</span>`:`<span class="chip">Χωρίς ραντεβού</span>`}${adm||me?docsChip(me?'me':x.id):''}${me?`<span class="chip">${ic('shield',13)} Διαχειριστής</span>`:(()=>{const u=x.uid&&S.meta.users.find(y=>y.id===x.uid);return u?`<span class="chip">${ic('key',13)} Σύνδεση: ${esc(u.username)}${u.role==='admin'?' · διαχειριστής':''}</span>`:'';})()}</div></div>${adm||me?`<button class="iconbtn" data-stf="${me?'me':x.id}" aria-label="Αλλαγή">${ic('edit',16)}</button>`:''}</div>`;};
-  el.innerHTML=card('Στοιχεία επιχείρησης',`<div class="field"><label class="f" for="bz-n">Επωνυμία</label><div class="row" style="flex-wrap:nowrap"><input class="in" id="bz-n" value="${esc(B.name)}" placeholder="π.χ. Κέντρο Μελέτης Αλφάβητο"><button class="btn" id="bz-s">Αποθήκευση</button></div><div class="tiny muted" style="margin-top:6px">Μπαίνει στις υπενθυμίσεις προς τους γονείς.</div></div>`)
+  el.innerHTML=card('Στοιχεία επιχείρησης',`<div class="field"><label class="f" for="bz-n">Επωνυμία</label><input class="in" id="bz-n" value="${esc(B.name)}" placeholder="π.χ. Κέντρο Μελέτης Αλφάβητο"></div>
+     <div class="grid g2" style="gap:10px"><div class="field"><label class="f" for="bz-ph">Τηλέφωνο</label><input class="in" id="bz-ph" type="tel" value="${esc(B.phone||'')}" placeholder="210…"></div><div class="field"><label class="f" for="bz-em">Email</label><input class="in" id="bz-em" type="email" value="${esc(B.email||'')}" placeholder="info@…"></div>
+     <div class="field"><label class="f" for="bz-web">Ιστοσελίδα</label><input class="in" id="bz-web" value="${esc(B.web||'')}" placeholder="προαιρετικό"></div><div class="field"><label class="f" for="bz-afm">ΑΦΜ</label><input class="in" id="bz-afm" inputmode="numeric" value="${esc(B.afm||'')}" placeholder="προαιρετικό"></div></div>
+     <button class="btn pri" id="bz-s">${ic('check',16)} Αποθήκευση</button><div class="tiny muted" style="margin-top:8px">Μπαίνουν αυτόματα στις υπενθυμίσεις, στη σελίδα γονέα, στα έντυπα και στις ειδοποιήσεις οφειλής.</div>`)
+   +card('Τοποθεσίες',placesCardHTML())
    +card('Προσωπικό',`<p class="small muted" style="margin-top:0">Όσοι «κάνουν ραντεβού» μετράνε στη χωρητικότητα: με 2 καθηγητές, 10 ώρες λειτουργίας γίνονται 20 ώρες ραντεβού. Η γραμματεία δεν μετράει.</p>${row(null,1)}${B.staff.map(x=>row(x)).join('')}${adm?`<button class="btn pri" id="bz-a" style="margin-top:12px">${ic('plus',16)} Προσθήκη προσωπικού</button><p class="tiny muted" style="margin:10px 0 0">Όποιος χρειάζεται να μπαίνει ο ίδιος στο LUMIO σε αυτή τη συσκευή, παίρνει «Δική του σύνδεση» μέσα από την καρτέλα του — με δικό του όνομα χρήστη, κωδικό και μόνο τους δικούς του μαθητές.</p>`:''}`)
    +card('Ωράριο λειτουργίας',`<dl class="kv"><dt>Ώρες</dt><dd>${c.from}–${c.to} (${hN(hrs*60)} ώρες)</dd><dt>Μέρες</dt><dd>${DAY_ORDER.filter(d=>c.days.includes(d)).map(d=>WDAYS_S[d]).join(', ')||'—'}</dd><dt>Διάστημα ραντεβού</dt><dd>${c.step} λεπτά</dd></dl><button class="btn" id="bz-h">${ic('clock',16)} Αλλαγή ωραρίου</button>
      <div class="capbox">${ic('users',18)}<div><b>Χωρητικότητα: ${hN(hrs*60)} ώρες × ${PV.length} ${PV.length===1?'άτομο':'άτομα'} = ${hN(hrs*60*PV.length)} ώρες ραντεβού τη μέρα</b><div class="small">Από αυτό γεμίζουν τα χρωματιστά κουτάκια των ημερών στα Ραντεβού.</div></div></div>`)
@@ -2838,7 +2849,7 @@ const SET={
        <div style="${B.holOff?'opacity:.5;pointer-events:none':''}">${L.map(h=>`<label class="holrow ${h.date<t?'past':''}"><span class="hd">${WDAYS_S[wdOf(h.date)]} ${fmtShort(h.date)}</span><span class="grow">${esc(h.name)}</span><input type="checkbox" data-hol="${h.id}" ${holOn(h)?'checked':''}></label>`).join('')}</div>
        <p class="tiny muted" style="margin:8px 0 0">Για άλλη μέρα (π.χ. άδεια ή τοπική γιορτή) πάτα «Κλειστά αυτή τη μέρα» στα Ραντεβού. Σε μια αργία που δουλεύετε, πάτα «Άνοιγμα ημέρας».</p>`;})());
 
-  $('#bz-s',el).onclick=()=>{B.name=$('#bz-n',el).value.trim();save();toast('Αποθηκεύτηκε.','ok');};$('#bz-h',el).onclick=agendaCfgDialog;const ba=$('#bz-a',el);if(ba)ba.onclick=()=>staffDialog();
+  $('#bz-s',el).onclick=()=>{B.name=$('#bz-n',el).value.trim();B.phone=$('#bz-ph',el).value.trim();B.email=$('#bz-em',el).value.trim();B.web=$('#bz-web',el).value.trim();B.afm=$('#bz-afm',el).value.trim();save();toast('Αποθηκεύτηκε.','ok');};$('#bz-h',el).onclick=agendaCfgDialog;const ba=$('#bz-a',el);if(ba)ba.onclick=()=>staffDialog();
   $$('[data-stf]',el).forEach(b=>b.onclick=()=>staffDialog(b.dataset.stf));
   $$('[data-docs]',el).forEach(b=>b.onclick=()=>staffDocsDialog(b.dataset.docs));
   $('#hl-on',el).onchange=e=>{B.holOff=!e.target.checked;save();render();};$$('[data-hol]',el).forEach(x=>x.onchange=()=>{B.hol=B.hol||{};B.hol[x.dataset.hol]=x.checked;save();});},
@@ -3402,7 +3413,7 @@ function isClosed(d){const C=closedDays();if(C[d]===false)return false;return!!C
 /* ---- επιχείρηση: προσωπικό, ειδικότητες, ποιος κάνει ραντεβού ---- */
 const ROLES=[['teacher','Καθηγητής',1],['assistant','Βοηθός καθηγητή',1],['secretary','Γραμματέας',0],['special','Ειδικός παιδαγωγός',1],['speech','Λογοθεραπευτής',1],['ot','Εργοθεραπευτής',1],['psych','Ψυχολόγος',1],['tutor','Φροντιστής / Ιδιαίτερα',1],['music','Δάσκαλος μουσικής / τέχνης',1],['coord','Υπεύθυνος σπουδών',0],['acct','Λογιστήριο / Διοικητικός',0],['clean','Καθαριότητα / Βοηθητικό',0],['other','Άλλη ειδικότητα',1]];
 const STAFF_COLORS=['#7462B4','#3A8A61','#C77A3A','#2F7FA8','#B4527A','#8A7A2E','#5A6ACF','#A0522D','#2E8C8C','#9C5BB5'];
-function biz(){return S.data.business=Object.assign({name:'',meTeaches:true,meRole:'teacher',meColor:'#7462B4',staff:[]},S.data.business||{});}
+function biz(){const B=S.data.business=S.data.business||{};const D={name:'',meTeaches:true,meRole:'teacher',meColor:'#7462B4',staff:[]};for(const k in D)if(B[k]===undefined)B[k]=Array.isArray(D[k])?[]:D[k];return B;}
 const roleName=(r,custom)=>r==='other'&&custom?custom:(ROLES.find(x=>x[0]===r)||[0,'Άλλη ειδικότητα'])[1];
 const roleTeaches=r=>!!(ROLES.find(x=>x[0]===r)||[0,0,1])[2];
 function providers(){const B=biz();const L=[];if(B.meTeaches)L.push({id:'me',name:S.user.name||'Εγώ',short:'Εγώ',color:B.meColor||'#7462B4',role:B.meRole});
@@ -4038,7 +4049,7 @@ function consentCardHTML(s){const c=consentOf(s);const n=c?CONSENT_ITEMS.filter(
    <p class="small muted" style="margin-top:0">${c?`${esc(c.by||'Γονέας')} · ${n}/${CONSENT_ITEMS.length} συναινέσεις${n<CONSENT_ITEMS.length?' — όσα δεν συναίνεσε σημειώνονται όπου χρειάζεται':''}.`:'Πριν κρατήσεις στοιχεία του παιδιού, δώσε στον γονέα το έντυπο ενημέρωσης να το υπογράψει.'}</p>
    <div class="row"><button class="btn sm" data-cn="pdf">${ic('download',15)} Έντυπο PDF</button><button class="btn sm ${c?'':'pri'}" data-cn="mark">${ic('check',15)} ${c?'Αλλαγή':'Καταχώριση υπογραφής'}</button><button class="btn sm" data-cn="export">${ic('file',15)} Εξαγωγή στοιχείων μαθητή</button></div></div>`;}
 function bindConsent(s,root){root.addEventListener('click',e=>{const b=e.target.closest('[data-cn]');if(!b)return;const k=b.dataset.cn;if(k==='pdf')consentPDF(s);else if(k==='mark')consentMark(s);else if(k==='export')studentExport(s);});}
-function consentHTML(s){const B=biz();const P=S.data.profile||{};const who=esc(B.name||S.meta.org||S.user.name);const par=(s.contacts||[]).find(c=>c.name)||{};
+function consentHTML(s){const B=biz();const P=bizContact();const who=esc(B.name||S.meta.org||S.user.name);const par=(s.contacts||[]).find(c=>c.name)||{};
   return`<div class="report legaldoc"><div class="rh">${LOGO}<div style="flex:1"><h2 style="margin:0">Ενημέρωση και συναίνεση γονέα</h2><div class="small muted">${who}${S.user.name&&B.name?' · '+esc(S.user.name):''}${P.phone?' · '+esc(P.phone):''}${P.email?' · '+esc(P.email):''}</div></div></div>
    <p><b>Μαθητής/τρια:</b> ${esc(stuName(s))}${s.grade?' · '+esc(s.grade):''} &nbsp; <b>Γονέας/κηδεμόνας:</b> ${esc(par.name||'………………………………')}</p>
    <h4>Τι στοιχεία κρατάμε και γιατί</h4><p class="small">Όνομα ή κωδικό, ηλικία, τάξη, μαθήματα, μαθησιακές παρατηρήσεις, πρόγραμμα και παρουσίες, αποτελέσματα ασκήσεων, πληρωμές, και τα στοιχεία επικοινωνίας σας. Τα χρησιμοποιούμε για να οργανώνουμε τα μαθήματα, να προσαρμόζουμε το υλικό στο παιδί, να σας ενημερώνουμε για την πρόοδο και για την οικονομική διαχείριση. Βάση: η συμφωνία μας για τα μαθήματα και, για τα οικονομικά, η φορολογική νομοθεσία· για τα προαιρετικά παρακάτω, η συναίνεσή σας.</p>
@@ -4308,7 +4319,7 @@ function packMsg(sid){const st=stOf(sid)||{};const p=packActive(sid);const last=
    :`Καλησπέρα! Το πακέτο των ${last?last.n:''} μαθημάτων του/της ${stuName(st)} ολοκληρώθηκε. Για συνέχεια, μπορούμε να ανανεώσουμε με νέο πακέτο. ${B.name||S.user.name}`;}
 
 /* ---- ειδοποίηση οφειλής ---- */
-function oweText(sid,ym){const st=stOf(sid)||{};const b=balanceOf(sid);const L=b.list.filter(x=>!ym||x.date.startsWith(ym)).sort((a,c)=>a.date.localeCompare(c.date));const sum=sumA(L);const B=biz();const P=S.data.profile||{};
+function oweText(sid,ym){const st=stOf(sid)||{};const b=balanceOf(sid);const L=b.list.filter(x=>!ym||x.date.startsWith(ym)).sort((a,c)=>a.date.localeCompare(c.date));const sum=sumA(L);const B=biz();const P=bizContact();
   const lines=L.map(x=>`• ${fmtShort(x.date)}${x.start?' '+x.start:''} — ${fmtEur(x.amount)}${x.note?' ('+x.note+')':''}`).join('\n');
   return{sum,n:L.length,txt:`Καλησπέρα! Σας ενημερώνω για τα μαθήματα του/της ${stuName(st)}${ym?' τον '+MONTHS[+ym.slice(5)-1].toLowerCase():''}:\n${lines}\nΣύνολο: ${fmtEur(sum)}.${S.data.settings.oweIban?'\nIBAN: '+S.data.settings.oweIban:''}\nΕυχαριστώ! ${B.name||S.user.name}${P.phone?' · '+P.phone:''}`};}
 function oweDialog(only){const E=earnInit();if(!E)return toast('Ξεκλείδωσε πρώτα το Ταμείο.','bad');let ym='';
@@ -4368,7 +4379,7 @@ document.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest
 async function parentPayload(sid,{months=3,fin=true}={}){const st=stOf(sid)||{};const B=biz();const P=S.data.profile||{};const t=todayISO();const from=addDays(t,-30*months);
   const pd=progressData(sid,from,t);const up=occ(t,addDays(t,28),{sid,by:''}).filter(o=>o.st==='').slice(0,12).map(o=>[o.date,o.s,o.e]);
   const rec=pd.L.slice(-10).reverse().map(o=>{const rs=pd.rs.filter(r=>r.date.slice(0,10)===o.date);return[o.date,o.st||'',rs.map(r=>r.title+' '+r.pct+'%').join(', ')||apptMats(o.a,o.date).map(m=>m.title).join(', ')];});
-  const o={v:1,n:stuName(st),av:st.avatar||'🙂',g:st.grade||'',b:B.name||S.meta.org||'',t:S.user.name,ph:P.phone||'',em:P.email||'',gen:t,mo:months,
+  const BC=bizContact();const o={v:1,n:stuName(st),av:st.avatar||'🙂',g:st.grade||'',b:B.name||S.meta.org||'',t:S.user.name,ph:BC.phone,em:BC.email,ad:BC.addr,web:BC.web,gen:t,mo:months,
     att:pd.att,up,rec,pr:{avg:pd.avg,min:pd.minutes,n:pd.rs.length,sub:pd.bySubject.map(x=>[x.k,x.avg,x.n]),ok:pd.strong.map(c=>c.c),wk:pd.weak.map(c=>c.c)},
     as:assessOf(sid).slice(-20).map(a=>[a.date,a.subject||'',a.title||'',a.score,a.max])};
   if(fin&&S.earn){const b=balanceOf(sid);const pk=packActive(sid);o.fin={bal:b.sum,n:b.n};if(pk)o.fin.pk=[pk.n,packLeft(pk)];}
@@ -4399,7 +4410,7 @@ const ParentPage={async open(str){let P;try{P=await unpackLink(str);if(!P||P.v!=
     ${P.pr.ok.length?`<p class="small">✅ Πολύ καλά σε: ${P.pr.ok.map(esc).join(', ')}</p>`:''}${P.pr.wk.length?`<p class="small">🎯 Δουλεύουμε: ${P.pr.wk.map(esc).join(', ')}</p>`:''}</div>
    ${A.length?`<div class="card ppcard"><h3>${ic('target',17)} Αξιολογήσεις</h3>${assessChartSVG(A)}${termTableHTML(A)}<div class="list" style="margin-top:10px">${A.slice().reverse().map(a=>`<div class="rw static"><span class="grow"><b>${esc(a.title||'Τεστ')} · ${a.score}/${a.max}</b><small>${esc(a.subject||'')} · ${fmtDate(a.date)}</small></span></div>`).join('')}</div></div>`:''}
    ${P.rec.length?`<div class="card ppcard"><h3>${ic('history',17)} Πρόσφατα μαθήματα</h3><table class="t"><tr><th>Ημ/νία</th><th>Κατάσταση</th><th>Τι κάναμε</th></tr>${P.rec.map(([d,s,w])=>`<tr><td>${fmtShort(d)}</td><td>${stt[s]||'—'}</td><td>${esc(w||'—')}</td></tr>`).join('')}</table></div>`:''}
-   <footer class="ppfoot small muted">${esc(P.t)}${P.ph?` · <a href="tel:${telLink(P.ph)}">${esc(P.ph)}</a>`:''}${P.em?` · <a href="mailto:${esc(P.em)}">${esc(P.em)}</a>`:''}<div class="tiny" style="margin-top:6px">Ιδιωτική σελίδα — μην προωθείτε τον σύνδεσμο. Δημιουργήθηκε με το LUMIO.</div></footer></div>`;}};
+   <footer class="ppfoot small muted">${esc(P.t)}${P.ph?` · <a href="tel:${telLink(P.ph)}">${esc(P.ph)}</a>`:''}${P.em?` · <a href="mailto:${esc(P.em)}">${esc(P.em)}</a>`:''}${P.ad?`<div>${esc(P.ad)}</div>`:''}${P.web?`<div>${esc(P.web)}</div>`:''}<div class="tiny" style="margin-top:6px">Ιδιωτική σελίδα — μην προωθείτε τον σύνδεσμο. Δημιουργήθηκε με το LUMIO.</div></footer></div>`;}};
 
 /* ===== Έτοιμα φύλλα εργασίας για εκτύπωση (με λύσεις) ===== */
 function rng(seed){let s=seed>>>0||1;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
@@ -4465,14 +4476,22 @@ function osmTiles(L,m){L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.p
 const GR_CENTER=[37.9838,23.7275];
 function pinIcon(L,html,cls){return L.divIcon({className:'lpin '+(cls||''),html:`<span><em>${html}</em></span>`,iconSize:[36,44],iconAnchor:[18,42],popupAnchor:[0,-38]});}
 const dirHref=(lat,lng)=>`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-function bizLoc(){return biz().loc||null;}
+const PLACE_T={main:['Έδρα','building','main'],branch:['Δεύτερη έδρα','building','branch'],home:['Το σπίτι μου','home','home'],other:['Άλλο μέρος','l-map','other']};
+function bizPlaces(){const B=biz();if(!B.places){B.places=[];if(B.loc){B.places.push(Object.assign({id:uid(),type:'main',name:''},B.loc));}delete B.loc;}return B.places.filter(p=>p.lat!=null||p.addr);}
+function bizLoc(){const P=bizPlaces().filter(p=>p.lat!=null);return P.find(p=>p.type==='main')||P[0]||null;}
+function placeName(p){return p.name||PLACE_T[p.type||'other'][0];}
+function placePin(L,p){const t=PLACE_T[p.type||'other']||PLACE_T.other;return pinIcon(L,p.type==='home'?'🏠':p.type==='other'?'📍':ic('building',16),'pl-'+t[2]);}
+function placeDialog(p0){const p=p0||{type:bizPlaces().some(x=>x.type==='main')?'branch':'main',name:''};
+  locDialog({title:p0?'Αλλαγή τοποθεσίας':'Νέα τοποθεσία',loc:p0&&(p0.lat!=null||p0.addr)?p0:null,extra:`<div class="grid g2 field" style="gap:8px"><select class="in" id="ptype">${Object.entries(PLACE_T).map(([k,v])=>opt(k,v[0],p.type)).join('')}</select><input class="in" id="pname" value="${esc(p.name||'')}" placeholder="Όνομα (προαιρετικό), π.χ. Παράρτημα Κηφισιάς"></div>`},(loc,_h,ex)=>{const B=biz();bizPlaces();
+    if(!loc){B.places=B.places.filter(x=>x.id!==(p0&&p0.id));}else{const o=Object.assign({id:p0?p0.id:uid()},loc,ex||{});if(o.type==='main')B.places.forEach(x=>{if(x.id!==o.id&&x.type==='main')x.type='branch';});const i=B.places.findIndex(x=>x.id===o.id);if(i>=0)B.places[i]=o;else B.places.push(o);}
+    save();toast('Αποθηκεύτηκε.','ok');render();});}
 function placeTxt(loc){return loc?(loc.addr||`${(+loc.lat).toFixed(5)}, ${(+loc.lng).toFixed(5)}`):'';}
 async function geocode(q){const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=el&countrycodes=gr&q='+encodeURIComponent(q));if(!r.ok)throw new Error('Η αναζήτηση διεύθυνσης δεν απάντησε.');return(await r.json()).map(x=>({addr:x.display_name.split(', ').slice(0,4).join(', '),lat:+x.lat,lng:+x.lon}));}
 
 /* επιλογή θέσης: αναζήτηση διεύθυνσης, πάτημα στον χάρτη ή «η θέση μου» */
-function locDialog({title,loc,home,withHome},onSave){let cur=loc?Object.assign({},loc):null;let L,m,mk;
+function locDialog({title,loc,home,withHome,extra},onSave){let cur=loc?Object.assign({},loc):null;let L,m,mk;
   const md=modal(`<h3 style="margin-top:0">${ic('l-map',18)} ${esc(title)}</h3>
-   <div class="row field" style="gap:6px;flex-wrap:nowrap"><input class="in" id="lq" placeholder="Οδός, αριθμός, περιοχή" value="${esc(loc&&loc.addr||'')}" style="flex:1;min-width:0"><button class="btn" id="lgo">${ic('search',16)}</button></div>
+   ${extra||''}<div class="row field" style="gap:6px;flex-wrap:nowrap"><input class="in" id="lq" placeholder="Οδός, αριθμός, περιοχή" value="${esc(loc&&loc.addr||'')}" style="flex:1;min-width:0"><button class="btn" id="lgo">${ic('search',16)}</button></div>
    <div id="lres" class="list field" style="display:none"></div>
    <div id="lmap" class="lmapsm"></div><p class="tiny muted" style="margin:6px 0 10px">Πάτα στον χάρτη ή σύρε την πινέζα για ακριβή θέση. <button class="btn sm ghost" id="lme">${ic('target',14)} Η θέση μου</button></p>
    ${withHome?`<label class="check field"><input type="checkbox" id="lhome" ${home!==false?'checked':''}> <span>Τα μαθήματα γίνονται εδώ (ιδιαίτερο στο σπίτι)</span></label>`:''}
@@ -4487,30 +4506,29 @@ function locDialog({title,loc,home,withHome},onSave){let cur=loc?Object.assign({
     catch(e){box.innerHTML=`<div class="small" style="padding:8px;color:var(--bad)">${esc(e.message||'Δεν έγινε η αναζήτηση.')}</div>`;}};
   $('#lgo',md.el).onclick=search;$('#lq',md.el).onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();search();}};
   $('#lme',md.el).onclick=()=>{if(!navigator.geolocation)return toast('Η συσκευή δεν δίνει θέση.','bad');navigator.geolocation.getCurrentPosition(p=>setPin(p.coords.latitude,p.coords.longitude,17),()=>toast('Δεν δόθηκε άδεια για τη θέση.','bad'),{enableHighAccuracy:true,timeout:10000});};
-  $('#lok',md.el).onclick=()=>{const addr=$('#lq',md.el).value.trim();if(!cur||cur.lat==null){if(!addr)return toast('Βάλε διεύθυνση ή πάτα στον χάρτη.','bad');cur={addr};}else cur.addr=addr||cur.addr||'';const hm=$('#lhome',md.el);md.close();onSave(cur,hm?hm.checked:undefined);};
+  $('#lok',md.el).onclick=()=>{const addr=$('#lq',md.el).value.trim();if(!cur||cur.lat==null){if(!addr)return toast('Βάλε διεύθυνση ή πάτα στον χάρτη.','bad');cur={addr};}else cur.addr=addr||cur.addr||'';const hm=$('#lhome',md.el);const pt=$('#ptype',md.el);const ex=pt?{type:pt.value,name:$('#pname',md.el).value.trim()}:undefined;md.close();onSave(cur,hm?hm.checked:undefined,ex);};
   const rm=$('#lrm',md.el);if(rm)rm.onclick=()=>{md.close();onSave(null);};}
 function stuLocDialog(sid){const s=getStudent(sid);if(!s)return;locDialog({title:'Διεύθυνση — '+stuName(s),loc:s.loc,home:s.loc?s.loc.home:true,withHome:true},(loc,home)=>{const st=getStudent(sid);if(!loc)delete st.loc;else st.loc=Object.assign(loc,{home:home!==false});save();toast('Αποθηκεύτηκε.','ok');render();});}
-function bizLocDialog(){locDialog({title:'Η έδρα μου (φροντιστήριο ή σπίτι)',loc:bizLoc()},loc=>{const B=biz();if(!loc)delete B.loc;else B.loc=loc;save();toast('Αποθηκεύτηκε.','ok');render();});}
+function bizLocDialog(){const m=bizPlaces().find(p=>p.type==='main');placeDialog(m);}
 function stuLocCardHTML(s){const l=s.loc;return`<div class="card section locard"><div class="card-h"><h3>${ic('l-map',17)} ${l&&l.home?'Μαθήματα στο σπίτι':'Διεύθυνση'}</h3><button class="btn sm" data-sloc="${s.id}">${ic(l?'edit':'plus',15)} ${l?'Αλλαγή':'Προσθήκη'}</button></div>
   ${l?`<p class="small" style="margin:0 0 8px">${esc(placeTxt(l))}</p><div class="row" style="gap:6px">${l.lat!=null?`<a class="btn sm" href="#/map?s=${s.id}">${ic('l-map',15)} Στον χάρτη</a><a class="btn sm" href="${dirHref(l.lat,l.lng)}" target="_blank" rel="noopener">${ic('route',15)} Οδηγίες</a>`:''}</div>`:`<p class="small muted" style="margin:0">Για ιδιαίτερα στο σπίτι: βάλε τη διεύθυνση και θα φαίνεται στον χάρτη και στα ραντεβού.</p>`}</div>`;}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sloc]');if(!b)return;e.preventDefault();stuLocDialog(b.dataset.sloc);});
 
 /* σελίδα χάρτη */
-async function viewMap(r){const t=todayISO();const f=['all','today','tomorrow'].includes(r.q.f)?r.q.f:'today';const day=f==='tomorrow'?addDays(t,1):t;
+async function viewMap(r){const t=todayISO();const todayStops=occ(t,t).filter(o=>o.st===''&&(()=>{const s=getStudent(o.a.sid);return s&&s.loc&&s.loc.lat!=null&&s.loc.home!==false;})()).length;const f=['all','today','tomorrow'].includes(r.q.f)?r.q.f:(todayStops?'today':'all');const day=f==='tomorrow'?addDays(t,1):t;
   const S0=S.data.students;const withLoc=S0.filter(s=>s.loc&&s.loc.lat!=null);const noLoc=S0.filter(s=>!s.loc||s.loc.lat==null);
   const occD=occ(day,day).filter(o=>o.st==='');const stops=occD.map(o=>({o,s:getStudent(o.a.sid)})).filter(x=>x.s&&x.s.loc&&x.s.loc.lat!=null&&x.s.loc.home!==false);
   const shown=f==='all'?withLoc.map(s=>({s,o:null})):stops;const B=bizLoc();
-  M().innerHTML=`${pageHead('Χάρτης',f==='all'?`${withLoc.length} ${withLoc.length===1?'μαθητής':'μαθητές'} με διεύθυνση`:`${stops.length} ${stops.length===1?'μάθημα':'μαθήματα'} εκτός έδρας ${f==='today'?'σήμερα':'αύριο'}`,`<button class="btn sm" id="mbiz">${ic('building',15)} ${B?'Η έδρα μου':'Όρισε την έδρα σου'}</button>`)}
+  M().innerHTML=`${pageHead('Χάρτης',f==='all'?`${withLoc.length} ${withLoc.length===1?'μαθητής':'μαθητές'} με διεύθυνση`:`${stops.length} ${stops.length===1?'μάθημα':'μαθήματα'} εκτός έδρας ${f==='today'?'σήμερα':'αύριο'}`,`<a class="btn sm" href="#/settings/business">${ic('building',15)} ${bizPlaces().length?'Οι τοποθεσίες μου':'Όρισε την έδρα σου'}</a>`)}
    <div class="seg field">${[['today','Σήμερα'],['tomorrow','Αύριο'],['all','Όλοι']].map(([k,l])=>`<a href="#/map?f=${k}" class="${k===f?'on':''}">${l}</a>`).join('')}</div>
-   <div id="bigmap" class="lmap"><div class="loading small"><div class="sun">☀️</div>Φόρτωση χάρτη…</div></div>
+   ${bizPlaces().length?`<div class="mlegend">${[...new Set(bizPlaces().map(p=>p.type||'other'))].map(k=>`<span><i class="lg-${PLACE_T[k][2]}"></i>${PLACE_T[k][0]}</span>`).join('')}<span><i class="lg-stu"></i>Μαθητές</span></div>`:''}<div id="bigmap" class="lmap"><div class="loading small"><div class="sun">☀️</div>Φόρτωση χάρτη…</div></div>
    ${f!=='all'&&stops.length>1?`<a class="btn block" style="margin:10px 0" target="_blank" rel="noopener" href="${routeHref(B,stops)}">${ic('route',16)} Όλη η διαδρομή ${f==='today'?'της ημέρας':'της αυριανής'} στους χάρτες Google</a>`:''}
    ${shown.length?`<div class="list section">${shown.map((x,i)=>`<div class="rw static wrapm" data-mfocus="${x.s.id}"><span class="ricon mnum">${f==='all'?(x.s.avatar||'🙂'):i+1}</span><span class="grow"><b>${esc(stuName(x.s))}${x.o?' · '+x.o.s+'–'+x.o.e:''}</b><small style="white-space:normal">${esc(placeTxt(x.s.loc))}${x.s.loc.home===false?' · μόνο διεύθυνση':''}</small></span><span class="end"><a class="btn sm" target="_blank" rel="noopener" href="${dirHref(x.s.loc.lat,x.s.loc.lng)}">${ic('route',14)} Οδηγίες</a><button class="iconbtn" data-sloc="${x.s.id}" aria-label="Αλλαγή διεύθυνσης">${ic('edit',16)}</button></span></div>`).join('')}</div>`
     :`<div class="note small section">${f==='all'?'Κανένας μαθητής δεν έχει ακόμη διεύθυνση.':`Κανένα μάθημα στο σπίτι μαθητή ${f==='today'?'σήμερα':'αύριο'}.`} Για να μπει πινέζα, άνοιξε τον μαθητή → «Διεύθυνση», ή διάλεξε από κάτω.</div>`}
    ${noLoc.length?`<details class="section"><summary class="small"><b>Χωρίς διεύθυνση (${noLoc.length})</b></summary><div class="list" style="margin-top:8px">${noLoc.map(s=>`<button class="rw" data-sloc="${s.id}"><span class="ricon">${s.avatar||'🙂'}</span><span class="grow"><b>${esc(stuName(s))}</b><small>Πάτα για να βάλεις διεύθυνση</small></span>${ic('plus',16)}</button>`).join('')}</div></details>`:''}`;
-  $('#mbiz').onclick=bizLocDialog;
   let L;try{L=await leaflet();}catch(e){$('#bigmap').innerHTML=`<div class="note small" style="margin:12px">Ο χάρτης χρειάζεται σύνδεση στο διαδίκτυο. Η λίστα και οι «Οδηγίες» δουλεύουν κανονικά.</div>`;return;}
   if(!document.getElementById('bigmap'))return;$('#bigmap').innerHTML='';const m=L.map('bigmap');osmTiles(L,m);const pts=[];const mks={};
-  if(B){L.marker([B.lat,B.lng],{icon:pinIcon(L,ic('building',16),'biz')}).addTo(m).bindPopup('<b>Η έδρα μου</b><br>'+esc(placeTxt(B)));pts.push([B.lat,B.lng]);}
+  bizPlaces().filter(p=>p.lat!=null).forEach(p=>{L.marker([p.lat,p.lng],{icon:placePin(L,p)}).addTo(m).bindPopup(`<b>${esc(placeName(p))}</b><br><small>${esc(placeTxt(p))}</small><br><a href="${dirHref(p.lat,p.lng)}" target="_blank" rel="noopener">Οδηγίες</a>`);pts.push([p.lat,p.lng]);});
   shown.forEach((x,i)=>{const ll=[x.s.loc.lat,x.s.loc.lng];pts.push(ll);mks[x.s.id]=L.marker(ll,{icon:pinIcon(L,f==='all'?(x.s.avatar||'🙂'):String(i+1),f==='all'?'':'num')}).addTo(m).bindPopup(`<b>${esc(stuName(x.s))}</b>${x.o?'<br>'+x.o.s+'–'+x.o.e:''}<br><small>${esc(placeTxt(x.s.loc))}</small><br><a href="${dirHref(ll[0],ll[1])}" target="_blank" rel="noopener">Οδηγίες</a>`);});
   if(f!=='all'&&stops.length>1)L.polyline((B?[[B.lat,B.lng]]:[]).concat(stops.map(x=>[x.s.loc.lat,x.s.loc.lng])),{color:'#7462B4',weight:3,opacity:.7,dashArray:'6 6'}).addTo(m);
   if(pts.length>1)m.fitBounds(pts,{padding:[40,40],maxZoom:16});else if(pts.length)m.setView(pts[0],15);else m.setView(GR_CENTER,11);
@@ -4518,6 +4536,10 @@ async function viewMap(r){const t=todayISO();const f=['all','today','tomorrow'].
   if(r.q.s&&mks[r.q.s]){m.setView(mks[r.q.s].getLatLng(),16);mks[r.q.s].openPopup();}
   M().addEventListener('click',e=>{const x=e.target.closest('[data-mfocus]');if(!x||e.target.closest('a,button'))return;const k=mks[x.dataset.mfocus];if(k){m.setView(k.getLatLng(),16);k.openPopup();$('#bigmap').scrollIntoView({behavior:'smooth',block:'center'});}});}
 function routeHref(B,stops){const P=stops.map(x=>x.s.loc.lat+','+x.s.loc.lng);const dest=P[P.length-1];const way=P.slice(0,-1).join('|');return`https://www.google.com/maps/dir/?api=1${B?'&origin='+B.lat+','+B.lng:''}&destination=${dest}${way?'&waypoints='+encodeURIComponent(way):''}`;}
+
+function placesCardHTML(){const P=bizPlaces();return`<div class="list">${P.map(p=>`<div class="rw static wrapm"><span class="ricon plic pl-${(PLACE_T[p.type||'other']||PLACE_T.other)[2]}">${p.type==='home'?'🏠':p.type==='other'?'📍':ic('building',16)}</span><span class="grow"><b>${esc(placeName(p))}${p.name?` <span class="chip sm">${PLACE_T[p.type||'other'][0]}</span>`:''}</b><small style="white-space:normal">${esc(placeTxt(p))||'Χωρίς θέση στον χάρτη'}</small></span><span class="end">${p.lat!=null?`<a class="iconbtn" href="#/map?f=all" aria-label="Στον χάρτη">${ic('l-map',16)}</a>`:''}<button class="iconbtn" data-plc="${p.id}" aria-label="Αλλαγή">${ic('edit',16)}</button></span></div>`).join('')}</div>${P.length?'':'<p class="small muted" style="margin:0 0 8px">Πρόσθεσε την έδρα σου — και όσες άλλες (δεύτερη έδρα, το σπίτι σου). Φαίνονται στον χάρτη με δική τους πινέζα και από εκεί ξεκινά η διαδρομή.</p>'}<button class="btn" data-plc="" style="margin-top:8px">${ic('plus',16)} Προσθήκη τοποθεσίας</button>`;}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-plc]');if(!b)return;e.preventDefault();placeDialog(b.dataset.plc?bizPlaces().find(p=>p.id===b.dataset.plc):null);});
+function bizContact(){const B=biz(),P=S.data.profile||{};return{phone:B.phone||P.phone||'',email:B.email||P.email||'',web:B.web||'',afm:B.afm||'',addr:(bizLoc()||{}).addr||''};}
 
 /* ===== Μπάρα κάτω από κάθε σειρά που κυλά δεξιά–αριστερά: δείχνει ότι υπάρχει κι άλλο ===== */
 const HS_SEL='.tabs,.seg,.tablewrap,.avscroll,.dstrip,.pvbar,.steps,.chips,.tmseg,[data-hs]';
