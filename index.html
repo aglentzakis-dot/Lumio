@@ -971,6 +971,13 @@ body.agdragging,body.agdragging *{user-select:none!important;-webkit-user-select
 .legaldoc h4{margin:14px 0 4px}
 #topBanner a{color:inherit;font-weight:700;text-decoration:underline}
 
+.syncdot{position:relative}.syncdot i{position:absolute;right:6px;bottom:6px;width:8px;height:8px;border-radius:50%;background:var(--ink3);box-shadow:0 0 0 2px var(--paper)}
+.syncdot[data-s=ok] i{background:var(--ok)}.syncdot[data-s=err] i{background:var(--bad)}.syncdot[data-s=noauth] i{background:var(--warn)}
+.syncdot[data-s=busy] i{background:var(--lilac-d);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-item;margin:6px 0}
+#syOver{white-space:normal;text-align:left;height:auto;line-height:1.3;padding:8px 12px}
+
 /* ===== games ===== */
 .gwrap{position:fixed;inset:0;z-index:80;overflow:auto;display:flex;flex-direction:column;font-family:"Comfortaa","Commissioner",sans-serif}
 .gwrap.teen{font-family:"Commissioner",sans-serif}
@@ -1174,7 +1181,7 @@ body.agdragging,body.agdragging *{user-select:none!important;-webkit-user-select
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.19.0';
+const APP_VERSION='2.20.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -1261,19 +1268,19 @@ const IDB={db:null,
 /* ---- κατάσταση ---- */
 const S={meta:null,user:null,raw:null,dataKey:null,data:null,earn:null,earnKey:null,studentMode:null,lastAct:Date.now(),fails:0,lockUntil:0};
 const LEGAL_VER='2026-10';
-function defaultData(){return{students:[],materials:[],uploads:[],results:[],assignments:[],programs:[],reports:[],inbox:[],profile:{title:'',email:'',phone:'',bio:''},settings:{aiKey:'',model:'auto',autoLockMin:0,sendNotes:false,sound:true,lastReportCheck:'',notify:{reports:true,assign:true,updates:true},v2:true,termsOk:LEGAL_VER}};}
+function defaultData(){return{students:[],materials:[],uploads:[],results:[],assignments:[],programs:[],reports:[],inbox:[],profile:{title:'',email:'',phone:'',bio:''},settings:{aiKey:'',model:'auto',autoLockMin:0,sendNotes:false,sound:true,lastReportCheck:'',notify:{reports:true,assign:true,updates:true},v2:true}};}
 function migrate(d){const def=defaultData();for(const k in def)if(d[k]===undefined)d[k]=def[k];if(!d.settings.v2){d.settings.autoLockMin=0;d.settings.v2=true;}d.settings={...def.settings,...d.settings};d.settings.notify={...def.settings.notify,...(d.settings.notify||{})};d.profile={...def.profile,...d.profile};return d;}
 async function saveMeta(){await IDB.set('meta',S.meta);}
-const _saveData=debounce(async()=>{if(!S.dataKey||!S.data)return;await IDB.set('vault',await encJSON(S.dataKey,S.data));Backup.auto();},400);
+const _saveData=debounce(async()=>{if(!S.dataKey||!S.data)return;await IDB.set('vault',await encJSON(S.dataKey,S.data));Backup.auto();try{Sync.soon();}catch(e){}},400);
 function save(){_saveData();}
 async function saveNow(){if(!S.dataKey||!S.data)return;await IDB.set('vault',await encJSON(S.dataKey,S.data));}
 
 /* ---- λογαριασμοί ---- */
 function genRecovery(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const r=rand(16);let c='';for(let i=0;i<16;i++){c+=A[r[i]%A.length];if(i%4===3&&i<15)c+='-';}return c;}
 const normCode=c=>String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/(.{4})(?=.)/g,'$1-');
-async function createAdmin({name,username,pass,org,email,remember=true}){const raw=rand(32);const code=genRecovery();S.meta={schema:2,org:org||'',created:new Date().toISOString(),users:[{id:uid(),name,email:(email||'').trim().toLowerCase(),username:username.trim().toLowerCase(),role:'admin',wrap:await wrapRaw(raw,pass),recWrap:await wrapRaw(raw,code),earnWrap:null,created:new Date().toISOString()}]};await saveMeta();S.raw=raw;S.dataKey=await importRaw(raw);S.data=defaultData();S.user=S.meta.users[0];await saveNow();if(remember)await Session.save();return code;}
+async function createAdmin({name,username,pass,org,email,remember=true}){const raw=rand(32);const code=genRecovery();S.meta={schema:2,org:org||'',created:new Date().toISOString(),users:[{id:uid(),name,email:(email||'').trim().toLowerCase(),username:username.trim().toLowerCase(),role:'admin',wrap:await wrapRaw(raw,pass),recWrap:await wrapRaw(raw,code),earnWrap:null,created:new Date().toISOString()}]};await saveMeta();S.raw=raw;S.dataKey=await importRaw(raw);S.data=defaultData();S.data.settings.termsOk=LEGAL_VER;S.user=S.meta.users[0];await saveNow();if(remember)await Session.save();return code;}
 async function login(username,pass,remember=true){if(Date.now()<S.lockUntil)throw new Error('Πολλές αποτυχημένες προσπάθειες. Δοκίμασε ξανά σε λίγα δευτερόλεπτα.');const u=S.meta.users.find(x=>x.username===username.trim().toLowerCase());let raw;try{if(!u)throw 0;raw=await unwrapRaw(u.wrap,pass);}catch(e){S.fails++;if(S.fails>=5){S.lockUntil=Date.now()+30000;S.fails=0;}throw new Error('Λάθος όνομα χρήστη ή κωδικός.');}S.fails=0;await openVault(u,raw);if(remember)await Session.save();else await Session.clear();}
-async function openVault(u,raw){S.raw=raw;S.dataKey=await importRaw(raw);const blob=await IDB.get('vault');S.data=migrate(blob?await decJSON(S.dataKey,blob):defaultData());S.user=u;S.lastAct=Date.now();try{const b=await IDB.get('tm:'+u.id);if(b){const o=await decJSON(S.dataKey,b);for(const k in o)localStorage.setItem(k,o[k]);await IDB.del('tm:'+u.id);}}catch(e){}}
+async function openVault(u,raw){S.raw=raw;S.dataKey=await importRaw(raw);const blob=await IDB.get('vault');S.data=migrate(blob?await decJSON(S.dataKey,blob):defaultData());S.user=u;S.lastAct=Date.now();try{const b=await IDB.get('tm:'+u.id);if(b){const o=await decJSON(S.dataKey,b);for(const k in o)localStorage.setItem(k,o[k]);await IDB.del('tm:'+u.id);}}catch(e){}try{syncAfterOpen();}catch(e){}}
 async function resetWithRecovery(username,code,newPass){const q=username.trim().toLowerCase();const u=S.meta.users.find(x=>x.username===q||(x.email&&x.email===q));if(!u||!u.recWrap)throw new Error('Δεν βρέθηκε λογαριασμός με κωδικό ανάκτησης για αυτό το όνομα χρήστη.');let raw;try{raw=await unwrapRaw(u.recWrap,normCode(code));}catch(e){throw new Error('Ο κωδικός ανάκτησης δεν είναι σωστός.');}u.wrap=await wrapRaw(raw,newPass);await saveMeta();return u;}
 async function newRecovery(userId){const u=S.meta.users.find(x=>x.id===userId);const code=genRecovery();u.recWrap=await wrapRaw(S.raw,code);await saveMeta();return code;}
 const Session={
@@ -1302,7 +1309,7 @@ const Earn={
   hasPin(){return!!S.user.earnWrap;},
   async setup(pin){const raw=rand(32);S.user.earnWrap=await wrapRaw(raw,pin);await saveMeta();S.earnKey=await importRaw(raw);S.earn={rates:{},sessions:[]};await this.save();},
   async unlock(pin){const raw=await unwrapRaw(S.user.earnWrap,pin);S.earnKey=await importRaw(raw);const blob=await IDB.get('earn:'+S.user.id);S.earn=blob?await decJSON(S.earnKey,blob):{rates:{},sessions:[]};},
-  async save(){if(S.earnKey)await IDB.set('earn:'+S.user.id,await encJSON(S.earnKey,S.earn));try{TM.syncWork();}catch(e){}Backup.auto();},
+  async save(){if(S.earnKey)await IDB.set('earn:'+S.user.id,await encJSON(S.earnKey,S.earn));try{TM.syncWork();}catch(e){}Backup.auto();try{Sync.soon();}catch(e){}},
   lock(){S.earn=null;S.earnKey=null;},
   async changePin(oldPin,newPin){const raw=await unwrapRaw(S.user.earnWrap,oldPin);S.user.earnWrap=await wrapRaw(raw,newPin);await saveMeta();}
 };
@@ -2205,12 +2212,12 @@ function render(){
   const sec=navSection(r);const stuLocked=sec==='students'&&StuLock.locked();const cr=crumbsFor(r,sec);const unread=S.data.inbox.filter(x=>!x.read).length;
   document.body.innerHTML=`<div class="app">${sidebarHTML(sec,r)}<div class="shell"><header class="topbar noprint">${sec==='dashboard'?`<a class="tbrand" href="#/dashboard">${LOGO}<b>LUMIO</b></a>`:''}${cr.length>1&&cr[cr.length-2][1]?`<a class="iconbtn mback" href="#/${cr[cr.length-2][1]}" aria-label="Πίσω">${ic('left',22)}</a>`:''}
     <nav class="crumbs ${sec==='dashboard'?'onhome':''}" aria-label="Τοποθεσία">${cr.map((c,i)=>i<cr.length-1?`<span class="cpath">${c[1]?`<a href="#/${c[1]}">${esc(c[0])}</a>`:esc(c[0])}</span><span class="cpath">${ic('right',14)}</span>`:`<b>${esc(c[0])}</b>`).join('')}</nav>
-    <a class="tbav" href="#/profile" aria-label="Το προφίλ μου">${meAvatar(32)}</a><button class="iconbtn" id="bell" aria-label="Ειδοποιήσεις">${ic('bell',20)}${unread?'<i class="dot"></i>':''}</button><button class="iconbtn burger" id="burger" aria-label="Μενού">${ic('menu',22)}</button></header>
+    <a class="tbav" href="#/profile" aria-label="Το προφίλ μου">${meAvatar(32)}</a>${syncDotHTML()}<button class="iconbtn" id="bell" aria-label="Ειδοποιήσεις">${ic('bell',20)}${unread?'<i class="dot"></i>':''}</button><button class="iconbtn burger" id="burger" aria-label="Μενού">${ic('menu',22)}</button></header>
     <main class="main" id="main"></main></div>
   <nav class="bottomnav noprint">${[['dashboard','home','Αρχική'],['agenda','l-calendar-clock','Ραντεβού'],['create','sparkles','Δημιουργία'],['students','users','Μαθητές'],['menu','menu','Μενού']].map(([k,i,l])=>`<a ${k==='menu'?'role="button" tabindex="0" id="bnMenu"':`href="#/${k}"`} class="${sec===k?'on':''} ${k==='create'?'mid':''}"><span class="bi">${ic(i,k==='create'?24:22)}</span><span>${l}</span></a>`).join('')}</nav></div>`;
   const tog=()=>document.body.classList.toggle('drawer');$('#burger').onclick=tog;$('#bnMenu').onclick=tog;$('#drawerOv').onclick=tog;
   $('#cTog').onclick=()=>{const o=!$('#cSub').classList.toggle('hidden');$('#cTog').classList.toggle('open',o);try{localStorage.setItem('lumio-cOpen',o?'1':'0');}catch(e){}};
-  $('#logoutBtn').onclick=askLogout;$('#bell').onclick=showInbox;
+  $('#logoutBtn').onclick=askLogout;$('#bell').onclick=showInbox;bindSyncDot();
   const V={dashboard:viewDashboard,students:viewStudents,student:viewStudent,'student-edit':viewStudentEdit,create:viewCreate,preview:viewPreview,games:viewGames,worksheets:viewWorksheets,materials:viewMaterials,reports:viewReports,report:viewReport,calendar:viewCalendar,plan:viewProgram,earnings:viewEarnings,sessions:viewSessions,agenda:viewAgenda,settings:viewSettings,profile:viewProfile}[r.name]||viewDashboard;
   if(!window.AGPOS)window.scrollTo(0,0);
   legalBanner();
@@ -2240,7 +2247,7 @@ function renderAuth(){const r=parseRoute();const n=r.name;
   authShell(`<div class="auth-welcome"><span class="logo">${LOGO}</span><h1>LUMIO</h1><p class="muted">Η έξυπνη ψηφιακή συνεργάτιδα του παιδαγωγού.</p>
     <div class="stack"><a class="btn pri lg block" href="#/login">Σύνδεση</a><a class="btn lg block" href="#/signup">Δημιουργία λογαριασμού</a></div>
     <p class="tiny muted" style="margin-top:26px">${ic('shield',14)} Τα δεδομένα των μαθητών κρυπτογραφούνται και μένουν στη συσκευή σου.</p></div>`);}
-function viewLogin(){if(!S.meta){authShell(`<h1>Σύνδεση</h1><p class="lead">Δεν υπάρχει ακόμη λογαριασμός σε αυτή τη συσκευή.</p><div class="stack"><a class="btn pri lg block" href="#/signup">Δημιουργία λογαριασμού</a><button class="btn block" id="rest">${ic('upload',18)} Επαναφορά από αντίγραφο ασφαλείας</button></div><p class="small muted" style="margin-top:16px">Οι λογαριασμοί του LUMIO ζουν στη συσκευή όπου δημιουργήθηκαν. Για να συνεχίσεις σε άλλη συσκευή, κάνε επαναφορά από αντίγραφο ασφαλείας.</p><input type="file" id="rf" accept=".json" class="hidden"><p class="alt"><a href="#/welcome">${ic('left',14)} Πίσω</a></p>`);bindRestore();return;}
+function viewLogin(){if(!S.meta){authShell(`<h1>Σύνδεση</h1><p class="lead">Δεν υπάρχει ακόμη λογαριασμός σε αυτή τη συσκευή.</p><div class="stack"><a class="btn pri lg block" href="#/signup">Δημιουργία λογαριασμού</a><button class="btn block" id="gdr">${ic('cloud',18)} Φέρε τα δεδομένα από το Google Drive</button><button class="btn block" id="rest">${ic('upload',18)} Επαναφορά από αντίγραφο ασφαλείας</button></div><p class="small muted" style="margin-top:16px">Αν χρησιμοποιείς ήδη το LUMIO σε άλλη συσκευή με ενεργό συγχρονισμό, πάτα «Φέρε τα δεδομένα από το Google Drive» και μετά συνδέσου με το ίδιο όνομα χρήστη και κωδικό.</p><input type="file" id="rf" accept=".json" class="hidden"><p class="alt"><a href="#/welcome">${ic('left',14)} Πίσω</a></p>`);bindRestore();return;}
   const last=localStorage.getItem('pai-lastuser')||'';
   authShell(`<h1>Καλώς ήρθες ξανά</h1><p class="lead">Συνδέσου στο LUMIO${S.meta.org?' · '+esc(S.meta.org):''}</p>
    <form id="f"><div class="field"><label class="f" for="u">Όνομα χρήστη</label><input class="in" id="u" name="u" required autocomplete="username" autocapitalize="none" value="${esc(last)}"></div>${pwField('p','Κωδικός')}
@@ -2248,7 +2255,7 @@ function viewLogin(){if(!S.meta){authShell(`<h1>Σύνδεση</h1><p class="lea
    <button class="btn pri lg block">Σύνδεση</button></form><p class="alt">Δεν έχεις λογαριασμό; <a href="#/signup">Δημιουργία λογαριασμού</a></p>`);
   ($('#u').value?$('#p'):$('#u')).focus();
   $('#f').onsubmit=async e=>{e.preventDefault();const o=fd(e.target);const b=$('button.pri',e.target);b.disabled=true;b.innerHTML='<span class="spinner"></span>';try{await login(o.u,o.p,!!o.rem);localStorage.setItem('pai-lastuser',o.u.trim().toLowerCase());monthlyAuto();const t=S.afterLogin;S.afterLogin=null;location.hash=t||'#/dashboard';render();}catch(err){toast(err.message,'bad');b.disabled=false;b.textContent='Σύνδεση';}};}
-function bindRestore(){const rb=$('#rest');if(!rb)return;rb.onclick=()=>$('#rf').click();$('#rf').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await Backup.restoreText(await f.text());S.meta=await IDB.get('meta');toast('Η επαναφορά ολοκληρώθηκε. Συνδέσου με τον κωδικό σου.','ok');go('login');render();}catch(err){toast(err.message,'bad');}};}
+function bindRestore(){const g=$('#gdr');if(g)g.onclick=async()=>{g.disabled=true;try{await Sync.restoreNew();S.meta=await IDB.get('meta');toast('Τα δεδομένα ήρθαν από το Google Drive. Συνδέσου με το όνομα χρήστη και τον κωδικό σου.','ok');go('login');render();}catch(err){toast(err.message,'bad');g.disabled=false;}};const rb=$('#rest');if(!rb)return;rb.onclick=()=>$('#rf').click();$('#rf').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await Backup.restoreText(await f.text());S.meta=await IDB.get('meta');toast('Η επαναφορά ολοκληρώθηκε. Συνδέσου με τον κωδικό σου.','ok');go('login');render();}catch(err){toast(err.message,'bad');}};}
 function viewSignup(){if(S.meta){authShell(`<h1>Δημιουργία λογαριασμού</h1><p class="lead">Σε αυτή τη συσκευή υπάρχει ήδη ο χώρος εργασίας${S.meta.org?' «'+esc(S.meta.org)+'»':''} με ${S.meta.users.length} ${S.meta.users.length===1?'λογαριασμό':'λογαριασμούς'}.</p><div class="note l small field">Αν έχεις ήδη λογαριασμό, συνδέσου. Αν είσαι νέος παιδαγωγός στον ίδιο χώρο, ο διαχειριστής δημιουργεί τον λογαριασμό σου από <b>Ρυθμίσεις → Οργανισμός</b>.</div><a class="btn pri lg block" href="#/login">Σύνδεση</a><p class="alt"><a href="#/welcome">${ic('left',14)} Πίσω</a></p>`);return;}
   authShell(`<h1>Δημιουργία λογαριασμού</h1><p class="lead">Λίγα στοιχεία και ξεκινάς.</p>
    <form id="f"><div class="field"><label class="f" for="name">Ονοματεπώνυμο</label><input class="in" id="name" name="name" required autocomplete="name"></div>
@@ -2750,7 +2757,7 @@ const SETTINGS_GROUPS=[['me','Ο λογαριασμός μου'],['app','Εφα�
 const SETTINGS_SECTIONS=[['profile','smile','Το προφίλ μου','Φωτογραφία, στοιχεία, ειδικότητα','me'],['business','building','Η επιχείρησή μου','Ωράριο λειτουργίας, προσωπικό, ειδικότητες','me'],['account','user','Λογαριασμός','Όνομα χρήστη, κωδικός, ανάκτηση','me'],['security','shield','Ασφάλεια','Σύνδεση, κλείδωμα μαθητών, PIN Ταμείου','me'],
  ['appearance','palette','Εμφάνιση','Θέμα, χρώματα, φόντο, μέγεθος κειμένου','app'],['notifications','bell','Ειδοποιήσεις','Αναφορές, αναθέσεις, ήχοι','app'],['language','globe','Γλώσσα','Ελληνικά','app'],
  ['watermark','l-stamp','Υδατογράφημα','Σε όλα τα PDF που στέλνεις','docs'],
- ['privacy','eye','Ιδιωτικότητα','Δεδομένα μαθητών, εξαγωγή','data'],['legal','shield','Όροι & απόρρητο','Όροι χρήσης, πολιτική απορρήτου, οδηγός','data'],['backup','cloud','Αντίγραφα ασφαλείας','Κοινός φάκελος, επαναφορά','data'],
+ ['privacy','eye','Ιδιωτικότητα','Δεδομένα μαθητών, εξαγωγή','data'],['legal','shield','Όροι & απόρρητο','Όροι χρήσης, πολιτική απορρήτου, οδηγός','data'],['sync','refresh','Συγχρονισμός συσκευών','Google Drive, κρυπτογραφημένα','data'],['backup','cloud','Αντίγραφα ασφαλείας','Κοινός φάκελος, επαναφορά','data'],
  ['ai','sparkles','Τεχνητή νοημοσύνη','Κλειδί και μοντέλο','svc'],['email','send','Αποστολή email','Κωδικοί ανάκτησης στο email','svc'],
  ['subscription','card','Συνδρομή & έκδοση','Πρόγραμμα, αναβάθμιση','about']];
 async function viewSettings(r){const secs=SETTINGS_SECTIONS.filter(s=>!['organization','email'].includes(s[0])||isAdmin());if(r.id==='profile')return go('profile');const id=secs.some(s=>s[0]===r.id)?r.id:null;const cur=id||(innerWidth>960?'account':null);
@@ -2759,6 +2766,7 @@ async function viewSettings(r){const secs=SETTINGS_SECTIONS.filter(s=>!['organiz
   $('#lo').onclick=askLogout;if(!cur)return;const sec=secs.find(s=>s[0]===cur);const sb=$('#sb');sb.innerHTML=`<div class="eyebrow">${(SETTINGS_GROUPS.find(g=>g[0]===sec[4])||[])[1]||''}</div><h2>${sec[2]}</h2><p class="setmeta">${sec[3]}</p><div id="sbody"></div>`;await SET[cur]($('#sbody'));}
 const card=(t,body)=>`<div class="card"><div class="card-h"><h3>${t}</h3></div>${body}</div>`;
 const SET={
+ sync(el){return syncSettings(el);},
  async legal(el){const L=S.data.students;const pend=L.filter(s=>!s.consent);el.innerHTML=card('Κείμενα',`<div class="list">${[['terms','file','Όροι χρήσης'],['privacy','shield','Πολιτική απορρήτου'],['guide','book','Οδηγός για τον παιδαγωγό']].map(([k,i,t])=>`<button class="rw" data-lgo="${k}"><span class="ricon">${ic(i,17)}</span><span class="grow"><b>${t}</b><small>${k==='guide'?'Τι πρέπει να κάνεις για να είσαι εντάξει με τον νόμο':'Τελευταία ενημέρωση '+LEGAL_DATE}</small></span>${ic('right',16)}</button>`).join('')}</div>`)
   +card('Συναινέσεις γονέων',L.length?`<p class="small muted" style="margin-top:0">${L.length-pend.length} από ${L.length} μαθητές έχουν υπογεγραμμένη ενημέρωση.</p>${pend.length?`<div class="list">${pend.map(s=>`<a class="rw" href="#/student/${s.id}"><span class="ricon">${s.avatar||'🙂'}</span><span class="grow"><b>${esc(stuName(s))}</b><small>Εκκρεμεί</small></span>${ic('right',16)}</a>`).join('')}</div>`:''}`:'<p class="small muted">Δεν υπάρχουν μαθητές ακόμη.</p>')+`<p class="tiny muted">${LEGAL_NOTE}</p>`;},
  async business(el){const B=biz();const adm=isAdmin();
@@ -3989,6 +3997,139 @@ function studentExport(s){const id=s.id,D=S.data;const o={app:'LUMIO',exported:n
   downloadText(`mathitis-${s.code||id}-${todayISO()}.json`,JSON.stringify(o,null,2),'application/json');toast('Τα στοιχεία του μαθητή κατέβηκαν (μη κρυπτογραφημένα — φύλαξέ τα με ασφάλεια).','ok');}
 
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-lgo]');if(!a)return;e.preventDefault();e.stopPropagation();legalDialog(a.dataset.lgo);},true);
+
+/* ===== Συγχρονισμός συσκευών μέσω του Google Drive του χρήστη (κρυπτογραφημένα) ===== */
+const GCLIENT='631139595852-r9uib4okhoh13nrb48bau1llqpoekik3.apps.googleusercontent.com';
+const GSCOPE='https://www.googleapis.com/auth/drive.file';
+const GD={
+  tok:null,exp:0,
+  load(){try{const o=JSON.parse(sessionStorage.getItem('lumio-gtok')||'null');if(o&&o.exp>Date.now()+60000){this.tok=o.tok;this.exp=o.exp;}}catch(e){}},
+  ok(){if(!this.tok)this.load();return!!this.tok&&this.exp>Date.now()+60000;},
+  async connect(interactive=true){await loadScript('https://accounts.google.com/gsi/client');if(!window.google||!google.accounts||!google.accounts.oauth2)throw new Error('Δεν φορτώθηκε η σύνδεση Google — έλεγξε τη σύνδεση στο διαδίκτυο.');
+    return new Promise((res,rej)=>{const c=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:GSCOPE,prompt:interactive?'':'none',hint:Sync.cfg().email||undefined,
+      callback:r=>{if(r&&r.access_token){this.tok=r.access_token;this.exp=Date.now()+((+r.expires_in||3600)*1000);try{sessionStorage.setItem('lumio-gtok',JSON.stringify({tok:this.tok,exp:this.exp}));}catch(e){}res(true);}else rej(new Error(r&&r.error_description||'Η σύνδεση με Google δεν ολοκληρώθηκε.'));},
+      error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'Έκλεισε το παράθυρο της Google.':e&&e.type==='popup_failed_to_open'?'Ο περιηγητής μπλόκαρε το παράθυρο της Google — επίτρεψε τα αναδυόμενα.':'Η σύνδεση με Google δεν ολοκληρώθηκε.'))});c.requestAccessToken();});},
+  forget(){const t=this.tok;this.tok=null;this.exp=0;try{sessionStorage.removeItem('lumio-gtok');}catch(e){}try{if(t&&window.google)google.accounts.oauth2.revoke(t,()=>{});}catch(e){}},
+  async api(path,opt={}){if(!this.ok())throw new Error('NOAUTH');const r=await fetch((path.startsWith('http')?'':'https://www.googleapis.com/')+path,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+this.tok},opt.headers||{})}));
+    if(r.status===401){this.tok=null;try{sessionStorage.removeItem('lumio-gtok');}catch(e){}throw new Error('NOAUTH');}if(!r.ok){let m='';try{m=(await r.json()).error.message;}catch(e){}throw new Error('Google Drive: '+(m||r.status));}return r;},
+  async find(q,fields='files(id,name,modifiedTime,size)'){const r=await this.api('drive/v3/files?spaces=drive&pageSize=100&orderBy=modifiedTime desc&fields='+encodeURIComponent(fields)+'&q='+encodeURIComponent(q+' and trashed=false'));return(await r.json()).files||[];},
+  async folder(name,parent){const q=`name='${name}' and mimeType='application/vnd.google-apps.folder'`+(parent?` and '${parent}' in parents`:'');const f=await this.find(q);if(f.length)return f[0].id;
+    const r=await this.api('drive/v3/files?fields=id',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,mimeType:'application/vnd.google-apps.folder',parents:parent?[parent]:undefined})});return(await r.json()).id;},
+  async root(){const c=Sync.cfg();if(c.folder)return c.folder;const id=await this.folder('LUMIO');Sync.setCfg({folder:id});return id;},
+  async file(name,parent){const f=await this.find(`name='${name}' and '${parent}' in parents`);return f[0]||null;},
+  async get(id){const r=await this.api('drive/v3/files/'+id+'?alt=media');return r.text();},
+  async put(name,parent,text,id){const meta={name,mimeType:'application/json'};if(!id)meta.parents=[parent];const b='lumio'+Math.random().toString(36).slice(2);
+    const body=`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${text}\r\n--${b}--`;
+    const r=await this.api('upload/drive/v3/files'+(id?'/'+id:'')+'?uploadType=multipart&fields=id,modifiedTime',{method:id?'PATCH':'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body});return r.json();},
+  async del(id){await this.api('drive/v3/files/'+id,{method:'DELETE'});}
+};
+
+/* τριμερής συγχώνευση: base = όπως ήταν στον προηγούμενο συγχρονισμό */
+const J=x=>x===undefined?'\u0000':JSON.stringify(x);
+const isObj=x=>x&&typeof x==='object'&&!Array.isArray(x);
+const hasIds=a=>Array.isArray(a)&&a.length>0&&a.every(x=>isObj(x)&&x.id!=null);
+function merge3(b,l,r,st){if(J(l)===J(r))return l;if(J(l)===J(b))return r;if(J(r)===J(b))return l;
+  if(isObj(l)&&isObj(r)){const o={};const B=isObj(b)?b:{};for(const k of new Set([...Object.keys(l),...Object.keys(r)])){const v=merge3(B[k],l[k],r[k],st);if(v!==undefined)o[k]=v;}return o;}
+  if((hasIds(l)||!l||!l.length)&&(hasIds(r)||!r||!r.length)&&Array.isArray(l)&&Array.isArray(r)){const B=new Map((Array.isArray(b)?b:[]).filter(isObj).map(x=>[x.id,x]));const L=new Map(l.map(x=>[x.id,x])),R=new Map(r.map(x=>[x.id,x]));const out=[];const seen=new Set();
+    const one=id=>{if(seen.has(id))return;seen.add(id);const bi=B.get(id),li=L.get(id),ri=R.get(id);let v;
+      if(li&&ri)v=merge3(bi,li,ri,st);else if(li)v=bi&&J(li)===J(bi)?undefined:li;else v=bi&&J(ri)===J(bi)?undefined:ri;if(v!==undefined)out.push(v);};
+    r.forEach(x=>one(x.id));l.forEach(x=>one(x.id));return out;}
+  if(st)st.conflicts++;return l;}
+
+const Sync={
+  cfg(){try{return JSON.parse(localStorage.getItem('lumio-sync')||'{}')||{};}catch(e){return{};}},
+  setCfg(p){const c=Object.assign(this.cfg(),p);try{localStorage.setItem('lumio-sync',JSON.stringify(c));}catch(e){}return c;},
+  on(){return!!this.cfg().on;},
+  busy:false,timer:null,
+  dev(){let d=localStorage.getItem('lumio-devname');if(!d){const u=navigator.userAgent;d=/iPhone/.test(u)?'iPhone':/iPad/.test(u)?'iPad':/Android/.test(u)?(/Mobile/.test(u)?'Κινητό Android':'Tablet Android'):/Mac/.test(u)?'Mac':/Windows/.test(u)?'Υπολογιστής Windows':'Συσκευή';try{localStorage.setItem('lumio-devname',d);}catch(e){}}return d;},
+  async localPack(){const meta=await IDB.get('meta');const vault=await IDB.get('vault');const earn={};for(const k of await IDB.keys())if(k.startsWith('earn:'))earn[k]=await IDB.get(k);
+    let tm=null;try{if(S.user&&S.dataKey){const o={};TM.lsKeys().forEach(k=>{if(k.includes(S.user.id))o[k]=localStorage.getItem(k);});tm=o;}}catch(e){}return{meta,vault,earn,tm};},
+  /* κάνει όλη τη δουλειά· επιστρέφει κείμενο αποτελέσματος */
+  async run(why){if(this.busy||!S.dataKey||!S.data||!this.on())return null;if(!GD.ok())return'noauth';this.busy=true;this.ui('busy');
+    try{await saveNow();this.pendingEarn=false;const st={conflicts:0};const root=await GD.root();const rf=await GD.file('lumio-sync.json',root);const L=await this.localPack();
+      const baseBlob=await IDB.get('syncbase');let base=null;try{base=baseBlob?await decJSON(S.dataKey,baseBlob):null;}catch(e){}
+      const bmeta=base&&base.meta||null,bearn=base&&base.earnH||{},btm=base&&base.tm||null;
+      let out={meta:L.meta,vault:L.vault,earn:Object.assign({},L.earn),tm:null},newBase={data:S.data,meta:L.meta,earnH:{},tm:L.tm};
+      let changedLocal=false,R=null,rdata=null,rtm=null;
+      if(rf&&rf.modifiedTime!==this.cfg().remoteTime||rf&&!base){R=JSON.parse(await GD.get(rf.id));if(R.app!=='LUMIO-sync')throw new Error('Το αρχείο συγχρονισμού δεν αναγνωρίζεται.');
+        try{rdata=await decJSON(S.dataKey,R.vault);}catch(e){this.setCfg({foreign:true});throw new Error('FOREIGN');}
+        const merged=merge3(base?base.data:{},S.data,rdata,st);if(J(merged)!==J(S.data)){S.data=migrate(merged);changedLocal=true;}newBase.data=S.data;
+        /* χρήστες: ένωση ανά χρήστη, με τριμερή κανόνα */
+        const mm=merge3(bmeta||{},L.meta||{},R.meta||{},st);out.meta=mm;newBase.meta=mm;if(J(mm)!==J(L.meta)){await IDB.set('meta',mm);S.meta=mm;const me=mm.users.find(u=>u.id===S.user.id);if(me)S.user=me;}
+        /* Ταμείο: κρυπτογραφημένο με το PIN κάθε χρήστη */
+        const keys=new Set([...Object.keys(L.earn),...Object.keys(R.earn||{})]);
+        for(const k of keys){const lb=L.earn[k],rb=(R.earn||{})[k],bh=bearn[k],lh=lb?J(lb):'',rh=rb?J(rb):'';
+          if(lh===rh){newBase.earnH[k]=lh;continue;}
+          if(lh===(bh||'')&&rb){await IDB.set(k,rb);out.earn[k]=rb;newBase.earnH[k]=rh;if(S.earn&&k==='earn:'+S.user.id){S.earn=await decJSON(S.earnKey,rb);}continue;}
+          if(rh===(bh||'')||!rb){out.earn[k]=lb;newBase.earnH[k]=lh;continue;}
+          if(S.earnKey&&k==='earn:'+S.user.id){try{const le=await decJSON(S.earnKey,lb),re=await decJSON(S.earnKey,rb);let be={};try{const x=await IDB.get('syncbase-'+k);if(x)be=await decJSON(S.earnKey,x);}catch(e){}S.earn=merge3(be,le,re,st);await Earn.save();const nb=await IDB.get(k);out.earn[k]=nb;newBase.earnH[k]=J(nb);continue;}catch(e){}}
+          out.earn[k]=rb;if(bh)newBase.earnH[k]=bh;this.pendingEarn=true;}
+        /* Ταμείο εργασίας (τοπική αποθήκευση) */
+        try{if(R.tm){const rt=rtm=await decJSON(S.dataKey,R.tm);const P=o=>{const x={};for(const k in o||{}){try{x[k]=JSON.parse(o[k]);}catch(e){x[k]=o[k];}}return x;};
+          const mt=merge3(P(btm),P(L.tm),P(rt),st);const mine=k=>S.user&&k.includes(S.user.id);const oth={};for(const k in rt)if(!mine(k))oth[k]=rt[k];
+          const flat={};for(const k in mt)flat[k]=typeof mt[k]==='string'?mt[k]:JSON.stringify(mt[k]);for(const k in flat)if(mine(k)&&localStorage.getItem(k)!==flat[k]){localStorage.setItem(k,flat[k]);changedLocal=true;}
+          newBase.tm=Object.fromEntries(Object.entries(flat).filter(([k])=>mine(k)));out.tmOthers=oth;}}catch(e){}
+        if(changedLocal)await saveNow();}
+      else{for(const k in L.earn)newBase.earnH[k]=J(L.earn[k]);}
+      out.vault=await IDB.get('vault');
+      const tmAll=Object.assign({},out.tmOthers||{},newBase.tm||L.tm||{});
+      const pack={app:'LUMIO-sync',v:1,version:APP_VERSION,updated:new Date().toISOString(),device:this.dev(),by:S.user.name,meta:out.meta,vault:out.vault,earn:out.earn,tm:await encJSON(S.dataKey,tmAll)};
+      const same=rf&&base&&!changedLocal&&J(base.data)===J(S.data)&&J(bmeta)===J(out.meta)&&rf.modifiedTime===this.cfg().remoteTime&&Object.keys(L.earn).every(k=>J(L.earn[k])===(bearn[k]||''))&&J(btm)===J(L.tm);
+      const sameRemote=R&&rdata&&J(S.data)===J(rdata)&&J(out.meta)===J(R.meta)&&J(out.earn)===J(R.earn||{})&&(!rtm||J(tmAll)===J(rtm));
+      let rt=rf&&rf.modifiedTime;if(!same&&!sameRemote){const w=await GD.put('lumio-sync.json',root,JSON.stringify(pack),rf&&rf.id);rt=w.modifiedTime;}
+      await IDB.set('syncbase',await encJSON(S.dataKey,newBase));if(S.earn&&S.earnKey&&!this.pendingEarn)try{await IDB.set('syncbase-earn:'+S.user.id,await encJSON(S.earnKey,S.earn));}catch(e){}
+      this.setCfg({remoteTime:rt,last:new Date().toISOString(),foreign:false,lastDev:this.dev()});
+      await this.daily(root);
+      this.ui('ok');if(changedLocal&&why!=='open-silent'){toast('Ήρθαν αλλαγές από την άλλη συσκευή.','ok');if(!document.querySelector('.ov'))render();}
+      return st.conflicts?`ok:${st.conflicts}`:'ok';}
+    catch(e){this.ui('err');if(e.message==='NOAUTH')return'noauth';if(e.message==='FOREIGN')return'foreign';console.warn(e);return'err:'+e.message;}
+    finally{this.busy=false;}},
+  /* ένα πλήρες αντίγραφο την ημέρα στο LUMIO/Αντίγραφα, κρατά τα 10 νεότερα */
+  async daily(root){const c=this.cfg();if(c.daily===todayISO())return;try{const dir=await GD.folder('Αντίγραφα',root);const name='LUMIO-'+todayISO()+'.json';const ex=await GD.file(name,dir);await GD.put(name,dir,JSON.stringify(await Backup.snapshot()),ex&&ex.id);
+    const all=await GD.find(`'${dir}' in parents`);for(const f of all.slice(10))try{await GD.del(f.id);}catch(e){}this.setCfg({daily:todayISO()});}catch(e){}},
+  soon(){if(!this.on())return;clearTimeout(this.timer);this.timer=setTimeout(()=>this.run('save'),15000);},
+  async auto(why){if(!this.on())return;if(!GD.ok()){this.ui('noauth');return;}const r=await this.run(why);if(r==='foreign')this.ui('err');},
+  ui(state){this.state=state;if(!document.getElementById('syncDot')&&this.on()){const bell=document.getElementById('bell');if(bell){bell.insertAdjacentHTML('beforebegin',syncDotHTML());bindSyncDot();}}const b=document.getElementById('syncDot');if(b){b.dataset.s=state;b.title=this.stateTxt();}},
+  stateTxt(){return{busy:'Συγχρονισμός…',ok:'Συγχρονισμένο',err:'Σφάλμα συγχρονισμού — πάτα για λεπτομέρειες',noauth:'Πάτα για σύνδεση με Google'}[this.state]||'Συγχρονισμός';},
+  async connectAndRun(){try{await GD.connect(true);}catch(e){toast(e.message,'bad');return null;}this.setCfg({on:true});return this.run('manual');},
+  /* νέα συσκευή: φέρνει τα δεδομένα από το Drive */
+  async restoreNew(){await GD.connect(true);const root=await GD.root();const rf=await GD.file('lumio-sync.json',root);if(!rf)throw new Error('Δεν βρέθηκαν δεδομένα LUMIO στο Google Drive αυτού του λογαριασμού.');
+    const R=JSON.parse(await GD.get(rf.id));if(R.app!=='LUMIO-sync'||!R.meta||!R.vault)throw new Error('Το αρχείο στο Drive δεν αναγνωρίζεται.');
+    for(const k of await IDB.keys())if(!['devkey','devkeyraw'].includes(k))await IDB.del(k);await IDB.set('meta',R.meta);await IDB.set('vault',R.vault);for(const k in R.earn||{})await IDB.set(k,R.earn[k]);
+    if(R.tm)await IDB.set('tm-sync',R.tm);this.setCfg({on:true,remoteTime:null});return R;}
+};
+/* μετά τη σύνδεση: ξεκλείδωμα του Ταμείου εργασίας από το αντίγραφο του Drive */
+async function syncAfterOpen(){try{const b=await IDB.get('tm-sync');if(b&&S.dataKey){const o=await decJSON(S.dataKey,b);for(const k in o)if(S.user&&k.includes(S.user.id)&&!localStorage.getItem(k))localStorage.setItem(k,o[k]);}}catch(e){}
+  setTimeout(()=>Sync.auto('open-silent'),1200);}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.dataKey&&Sync.on()&&GD.ok()){const l=Sync.cfg().last;if(!l||Date.now()-new Date(l)>60000)Sync.run('focus');}});
+setInterval(()=>{if(S.dataKey&&Sync.on()&&GD.ok()&&document.visibilityState==='visible')Sync.run('tick');},5*60000);
+
+function syncDotHTML(){if(!Sync.on())return'';return`<button class="iconbtn syncdot" id="syncDot" data-s="${Sync.state||(GD.ok()?'ok':'noauth')}" aria-label="Συγχρονισμός" title="${Sync.stateTxt()}">${ic('cloud',20)}<i></i></button>`;}
+function bindSyncDot(){const b=$('#syncDot');if(!b)return;b.onclick=async()=>{if(!GD.ok()){const r=await Sync.connectAndRun();syncToast(r);return;}if(Sync.state==='err'){go('settings/sync');return;}const r=await Sync.run('manual');syncToast(r);};}
+function syncToast(r){if(!r)return;if(r==='ok')toast('Συγχρονίστηκε.','ok');else if(r.startsWith('ok:'))toast(`Συγχρονίστηκε. ${r.slice(3)} ίδιες αλλαγές έγιναν και στις δύο συσκευές — κρατήθηκαν αυτές της συσκευής.`,'ok');else if(r==='noauth')toast('Χρειάζεται σύνδεση με Google.','bad');else if(r==='foreign')toast('Το Google Drive έχει δεδομένα άλλου λογαριασμού LUMIO.','bad');else toast(r.replace(/^err:/,''),'bad');}
+
+/* σελίδα ρυθμίσεων */
+async function syncSettings(el){const c=Sync.cfg();const on=Sync.on();const ok=GD.ok();
+  el.innerHTML=`<div class="card"><div class="card-h"><h3>${ic('cloud',18)} Συγχρονισμός συσκευών</h3>${on?`<span class="chip ${ok?'ok':''}">${ok?'Ενεργός':'Χρειάζεται σύνδεση'}</span>`:''}</div>
+   <p class="small muted" style="margin-top:0">Ίδια δεδομένα σε κινητό, tablet και υπολογιστή. Αποθηκεύονται στο <b>δικό σου</b> Google Drive, στον φάκελο «LUMIO», <b>κρυπτογραφημένα</b> με τον κωδικό σου — η Google δεν μπορεί να τα διαβάσει. Δωρεάν, χωρίς κάρτα.</p>
+   ${on?`<div class="list field">${[['Τελευταίος συγχρονισμός',c.last?fmtDate(c.last)+' '+new Date(c.last).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}):'—'],['Αυτή η συσκευή',Sync.dev()],['Ημερήσιο αντίγραφο',c.daily?'Στο Drive: LUMIO/Αντίγραφα (τα 10 νεότερα)':'—']].map(([a,b])=>`<div class="rw static"><span class="grow"><b>${a}</b><small>${esc(b)}</small></span></div>`).join('')}</div>
+    ${c.foreign?`<div class="note bad small field">Το Drive έχει δεδομένα <b>άλλου λογαριασμού LUMIO</b> (άλλος κωδικός). Για να ενώσεις συσκευές, στη νέα συσκευή επίλεξε «Φέρε τα δεδομένα από το Google Drive» πριν φτιάξεις λογαριασμό.<div class="row" style="margin-top:8px"><button class="btn sm danger" id="syOver">Αντικατάσταση με τα δεδομένα αυτής της συσκευής</button></div></div>`:''}
+    ${Sync.pendingEarn?`<div class="note small field">Το Ταμείο άλλαξε και στις δύο συσκευές. Ξεκλείδωσε το Ταμείο εδώ για να ενωθούν.</div>`:''}
+    <div class="row"><button class="btn pri" id="syNow">${ic('refresh',16)} ${ok?'Συγχρονισμός τώρα':'Σύνδεση με Google'}</button><button class="btn" id="syOff">Απενεργοποίηση</button></div>`
+   :`<button class="btn pri" id="syOn">${ic('cloud',16)} Σύνδεση με Google και ενεργοποίηση</button>`}
+   </div>
+   <div class="card section"><h3>Πώς λειτουργεί</h3><ol class="small howto">
+    <li>Σε αυτή τη συσκευή πάτα «Σύνδεση με Google» και διάλεξε τον λογαριασμό σου.</li>
+    <li>Στη <b>νέα</b> συσκευή άνοιξε το LUMIO και, <b>πριν φτιάξεις λογαριασμό</b>, πάτα «Σύνδεση» → «Φέρε τα δεδομένα από το Google Drive». Μετά συνδέσου με το ίδιο όνομα χρήστη και κωδικό.</li>
+    <li>Από εκεί και πέρα, οι αλλαγές περνούν μόνες τους (λίγα δευτερόλεπτα μετά από κάθε αλλαγή, όταν ανοίγεις την εφαρμογή και κάθε 5 λεπτά). Το συννεφάκι πάνω δεξιά δείχνει την κατάσταση — πάτα το για άμεσο συγχρονισμό.</li>
+    <li>Αν αλλάξει το ίδιο ακριβώς πράγμα (π.χ. η ώρα του ίδιου ραντεβού) και στις δύο συσκευές πριν συγχρονιστούν, κρατιέται η αλλαγή της συσκευής που συγχρονίζεται τελευταία — όλα τα υπόλοιπα (νέα, διαγραφές, άλλες αλλαγές) ενώνονται.</li>
+    <li>Η σύνδεση με Google κρατά περίπου μία ώρα· μετά, ένα πάτημα στο συννεφάκι την ανανεώνει.</li></ol>
+    <p class="tiny muted">Η εφαρμογή βλέπει <b>μόνο</b> τα αρχεία που δημιούργησε η ίδια στο Drive σου — κανένα άλλο αρχείο σου.</p></div>`;
+  const r=async p=>{const x=await p;syncToast(x);syncSettings(el);};
+  const a=$('#syOn',el);if(a)a.onclick=()=>r(Sync.connectAndRun());
+  const n=$('#syNow',el);if(n)n.onclick=()=>r(GD.ok()?Sync.run('manual'):Sync.connectAndRun());
+  const f=$('#syOff',el);if(f)f.onclick=async()=>{if(!await confirmDlg('Απενεργοποίηση συγχρονισμού σε αυτή τη συσκευή; Τα δεδομένα στο Drive μένουν.',{ok:'Απενεργοποίηση'}))return;Sync.setCfg({on:false});GD.forget();syncSettings(el);};
+  const o=$('#syOver',el);if(o)o.onclick=async()=>{if(!await confirmDlg('Τα δεδομένα LUMIO στο Drive θα αντικατασταθούν με αυτά της συσκευής. Η άλλη συσκευή θα πρέπει να ξαναφέρει τα δεδομένα από το Drive. Συνέχεια;',{danger:true,ok:'Αντικατάσταση'}))return;try{const root=await GD.root();const rf=await GD.file('lumio-sync.json',root);if(rf)await GD.del(rf.id);await IDB.del('syncbase');Sync.setCfg({foreign:false,remoteTime:null});r(Sync.run('manual'));}catch(e){toast(e.message,'bad');}};}
 
 /* ===== Βοήθεια: διακριτικό «!» δίπλα σε τίτλους — εξηγεί κάθε κουμπί της σελίδας ===== */
 const HELP={
