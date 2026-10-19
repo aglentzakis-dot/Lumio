@@ -5,7 +5,7 @@
 <meta name="description" content="Εξατομικευμένα εκπαιδευτικά παιχνίδια, φύλλα εργασίας και προγράμματα για κάθε μαθητή.">
 <meta name="theme-color" content="#FBF7EF">
 <meta name="robots" content="noindex">
-<meta name="app-version" content="2.31.0">
+<meta name="app-version" content="2.32.0">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -1265,7 +1265,7 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.31.0';
+const APP_VERSION='2.32.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -1334,7 +1334,12 @@ async function decJSON(key,o){return JSON.parse(TD.decode(await aesDec(key,o)));
 
 /* ---- συμπίεση για συνδέσμους ---- */
 async function packLink(obj){const data=TE.encode(JSON.stringify(obj));let out=data,z='j';if(window.CompressionStream){try{const cs=new CompressionStream('deflate-raw');const s=new Blob([data]).stream().pipeThrough(cs);out=new Uint8Array(await new Response(s).arrayBuffer());z='z';}catch(e){}}return z+b64(out).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-async function unpackLink(str){const z=str[0];let s=str.slice(1).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';let u8=unb64(s);if(z==='z'){const ds=new DecompressionStream('deflate-raw');u8=new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(ds)).arrayBuffer());}return JSON.parse(TD.decode(u8));}
+async function unpackLink(str){const z=str[0];let s=str.slice(1).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';let u8=unb64(s);if(z==='z'){const ds=new DecompressionStream('deflate-raw');u8=new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(ds)).arrayBuffer());}return linkClean(JSON.parse(TD.decode(u8)));}
+/* 2.32: ό,τι έρχεται από σύνδεσμο (#play=, #parent=, #res=) «καθαρίζεται» ολόκληρο πριν χρησιμοποιηθεί:
+   οι χαρακτήρες < > " ' ` γίνονται ακίνδυνοι ομοιότυποι (＜ ＞ ″ ’ ˋ), οι αριθμοί ελέγχονται, τα επικίνδυνα κλειδιά αγνοούνται. */
+function linkClean(v,d=0){if(d>12)return null;if(typeof v==='string')return v.slice(0,20000).replace(/</g,'＜').replace(/>/g,'＞').replace(/"/g,'″').replace(/'/g,'’').replace(/`/g,'ˋ');
+  if(Array.isArray(v))return v.slice(0,3000).map(x=>linkClean(x,d+1));if(v&&typeof v==='object'){const o={};for(const k of Object.keys(v).slice(0,600)){if(k==='__proto__'||k==='constructor'||k==='prototype')continue;o[k]=linkClean(v[k],d+1);}return o;}
+  if(typeof v==='number')return Number.isFinite(v)?v:0;return typeof v==='boolean'||v==null?v:null;}
 
 /* ---- αποθήκευση IndexedDB ---- */
 const IDB={db:null,
@@ -1637,7 +1642,7 @@ function calcExpr(src){const s=String(src).replace(/×|x(?=\s*\d)/g,'*').replace
   try{const v=add();ws();if(i<s.length)return null;return v;}catch(e){return null;}}
 function parseNum(str){if(str==null)return null;const t=String(str).trim();const f=/^(-?\d+)\s*\/\s*(\d+)$/.exec(t);if(f)return+f[1]/+f[2];const mx=/^(\d+)\s+(\d+)\/(\d+)$/.exec(t);if(mx)return+mx[1]+(+mx[2]/+mx[3]);const m=/-?\d+(?:[.,]\d+)?/.exec(t.replace(/\.(?=\d{3}\b)/g,''));return m?parseFloat(m[0].replace(',','.')):null;}
 const numEq=(a,b)=>a!=null&&b!=null&&Math.abs(a-b)<1e-6*Math.max(1,Math.abs(b));
-const norm=s=>String(s??'').trim().toLowerCase().replace(/\s+/g,' ');
+const norm=s=>String(s??'').replace(/[’‘]/g,"'").replace(/″/g,'"').replace(/＜/g,'<').replace(/＞/g,'>').trim().toLowerCase().replace(/\s+/g,' ');
 const normLoose=s=>norm(s).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ς/g,'σ').replace(/[.,!;·]/g,'');
 
 /* ---- έλεγχος κλειδιών απαντήσεων ---- */
@@ -2244,7 +2249,7 @@ function sessMin(s,e){if(!s||!e)return 0;const[a,b]=s.split(':').map(Number),[c,
 const sessAmount=(rate,min)=>Math.round((+rate||0)*min/60*100)/100;
 const BADGES=[['first','🌱','Πρώτο βήμα',h=>h.length>=1],['five','🔥','5 δραστηριότητες',h=>h.length>=5],['ten','🚀','10 δραστηριότητες',h=>h.length>=10],['perfect','💯','Τέλειο σκορ',h=>h.some(x=>x.pct===100)],['persist','💪','Δεν το βάζω κάτω',h=>h.some(x=>x.pct<60)],['improve','📈','Βελτίωση',h=>h.some((x,i)=>i>0&&x.pct-h[i-1].pct>=15)],['helper','💡','Ζήτησα βοήθεια και τα κατάφερα',h=>h.some(x=>x.hints>0&&x.pct>=60)],['streak','📅','3 μέρες στη σειρά',h=>{const d=[...new Set(h.map(x=>x.date.slice(0,10)))].sort();for(let i=2;i<d.length;i++){const a=new Date(d[i-2]),c=new Date(d[i]);if((c-a)/864e5===2)return true;}return false;}],['twenty','🌟','20 δραστηριότητες',h=>h.length>=20],['star90','🏅','3 φορές πάνω από 90%',h=>h.filter(x=>x.pct>=90).length>=3]];
 function stuShellHTML({name,avatar,theme,band,hist,tasks,tab,awards}){window.MEDAL_HIST=hist;const pts=hist.reduce((a,x)=>a+(x.score||0),0)+hist.length*5;const lvl=Math.floor(pts/100)+1,into=pts%100;const look=themeBg(theme,band);const T=THEMES[theme]||THEMES.neutral;const txt=look.dark?'#fff':'#2E2A33';
-  return`<div class="stu ${band}" style="background:${look.bg};color:${txt}"><div class="shead"><button class="bigav" id="sav">${avatar}</button><div class="lvl"><div style="font-weight:800;font-size:1.15rem">👋 Γεια σου! ${T.e}</div>${name?`<div class="small" style="font-weight:700">${esc(name)}</div>`:''}<div class="small">Επίπεδο ${lvl} · ${pts} πόντοι</div><div class="bar" style="margin-top:6px"><i style="width:${into}%"></i></div></div><div id="sx"></div></div>
+  return`<div class="stu ${band}" style="background:${look.bg};color:${txt}"><div class="shead"><button class="bigav" id="sav">${esc(avatar)}</button><div class="lvl"><div style="font-weight:800;font-size:1.15rem">👋 Γεια σου! ${T.e}</div>${name?`<div class="small" style="font-weight:700">${esc(name)}</div>`:''}<div class="small">Επίπεδο ${lvl} · ${pts} πόντοι</div><div class="bar" style="margin-top:6px"><i style="width:${into}%"></i></div></div><div id="sx"></div></div>
   <div class="sbody"><div class="philo" style="margin-bottom:14px"><span>Μάθε</span>→<span>Εξασκήσου</span>→<span>Βελτιώσου</span>→<span>Γιόρτασε την πρόοδο</span></div>
   <div class="tabs" style="border:0">${[['tasks','🎯 Οι αποστολές μου'],['journey','🗺️ Η διαδρομή μου'],['badges','🏅 Τα μετάλλιά μου']].map(([k,l])=>`<button data-st="${k}" class="${tab===k?'on':''}" style="${tab===k?'':'background:rgba(255,255,255,.6);color:#2E2A33'}">${l}</button>`).join('')}</div>
   ${tab==='tasks'?`<div class="scard">${tasks.length?tasks.map(t=>`<div class="act" data-play="${t.id}" style="${t.done?'opacity:.7':''}"><span class="e">${(GAME_TYPES[t.gameType]||{}).e||'🎮'}</span><div style="flex:1"><b>${esc(t.title)}</b><div class="small">${t.done?'✓ Ολοκληρώθηκε'+(t.pct!=null?' · '+t.pct+'%':'')+' — παίξε ξανά!':'Νέα αποστολή!'}</div></div><span style="font-size:1.6rem">▶</span></div>`).join(''):'<div class="empty">Δεν υπάρχουν αποστολές αυτή τη στιγμή. 🌤️</div>'}</div>`:''}
@@ -4428,7 +4433,7 @@ function termTableHTML(L){if(!L.length)return'';const yrs=[...new Set(L.map(a=>s
   return`<table class="t tterm"><tr><th>${y}</th>${[1,2,3].map(t=>`<th>${TERM_N[t]}</th>`).join('')}</tr>${subs.map(s=>`<tr><td><b>${esc(s)}</b></td>${[1,2,3].map(t=>`<td>${cell(s,t)}</td>`).join('')}</tr>`).join('')}</table>`;}
 function assessTabHTML(s){const L=assessOf(s.id);
   return`<div class="card section"><div class="card-h"><h3>${ic('chart',17)} Αξιολογήσεις</h3><button class="btn sm pri" data-asn="${s.id}">${ic('plus',15)} Νέα αξιολόγηση</button></div>
-   ${L.length?`${assessChartSVG(L)}${termTableHTML(L)}<div class="list" style="margin-top:12px">${L.slice().reverse().map(a=>`<div class="rw static wrapm"><span class="ricon ${aPct(a)>=85?'g':aPct(a)>=60?'y':'r'}"><b style="font-size:.8rem">${Math.round(aPct(a))}</b></span><span class="grow"><b>${esc(a.title||'Τεστ')} · ${a.score}/${a.max}</b><small>${esc(a.subject||'Γενικά')} · ${fmtDate(a.date)} · ${TERM_N[termOf(a.date)]}${a.note?' · '+esc(a.note):''}</small></span><span class="end"><button class="iconbtn" data-ase="${a.id}" aria-label="Αλλαγή">${ic('edit',16)}</button></span></div>`).join('')}</div>`
+   ${L.length?`${assessChartSVG(L)}${termTableHTML(L)}<div class="list" style="margin-top:12px">${L.slice().reverse().map(a=>`<div class="rw static wrapm"><span class="ricon ${aPct(a)>=85?'g':aPct(a)>=60?'y':'r'}"><b style="font-size:.8rem">${Math.round(aPct(a))}</b></span><span class="grow"><b>${esc(a.title||'Τεστ')} · ${esc(a.score)}/${esc(a.max)}</b><small>${esc(a.subject||'Γενικά')} · ${fmtDate(a.date)} · ${TERM_N[termOf(a.date)]}${a.note?' · '+esc(a.note):''}</small></span><span class="end"><button class="iconbtn" data-ase="${a.id}" aria-label="Αλλαγή">${ic('edit',16)}</button></span></div>`).join('')}</div>`
     :`<p class="small muted">Κατέγραψε τεστ και διαγωνίσματα — του φροντιστηρίου ή του σχολείου. Θα βλέπεις την πορεία ανά μάθημα και τον μέσο όρο ανά τρίμηνο, και θα μπαίνουν στην ενημέρωση των γονέων.</p>`}</div>`;}
 function assessDialog(sid,a0){const st=stOf(sid)||{};const subs=[...new Set(String(st.subjects||'').split(/[,;]/).map(x=>x.trim()).filter(Boolean).concat(assessOf(sid).map(a=>a.subject).filter(Boolean)))];const a=a0||{date:todayISO(),subject:subs[0]||'',title:'',score:'',max:(assessOf(sid).slice(-1)[0]||{}).max||20,note:''};
   const md=modal(`<h3 style="margin-top:0">${a0?'Αλλαγή αξιολόγησης':'Νέα αξιολόγηση'} — ${esc(stuName(st))}</h3>
@@ -4483,6 +4488,17 @@ function parentLinkDialog(sid){const st=stOf(sid)||{};let kind='edu',months=3,da
     else if(id==='ple')location.href=`mailto:${em.map(c=>c.email).join(',')}?subject=${encodeURIComponent(kind==='fin'?'Οικονομική ενημέρωση':'Πρόγραμμα και πρόοδος')}&body=${encodeURIComponent(msg(await link()))}`;
     else if(id==='plsh'){try{const u=await link();await navigator.share({title:'LUMIO',text:msg(''),url:u});}catch(x){}}});
 }
+/* 2.32: έλεγχος μορφής όλων των τιμών της σελίδας γονέα (αριθμοί, ημερομηνίες, ώρες) */
+function ppSan(P){const n=x=>Number.isFinite(+x)?+x:0,nn=x=>x==null?null:n(x),D=x=>/^\d{4}-\d{2}-\d{2}$/.test(String(x))?String(x):'',T=x=>/^\d{1,2}:\d{2}$/.test(String(x))?String(x):'',A=x=>Array.isArray(x)?x:[],Str=x=>x==null?'':String(x);
+  for(const k of['n','av','g','b','t','ph','em','ad','web','iban','k'])P[k]=Str(P[k]).slice(0,300);
+  P.mo=[1,3,12].includes(+P.mo)?+P.mo:3;P.gen=D(P.gen)||todayISO();if(P.exp!=null)P.exp=D(P.exp)||'2000-01-01';
+  const a=P.att||{};P.att={done:n(a.done),total:n(a.total),absent:n(a.absent)};
+  P.up=A(P.up).map(x=>[D(A(x)[0]),T(A(x)[1]),T(A(x)[2])]).filter(x=>x[0]);
+  P.rec=A(P.rec).map(x=>[D(A(x)[0]),Str(A(x)[1]),Str(A(x)[2])]).filter(x=>x[0]);
+  const r=P.pr||{};P.pr={avg:nn(r.avg),min:n(r.min),n:n(r.n),sub:A(r.sub).map(x=>[Str(A(x)[0]),Math.max(0,Math.min(100,n(A(x)[1]))),n(A(x)[2])]),ok:A(r.ok).map(Str),wk:A(r.wk).map(Str)};
+  P.as=A(P.as).map(x=>[D(A(x)[0]),Str(A(x)[1]),Str(A(x)[2]),n(A(x)[3]),n(A(x)[4])||1]).filter(x=>x[0]);
+  const f=P.fin;P.fin=f&&typeof f==='object'?{bal:n(f.bal),n:n(f.n),pk:Array.isArray(f.pk)?[n(f.pk[0]),n(f.pk[1])]:null,list:A(f.list).map(x=>[D(A(x)[0]),n(A(x)[1])]).filter(x=>x[0])}:null;
+  return P;}
 const ParentPage={msg(h,p){document.body.innerHTML=`<div class="auth"><div class="card" style="text-align:center"><span class="logo">${LOGO}</span><h2>${h}</h2><p class="muted">${p}</p></div></div>`;},
  async open(str){let P;
   if(str[0]==='Q'){P=await new Promise(res=>{let fails=0;document.body.innerHTML=`<div class="auth"><div class="card" style="text-align:center;max-width:380px"><span class="logo">${LOGO}</span><h2>Ιδιωτική σελίδα</h2><p class="muted small">Γράψτε τον κωδικό που σας έδωσε ο/η παιδαγωγός (10 γράμματα και αριθμοί).</p><input class="in" id="ppin" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="14" style="text-align:center;font-size:1.3rem;letter-spacing:.12em;text-transform:uppercase" placeholder="XXXX-XXXX-XX"><button class="btn pri" id="ppok" style="margin-top:12px;width:100%">Άνοιγμα</button><p class="small" id="pperr" style="color:var(--bad);min-height:1.2em"></p></div></div>`;
@@ -4491,17 +4507,18 @@ const ParentPage={msg(h,p){document.body.innerHTML=`<div class="auth"><div class
   else if(str[0]==='K'){try{P=await unkeyLink(str);}catch(e){P=null;}}
   else return this.msg('Ο σύνδεσμος είναι παλιού τύπου','Για την προστασία των στοιχείων του παιδιού, ζητήστε νέο σύνδεσμο από τον/την παιδαγωγό.');
   if(!P||P.v!==1)return this.msg('Ο σύνδεσμος δεν είναι έγκυρος','Ζητήστε νέο σύνδεσμο από τον/την παιδαγωγό.');
+  P=ppSan(P);
   if(P.exp&&todayISO()>P.exp)return this.msg('Ο σύνδεσμος έληξε',`Ίσχυε ως ${fmtDate(P.exp)}. Ζητήστε νέο από τον/την παιδαγωγό.`);
   if(P.k==='fin')return this.fin(P);
   document.title=P.n+' — LUMIO';const stt={done:'Ήρθε',absent:'Απουσία',cancel:'Ακυρώθηκε','':'—'};const A=P.as.map(x=>({date:x[0],subject:x[1],title:x[2],score:x[3],max:x[4]}));
   document.body.innerHTML=`<div class="ppage"><header class="pphead"><span class="pplogo">${LOGO}</span><div class="grow"><div class="tiny muted">${esc(P.b||'LUMIO')}</div><h1>${esc(P.av)} ${esc(P.n)}</h1><div class="small muted">${P.g?esc(P.g)+' · ':''}Ενημέρωση ${fmtDate(P.gen)}${P.exp?' · ισχύει ως '+fmtShort(P.exp):''}</div></div><button class="iconbtn noprint" onclick="print()" aria-label="Εκτύπωση">${ic('printer',20)}</button></header>
    ${P.fin?`<div class="card ppcard"><h3>${ic('wallet',17)} Οικονομικά</h3><div class="kpis k3"><div class="kpi"><div class="k">Υπόλοιπο</div><div class="v sm" style="color:${P.fin.bal?'var(--bad)':'var(--ok)'}">${P.fin.bal?fmtEur(P.fin.bal):'Εξοφλημένο'}</div>${P.fin.n?`<div class="d">${P.fin.n} ${P.fin.n===1?'συνεδρία':'συνεδρίες'}</div>`:''}</div>${P.fin.pk?`<div class="kpi"><div class="k">Πακέτο</div><div class="v sm">${P.fin.pk[1]} από ${P.fin.pk[0]}</div><div class="d">μαθήματα απομένουν</div></div>`:''}</div></div>`:''}
-   <div class="card ppcard"><h3>${ic('calendar',17)} Επόμενα μαθήματα</h3>${P.up.length?`<div class="list">${P.up.map(([d,s,e])=>`<div class="rw static"><span class="grow"><b>${WDAYS[wdOf(d)]} ${fmtShort(d)}</b><small>${s}–${e}</small></span></div>`).join('')}</div>`:'<p class="small muted">Δεν υπάρχουν προγραμματισμένα μαθήματα τις επόμενες 4 εβδομάδες.</p>'}</div>
+   <div class="card ppcard"><h3>${ic('calendar',17)} Επόμενα μαθήματα</h3>${P.up.length?`<div class="list">${P.up.map(([d,s,e])=>`<div class="rw static"><span class="grow"><b>${WDAYS[wdOf(d)]} ${fmtShort(d)}</b><small>${esc(s)}–${esc(e)}</small></span></div>`).join('')}</div>`:'<p class="small muted">Δεν υπάρχουν προγραμματισμένα μαθήματα τις επόμενες 4 εβδομάδες.</p>'}</div>
    <div class="card ppcard"><h3>${ic('chart',17)} Πρόοδος — ${P.mo===1?'τελευταίος μήνας':P.mo===12?'τελευταίος χρόνος':'τελευταίοι '+P.mo+' μήνες'}</h3>
     <div class="kpis"><div class="kpi"><div class="k">Μαθήματα</div><div class="v sm">${P.att.done}${P.att.total?'/'+P.att.total:''}</div>${P.att.absent?`<div class="d">${P.att.absent} απουσίες</div>`:''}</div><div class="kpi"><div class="k">Δραστηριότητες</div><div class="v sm">${P.pr.n}</div></div><div class="kpi"><div class="k">Μέση επιτυχία</div><div class="v sm">${P.pr.avg!=null?P.pr.avg+'%':'—'}</div></div><div class="kpi"><div class="k">Εξάσκηση</div><div class="v sm">${P.pr.min}΄</div></div></div>
     ${P.pr.sub.length?`<div style="margin-top:10px">${P.pr.sub.map(([k,a,n])=>`<div style="margin-bottom:8px"><div class="spread small"><span>${esc(k)}</span><span class="muted">${n} · <b style="color:var(--ink)">${a}%</b></span></div><div class="bar"><i style="width:${a}%;background:${a>=85?'var(--ok)':a>=60?'var(--yellow-d)':'var(--pink-d)'}"></i></div></div>`).join('')}</div>`:''}
     ${P.pr.ok.length?`<p class="small">✅ Πολύ καλά σε: ${P.pr.ok.map(esc).join(', ')}</p>`:''}${P.pr.wk.length?`<p class="small">🎯 Δουλεύουμε: ${P.pr.wk.map(esc).join(', ')}</p>`:''}</div>
-   ${A.length?`<div class="card ppcard"><h3>${ic('target',17)} Αξιολογήσεις</h3>${assessChartSVG(A)}${termTableHTML(A)}<div class="list" style="margin-top:10px">${A.slice().reverse().map(a=>`<div class="rw static"><span class="grow"><b>${esc(a.title||'Τεστ')} · ${a.score}/${a.max}</b><small>${esc(a.subject||'')} · ${fmtDate(a.date)}</small></span></div>`).join('')}</div></div>`:''}
+   ${A.length?`<div class="card ppcard"><h3>${ic('target',17)} Αξιολογήσεις</h3>${assessChartSVG(A)}${termTableHTML(A)}<div class="list" style="margin-top:10px">${A.slice().reverse().map(a=>`<div class="rw static"><span class="grow"><b>${esc(a.title||'Τεστ')} · ${esc(a.score)}/${esc(a.max)}</b><small>${esc(a.subject||'')} · ${fmtDate(a.date)}</small></span></div>`).join('')}</div></div>`:''}
    ${P.rec.length?`<div class="card ppcard"><h3>${ic('history',17)} Πρόσφατα μαθήματα</h3><table class="t"><tr><th>Ημ/νία</th><th>Κατάσταση</th><th>Τι κάναμε</th></tr>${P.rec.map(([d,s,w])=>`<tr><td>${fmtShort(d)}</td><td>${stt[s]||'—'}</td><td>${esc(w||'—')}</td></tr>`).join('')}</table></div>`:''}
    <footer class="ppfoot small muted">${esc(P.t)}${P.ph?` · <a href="tel:${telLink(P.ph)}">${esc(P.ph)}</a>`:''}${P.em?` · <a href="mailto:${esc(P.em)}">${esc(P.em)}</a>`:''}${P.ad?`<div>${esc(P.ad)}</div>`:''}${P.web?`<div>${esc(P.web)}</div>`:''}<div class="tiny" style="margin-top:6px">Ιδιωτική σελίδα — μην προωθείτε τον σύνδεσμο. Δημιουργήθηκε με το LUMIO.</div></footer></div>`;},
  fin(P){document.title='Οικονομική ενημέρωση — LUMIO';const F=P.fin;
