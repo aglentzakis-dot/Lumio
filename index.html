@@ -5,6 +5,7 @@
 <meta name="description" content="Εξατομικευμένα εκπαιδευτικά παιχνίδια, φύλλα εργασίας και προγράμματα για κάθε μαθητή.">
 <meta name="theme-color" content="#FBF7EF">
 <meta name="robots" content="noindex">
+<meta name="app-version" content="2.29.0">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -1264,7 +1265,7 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.28.1';
+const APP_VERSION='2.29.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -1351,8 +1352,8 @@ const IDB={db:null,
 /* ---- κατάσταση ---- */
 const S={meta:null,user:null,raw:null,dataKey:null,data:null,earn:null,earnKey:null,studentMode:null,lastAct:Date.now(),fails:0,lockUntil:0};
 const LEGAL_VER='2026-10b';
-function defaultData(){return{students:[],materials:[],uploads:[],results:[],assignments:[],programs:[],reports:[],inbox:[],profile:{title:'',email:'',phone:'',bio:''},settings:{aiKey:'',model:'auto',autoLockMin:0,sendNotes:false,sound:true,lastReportCheck:'',notify:{reports:true,assign:true,updates:true},v2:true}};}
-function migrate(d){const def=defaultData();for(const k in def)if(d[k]===undefined)d[k]=def[k];if(!d.settings.v2){d.settings.autoLockMin=0;d.settings.v2=true;}d.settings={...def.settings,...d.settings};d.settings.notify={...def.settings.notify,...(d.settings.notify||{})};d.profile={...def.profile,...d.profile};return d;}
+function defaultData(){return{students:[],materials:[],uploads:[],results:[],assignments:[],programs:[],reports:[],inbox:[],profile:{title:'',email:'',phone:'',bio:''},settings:{aiKey:'',model:'auto',autoLockMin:15,sendNotes:false,sound:true,lastReportCheck:'',notify:{reports:true,assign:true,updates:true},v2:true}};}
+function migrate(d){const def=defaultData();for(const k in def)if(d[k]===undefined)d[k]=def[k];if(!d.settings.v2){d.settings.autoLockMin=15;d.settings.v2=true;}if(!d.settings.v3){if(!+d.settings.autoLockMin)d.settings.autoLockMin=15;d.settings.v3=true;}d.settings={...def.settings,...d.settings};d.settings.notify={...def.settings.notify,...(d.settings.notify||{})};d.profile={...def.profile,...d.profile};return d;}
 async function saveMeta(){await IDB.set('meta',S.meta);}
 const _saveData=debounce(async()=>{if(!S.dataKey||!S.data)return;await IDB.set('vault',await encJSON(S.dataKey,S.data));Backup.auto();try{Sync.soon();}catch(e){}},400);
 function save(){_saveData();}
@@ -1362,14 +1363,14 @@ async function saveNow(){if(!S.dataKey||!S.data)return;await IDB.set('vault',awa
 function genRecovery(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const r=rand(16);let c='';for(let i=0;i<16;i++){c+=A[r[i]%A.length];if(i%4===3&&i<15)c+='-';}return c;}
 const normCode=c=>String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/(.{4})(?=.)/g,'$1-');
 async function createAdmin({name,username,pass,org,email,remember=true}){const raw=rand(32);const code=genRecovery();S.meta={schema:2,org:org||'',created:new Date().toISOString(),users:[{id:uid(),name,email:(email||'').trim().toLowerCase(),username:username.trim().toLowerCase(),role:'admin',wrap:await wrapRaw(raw,pass),recWrap:await wrapRaw(raw,code),earnWrap:null,created:new Date().toISOString()}]};await saveMeta();S.raw=raw;S.dataKey=await importRaw(raw);S.data=defaultData();S.data.settings.termsOk=LEGAL_VER;S.user=S.meta.users[0];await saveNow();if(remember)await Session.save();return code;}
-async function login(username,pass,remember=true){if(Date.now()<S.lockUntil)throw new Error('Πολλές αποτυχημένες προσπάθειες. Δοκίμασε ξανά σε λίγα δευτερόλεπτα.');const u=S.meta.users.find(x=>x.username===username.trim().toLowerCase());let raw;try{if(!u)throw 0;raw=await unwrapRaw(u.wrap,pass);}catch(e){S.fails++;if(S.fails>=5){S.lockUntil=Date.now()+30000;S.fails=0;}throw new Error('Λάθος όνομα χρήστη ή κωδικός.');}S.fails=0;await openVault(u,raw);try{kidFlag(null);}catch(e){}if(remember)await Session.save();else await Session.clear();}
+async function login(username,pass,remember=true){if(Date.now()<S.lockUntil)throw new Error('Πολλές αποτυχημένες προσπάθειες. Δοκίμασε ξανά σε λίγα δευτερόλεπτα.');const u=S.meta.users.find(x=>x.username===username.trim().toLowerCase());let raw;try{if(!u)throw 0;raw=await unwrapRaw(u.wrap,pass);}catch(e){S.fails++;if(S.fails>=5){S.lockUntil=Date.now()+30000;S.fails=0;}throw new Error('Λάθος όνομα χρήστη ή κωδικός.');}S.fails=0;await openVault(u,raw);actMark(true);try{kidFlag(null);}catch(e){}if(remember)await Session.save();else await Session.clear();}
 async function openVault(u,raw){S.raw=raw;S.dataKey=await importRaw(raw);const blob=await IDB.get('vault');S.data=migrate(blob?await decJSON(S.dataKey,blob):defaultData());S.user=u;S.lastAct=Date.now();try{const b=await IDB.get('tm:'+u.id);if(b){const o=await decJSON(S.dataKey,b);for(const k in o)localStorage.setItem(k,o[k]);await IDB.del('tm:'+u.id);}}catch(e){}try{syncAfterOpen();}catch(e){}}
 async function resetWithRecovery(username,code,newPass){const q=username.trim().toLowerCase();const u=S.meta.users.find(x=>x.username===q||(x.email&&x.email===q));if(!u||!u.recWrap)throw new Error('Δεν βρέθηκε λογαριασμός με κωδικό ανάκτησης για αυτό το όνομα χρήστη.');let raw;try{raw=await unwrapRaw(u.recWrap,normCode(code));}catch(e){throw new Error('Ο κωδικός ανάκτησης δεν είναι σωστός.');}u.wrap=await wrapRaw(raw,newPass);await saveMeta();return u;}
 async function newRecovery(userId){const u=S.meta.users.find(x=>x.id===userId);const code=genRecovery();u.recWrap=await wrapRaw(S.raw,code);await saveMeta();return code;}
 const Session={
   async devKey(){if(IDB.ls){let r=await IDB.get('devkeyraw');if(!r){r=b64(rand(32));await IDB.set('devkeyraw',r);}return importRaw(unb64(r));}let k=await IDB.get('devkey');if(!k){k=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);await IDB.set('devkey',k);}return k;},
   async save(){try{const k=await this.devKey();await IDB.set('session',{userId:S.user.id,at:new Date().toISOString(),...await aesEnc(k,S.raw)});}catch(e){console.warn('session',e);}},
-  async restore(){try{const s=await IDB.get('session');if(!s)return false;const u=S.meta.users.find(x=>x.id===s.userId);if(!u){await this.clear();return false;}const k=IDB.ls?await this.devKey():await IDB.get('devkey');if(!k)return false;const raw=await aesDec(k,s);await openVault(u,raw);return true;}catch(e){await this.clear();return false;}},
+  async restore(){try{const s=await IDB.get('session');if(!s)return false;const u=S.meta.users.find(x=>x.id===s.userId);if(!u){await this.clear();return false;}const k=IDB.ls?await this.devKey():await IDB.get('devkey');if(!k)return false;const raw=await aesDec(k,s);await openVault(u,raw);const m=+S.data.settings.autoLockMin||0;const act=+localStorage.getItem('pai-act')||0;if(m&&act&&Date.now()-act>m*60000){await this.clear();S.raw=null;S.dataKey=null;S.data=null;S.user=null;S.earn=null;S.earnKey=null;S.bootMsg='Η εφαρμογή κλείδωσε λόγω αδράνειας. Γράψε τον κωδικό σου.';return false;}S.lastAct=Date.now();actMark(true);return true;}catch(e){await this.clear();return false;}},
   async has(){try{return!!(await IDB.get('session'));}catch(e){return false;}},
   async clear(){try{await IDB.del('session');}catch(e){}}
 };
@@ -1384,7 +1385,9 @@ const stuName=s=>s?(s.name||s.code):'—';
 function genCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c;do{c='';const r=rand(6);for(const x of r)c+=A[x%A.length];}while(S.data&&S.data.students.some(s=>s.code===c));return c;}
 
 /* ---- αυτόματο κλείδωμα ---- */
-['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{S.lastAct=Date.now();},{passive:true}));
+['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{S.lastAct=Date.now();actMark();},{passive:true}));
+let _actT=0;function actMark(force){const n=Date.now();if(!force&&n-_actT<20000)return;_actT=n;try{localStorage.setItem('pai-act',String(S.lastAct||n));}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.user)actMark(true);});
 setInterval(()=>{if(!S.user||S.studentMode||document.querySelector('.gwrap'))return;const m=S.data?+S.data.settings.autoLockMin||0:0;if(m&&Date.now()-S.lastAct>m*60000)logout('Η εφαρμογή κλείδωσε λόγω αδράνειας.');if(S.earnKey&&Date.now()-S.lastAct>5*60000){Earn.lock();if(/^#\/(earnings|sessions)/.test(location.hash))render();}},20000);
 
 /* ---- απολαβές (χωριστό κλειδί) ---- */
@@ -2343,7 +2346,7 @@ function viewLogin(){if(!S.meta){authShell(`<h1>Σύνδεση</h1><p class="lea
   const last=localStorage.getItem('pai-lastuser')||'';
   authShell(`<h1>Καλώς ήρθες ξανά</h1><p class="lead">Συνδέσου στο LUMIO${S.meta.org?' · '+esc(S.meta.org):''}</p>
    <form id="f"><div class="field"><label class="f" for="u">Όνομα χρήστη</label><input class="in" id="u" name="u" required autocomplete="username" autocapitalize="none" value="${esc(last)}"></div>${pwField('p','Κωδικός')}
-   <div class="spread field"><label class="check"><input type="checkbox" name="rem" checked> <span>Να με θυμάσαι</span></label><a href="#/forgot" class="small">Ξέχασες τον κωδικό;</a></div>
+   <div class="spread field"><label class="check" title="Μόνο σε δική σου συσκευή με κλείδωμα οθόνης"><input type="checkbox" name="rem"> <span>Να με θυμάσαι</span></label><a href="#/forgot" class="small">Ξέχασες τον κωδικό;</a></div>
    <button class="btn pri lg block">Σύνδεση</button></form><p class="alt">Δεν έχεις λογαριασμό; <a href="#/signup">Δημιουργία λογαριασμού</a></p>`);
   ($('#u').value?$('#p'):$('#u')).focus();
   $('#f').onsubmit=async e=>{e.preventDefault();const o=fd(e.target);const b=$('button.pri',e.target);b.disabled=true;b.innerHTML='<span class="spinner"></span>';try{await login(o.u,o.p,!!o.rem);localStorage.setItem('pai-lastuser',o.u.trim().toLowerCase());monthlyAuto();const t=S.afterLogin;S.afterLogin=null;location.hash=t||'#/dashboard';render();}catch(err){toast(err.message,'bad');b.disabled=false;b.textContent='Σύνδεση';}};}
@@ -2354,7 +2357,7 @@ function viewSignup(){if(S.meta){authShell(`<h1>Δημιουργία λογαρ�
    <div class="field"><label class="f" for="org">Γραφείο, κέντρο ή σχολείο (προαιρετικό)</label><input class="in" id="org" name="org" autocomplete="organization"></div>
    <div class="field"><label class="f" for="email">Email</label><input class="in" type="email" id="email" name="email" required autocomplete="email" autocapitalize="none" placeholder="για τον κωδικό ανάκτησης"></div><div class="field"><label class="f" for="username">Όνομα χρήστη</label><input class="in" id="username" name="username" required autocomplete="username" autocapitalize="none"></div>
    ${pwField('pass','Κωδικός (τουλάχιστον 8 χαρακτήρες)','new-password','minlength="8"')}${pwField('pass2','Επανάληψη κωδικού','new-password')}
-   <label class="check field"><input type="checkbox" name="rem" checked> <span>Να με θυμάσαι σε αυτή τη συσκευή</span></label>
+   <label class="check field"><input type="checkbox" name="rem"> <span>Να με θυμάσαι σε αυτή τη συσκευή <span class="tiny muted">— μόνο σε δική σου συσκευή με κλείδωμα οθόνης</span></span></label>
    <label class="check field"><input type="checkbox" required> <span class="small">Κατανοώ ότι τα δεδομένα κρυπτογραφούνται με τον κωδικό μου. Ο κωδικός ανάκτησης θα σταλεί στο email μου για την περίπτωση που τον ξεχάσω. Αποδέχομαι τους <a href="#" data-lgo="terms">Όρους χρήσης</a> και την <a href="#" data-lgo="privacy">Πολιτική απορρήτου</a>.</span></label>
    <button class="btn pri lg block">Δημιουργία λογαριασμού</button></form><p class="alt">Έχεις ήδη λογαριασμό; <a href="#/login">Σύνδεση</a> · <button id="rest">Επαναφορά αντιγράφου</button></p><input type="file" id="rf" accept=".json" class="hidden">`);
   bindRestore();
@@ -2484,7 +2487,7 @@ async function boot(){try{document.documentElement.style.setProperty('--bgscene'
   if(!window.crypto||!crypto.subtle){document.body.innerHTML='<div class="auth-side"><div class="auth-card"><h2>Χρειάζεται ασφαλής σύνδεση (https)</h2><p>Άνοιξε την εφαρμογή από τη διεύθυνσή της.</p></div></div>';return;}
   document.body.innerHTML=`<div class="loading" style="min-height:100vh;justify-content:center"><div class="sun">${LOGO}</div></div>`;
   await IDB.init();try{S.meta=await IDB.get('meta')||null;}catch(e){S.meta=null;}
-  if(S.meta&&!location.hash.startsWith('#play=')){if(await Session.restore()){monthlyAuto();try{kidResume();}catch(e){}}}
+  if(S.meta&&!location.hash.startsWith('#play=')){if(await Session.restore()){monthlyAuto();try{kidResume();}catch(e){}}else if(S.bootMsg)setTimeout(()=>{toast(S.bootMsg);S.bootMsg=null;},600);}
   addEventListener('hashchange',()=>{if(S.leave&&S.leave.dirty()&&location.hash!==S.leave.hash){const to=location.hash;history.pushState(null,'',S.leave.hash);leaveDialog(to);return;}if(location.hash.startsWith('#play='))StudentLink.payload=null;render();});
   addEventListener('beforeunload',e=>{if(S.leave&&S.leave.dirty()){e.preventDefault();e.returnValue='';}});
   render();setTimeout(()=>Update.check(false),3000);setInterval(()=>Update.check(false),30*60000);}
@@ -2901,8 +2904,8 @@ const SET={
   <div class="grid g2" style="gap:12px"><div class="field"><label class="f" for="p-n">Ονοματεπώνυμο</label><input class="in" id="p-n" name="name" value="${esc(S.user.name)}" required></div><div class="field"><label class="f" for="p-t">Ειδικότητα</label><input class="in" id="p-t" name="title" value="${esc(P.title)}" placeholder="π.χ. Ειδική παιδαγωγός"></div><div class="field"><label class="f" for="p-e">Email</label><input class="in" type="email" id="p-e" name="email" required value="${esc(S.user.email||P.email)}"></div><div class="field"><label class="f" for="p-p">Τηλέφωνο (προαιρετικό)</label><input class="in" id="p-p" name="phone" value="${esc(P.phone)}"></div></div>
   <div class="field"><label class="f" for="p-b">Σύντομο βιογραφικό</label><textarea class="in" id="p-b" name="bio" style="min-height:80px">${esc(P.bio)}</textarea></div><button class="btn pri">${ic('check',16)} Αποθήκευση</button><p class="tiny muted" style="margin:10px 0 0">Το όνομα και η ειδικότητα εμφανίζονται στις αναφορές για τους γονείς.</p></form>`);
   $('#pf',el).onsubmit=async e=>{e.preventDefault();const o=fd(e.target);S.user.name=o.name.trim()||S.user.name;if(o.email)S.user.email=o.email.trim().toLowerCase();await saveMeta();Object.assign(P,{title:o.title,email:o.email,phone:o.phone,bio:o.bio});save();toast('Αποθηκεύτηκε.','ok');render();};},
- async security(el){const st=S.data.settings;const rem=await Session.has();el.innerHTML=card('Σύνδεση',`<label class="switch"><span><b>Να με θυμάσαι σε αυτή τη συσκευή</b><small>Ανοίγεις το LUMIO κατευθείαν στην αρχική, χωρίς κωδικό κάθε φορά.</small></span><input type="checkbox" id="rem" ${rem?'checked':''}></label>
-   <div class="field" style="margin-top:14px"><label class="f" for="al">Αυτόματη αποσύνδεση λόγω αδράνειας</label><select class="in" id="al">${opt(0,'Ποτέ',st.autoLockMin)}${[5,15,30,60].map(m=>opt(m,'Μετά από '+m+' λεπτά',st.autoLockMin)).join('')}</select><div class="tiny muted" style="margin-top:6px">Χρήσιμο σε κοινόχρηστες συσκευές. Η αυτόματη αποσύνδεση ακυρώνει και το «να με θυμάσαι».</div></div>
+ async security(el){const st=S.data.settings;const rem=await Session.has();el.innerHTML=card('Σύνδεση',`<label class="switch"><span><b>Να με θυμάσαι σε αυτή τη συσκευή</b><small>Ανοίγεις το LUMIO χωρίς κωδικό κάθε φορά. Κλειστό εξ αρχής: αν χαθεί ή κλαπεί το κινητό, ανοίγει χωρίς κωδικό. Άνοιξέ το μόνο σε δική σου συσκευή με κλείδωμα οθόνης.</small></span><input type="checkbox" id="rem" ${rem?'checked':''}></label>
+   <div class="field" style="margin-top:14px"><label class="f" for="al">Αυτόματη αποσύνδεση λόγω αδράνειας</label><select class="in" id="al">${opt(0,'Ποτέ (δεν προτείνεται)',st.autoLockMin)}${[5,15,30,60].map(m=>opt(m,'Μετά από '+m+' λεπτά',st.autoLockMin)).join('')}</select><div class="tiny muted" style="margin-top:6px">Προεπιλογή 15 λεπτά. Μετράει και όσο η εφαρμογή είναι κλειστή: μετά από τόσα λεπτά χωρίς χρήση ζητείται ξανά ο κωδικός, ακόμη και με «να με θυμάσαι».</div></div>
    <button class="btn danger" id="lo2">${ic('logout',16)} Αποσύνδεση από αυτή τη συσκευή</button>`)
   +card('Κλείδωμα μαθητών',`<p class="small muted">Ζητά απλό κωδικό (4–6 ψηφία) για να ανοίξουν οι «Μαθητές» και τα προφίλ τους — ώστε όποιος πιάσει το κινητό να μη βλέπει ευαίσθητα στοιχεία. Κλειδώνει ξανά όταν βγεις από την εφαρμογή ή μετά από 5 λεπτά αδράνειας.</p>${S.data.settings.stuLock?`<div class="okbox" style="margin-bottom:12px">${ic('lock',15)} Ενεργό</div><div class="row"><button class="btn" id="slc">${ic('key',16)} Αλλαγή κωδικού</button><button class="btn danger" id="slo">${ic('x',16)} Απενεργοποίηση</button></div>`:`<button class="btn pri" id="sla">${ic('lock',16)} Ενεργοποίηση κλειδώματος</button>`}`)
   +card('PIN Ταμείου',Earn.hasPin()?`<p class="small muted">Το Ταμείο προστατεύεται με ξεχωριστό PIN και κλειδώνει μετά από 5 λεπτά αδράνειας.</p><button class="btn" id="cpin">${ic('key',16)} Αλλαγή PIN</button>`:`<p class="small muted">Δεν έχει οριστεί ακόμη PIN. Ορίζεται την πρώτη φορά που ανοίγεις το Ταμείο.</p><a class="btn" href="#/earnings">${ic('wallet',16)} Άνοιγμα Ταμείου</a>`)
