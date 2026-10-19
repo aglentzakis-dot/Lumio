@@ -5,7 +5,7 @@
 <meta name="description" content="Εξατομικευμένα εκπαιδευτικά παιχνίδια, φύλλα εργασίας και προγράμματα για κάθε μαθητή.">
 <meta name="theme-color" content="#FBF7EF">
 <meta name="robots" content="noindex">
-<meta name="app-version" content="2.29.0">
+<meta name="app-version" content="2.30.0">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -1265,7 +1265,7 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.29.0';
+const APP_VERSION='2.30.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -1362,19 +1362,19 @@ async function saveNow(){if(!S.dataKey||!S.data)return;await IDB.set('vault',awa
 /* ---- λογαριασμοί ---- */
 function genRecovery(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const r=rand(16);let c='';for(let i=0;i<16;i++){c+=A[r[i]%A.length];if(i%4===3&&i<15)c+='-';}return c;}
 const normCode=c=>String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/(.{4})(?=.)/g,'$1-');
-async function createAdmin({name,username,pass,org,email,remember=true}){const raw=rand(32);const code=genRecovery();S.meta={schema:2,org:org||'',created:new Date().toISOString(),users:[{id:uid(),name,email:(email||'').trim().toLowerCase(),username:username.trim().toLowerCase(),role:'admin',wrap:await wrapRaw(raw,pass),recWrap:await wrapRaw(raw,code),earnWrap:null,created:new Date().toISOString()}]};await saveMeta();S.raw=raw;S.dataKey=await importRaw(raw);S.data=defaultData();S.data.settings.termsOk=LEGAL_VER;S.user=S.meta.users[0];await saveNow();if(remember)await Session.save();return code;}
+async function createAdmin({name,username,pass,org,email,remember=true}){const raw=rand(32);const code=genRecovery();S.meta={schema:2,org:org||'',created:new Date().toISOString(),users:[{id:uid(),name,email:(email||'').trim().toLowerCase(),username:username.trim().toLowerCase(),role:'admin',wrap:await wrapRaw(raw,pass),recWrap:await wrapRaw(raw,code),earnWrap:null,created:new Date().toISOString()}]};await saveMeta();S.raw=raw;S.dataKey=await importRaw(raw);S.data=defaultData();S.data.settings.termsOk=LEGAL_VER;S.user=S.meta.users[0];await TMS.open();await saveNow();if(remember)await Session.save();actMark(true);return code;}
 async function login(username,pass,remember=true){if(Date.now()<S.lockUntil)throw new Error('Πολλές αποτυχημένες προσπάθειες. Δοκίμασε ξανά σε λίγα δευτερόλεπτα.');const u=S.meta.users.find(x=>x.username===username.trim().toLowerCase());let raw;try{if(!u)throw 0;raw=await unwrapRaw(u.wrap,pass);}catch(e){S.fails++;if(S.fails>=5){S.lockUntil=Date.now()+30000;S.fails=0;}throw new Error('Λάθος όνομα χρήστη ή κωδικός.');}S.fails=0;await openVault(u,raw);actMark(true);try{kidFlag(null);}catch(e){}if(remember)await Session.save();else await Session.clear();}
-async function openVault(u,raw){S.raw=raw;S.dataKey=await importRaw(raw);const blob=await IDB.get('vault');S.data=migrate(blob?await decJSON(S.dataKey,blob):defaultData());S.user=u;S.lastAct=Date.now();try{const b=await IDB.get('tm:'+u.id);if(b){const o=await decJSON(S.dataKey,b);for(const k in o)localStorage.setItem(k,o[k]);await IDB.del('tm:'+u.id);}}catch(e){}try{syncAfterOpen();}catch(e){}}
+async function openVault(u,raw){S.raw=raw;S.dataKey=await importRaw(raw);const blob=await IDB.get('vault');S.data=migrate(blob?await decJSON(S.dataKey,blob):defaultData());S.user=u;S.lastAct=Date.now();await TMS.open();try{syncAfterOpen();}catch(e){}}
 async function resetWithRecovery(username,code,newPass){const q=username.trim().toLowerCase();const u=S.meta.users.find(x=>x.username===q||(x.email&&x.email===q));if(!u||!u.recWrap)throw new Error('Δεν βρέθηκε λογαριασμός με κωδικό ανάκτησης για αυτό το όνομα χρήστη.');let raw;try{raw=await unwrapRaw(u.recWrap,normCode(code));}catch(e){throw new Error('Ο κωδικός ανάκτησης δεν είναι σωστός.');}u.wrap=await wrapRaw(raw,newPass);await saveMeta();return u;}
 async function newRecovery(userId){const u=S.meta.users.find(x=>x.id===userId);const code=genRecovery();u.recWrap=await wrapRaw(S.raw,code);await saveMeta();return code;}
 const Session={
   async devKey(){if(IDB.ls){let r=await IDB.get('devkeyraw');if(!r){r=b64(rand(32));await IDB.set('devkeyraw',r);}return importRaw(unb64(r));}let k=await IDB.get('devkey');if(!k){k=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);await IDB.set('devkey',k);}return k;},
   async save(){try{const k=await this.devKey();await IDB.set('session',{userId:S.user.id,at:new Date().toISOString(),...await aesEnc(k,S.raw)});}catch(e){console.warn('session',e);}},
-  async restore(){try{const s=await IDB.get('session');if(!s)return false;const u=S.meta.users.find(x=>x.id===s.userId);if(!u){await this.clear();return false;}const k=IDB.ls?await this.devKey():await IDB.get('devkey');if(!k)return false;const raw=await aesDec(k,s);await openVault(u,raw);const m=+S.data.settings.autoLockMin||0;const act=+localStorage.getItem('pai-act')||0;if(m&&act&&Date.now()-act>m*60000){await this.clear();S.raw=null;S.dataKey=null;S.data=null;S.user=null;S.earn=null;S.earnKey=null;S.bootMsg='Η εφαρμογή κλείδωσε λόγω αδράνειας. Γράψε τον κωδικό σου.';return false;}S.lastAct=Date.now();actMark(true);return true;}catch(e){await this.clear();return false;}},
+  async restore(){try{const s=await IDB.get('session');if(!s)return false;const u=S.meta.users.find(x=>x.id===s.userId);if(!u){await this.clear();return false;}const k=IDB.ls?await this.devKey():await IDB.get('devkey');if(!k)return false;const raw=await aesDec(k,s);await openVault(u,raw);const m=+S.data.settings.autoLockMin||0;const act=+localStorage.getItem('pai-act')||0;if(m&&act&&Date.now()-act>m*60000){await this.clear();TMS.mem=null;TMS.uid=null;S.raw=null;S.dataKey=null;S.data=null;S.user=null;S.earn=null;S.earnKey=null;S.bootMsg='Η εφαρμογή κλείδωσε λόγω αδράνειας. Γράψε τον κωδικό σου.';return false;}S.lastAct=Date.now();actMark(true);return true;}catch(e){await this.clear();return false;}},
   async has(){try{return!!(await IDB.get('session'));}catch(e){return false;}},
   async clear(){try{await IDB.del('session');}catch(e){}}
 };
-function logout(msg){Session.clear();S.stuOpen=false;S.raw=null;S.dataKey=null;S.data=null;S.user=null;S.earn=null;S.earnKey=null;S.studentMode=null;location.hash='#/welcome';render();if(msg)toast(msg);}
+function logout(msg){try{TMS.close();}catch(e){}Session.clear();S.stuOpen=false;S.raw=null;S.dataKey=null;S.data=null;S.user=null;S.earn=null;S.earnKey=null;S.studentMode=null;location.hash='#/welcome';render();if(msg)toast(msg);}
 async function addUser({name,username,pass,role,email}){username=username.trim().toLowerCase();if(S.meta.users.some(u=>u.username===username))throw new Error('Υπάρχει ήδη αυτό το όνομα χρήστη.');const code=genRecovery();const u={id:uid(),name,username,email:(email||'').trim().toLowerCase(),role,wrap:await wrapRaw(S.raw,pass),recWrap:await wrapRaw(S.raw,code),earnWrap:null,created:new Date().toISOString()};S.meta.users.push(u);await saveMeta();u._code=code;return u;}
 async function setUserPass(userId,pass){const u=S.meta.users.find(x=>x.id===userId);u.wrap=await wrapRaw(S.raw,pass);await saveMeta();}
 const isAdmin=()=>S.user&&S.user.role==='admin';
@@ -1409,13 +1409,13 @@ const Backup={
   supported(){return'showDirectoryPicker'in window;},
   async pick(){const h=await window.showDirectoryPicker({id:'backups',mode:'readwrite',startIn:'downloads'});await this.setRoot(h);return h;},
   async perm(h,ask){const o={mode:'readwrite'};if(await h.queryPermission(o)==='granted')return true;if(ask)return(await h.requestPermission(o))==='granted';return false;},
-  async snapshot(){const keys=await IDB.keys();const out={app:'LUMIO',version:APP_VERSION,created:new Date().toISOString(),encrypted:true,kv:{}};for(const k of keys){if(['session','devkey','devkeyraw','_probe'].includes(k))continue;out.kv[k]=await IDB.get(k);}try{if(S.user&&S.dataKey){const o={};TM.lsKeys().forEach(k=>{if(k.includes(S.user.id))o[k]=localStorage.getItem(k);});if(Object.keys(o).length)out.kv['tm:'+S.user.id]=await encJSON(S.dataKey,o);}}catch(e){}return out;},
+  async snapshot(){try{await TMS.flush();}catch(e){}const keys=await IDB.keys();const out={app:'LUMIO',version:APP_VERSION,created:new Date().toISOString(),encrypted:true,kv:{}};for(const k of keys){if(['session','devkey','devkeyraw','_probe'].includes(k))continue;out.kv[k]=await IDB.get(k);}return out;},
   fileName(){return BACKUP_SUB+'-'+todayISO()+'.json';},
   async write(ask=false){const snap=JSON.stringify(await this.snapshot());const root=await this.getRoot();if(root&&await this.perm(root,ask)){const dir=await root.getDirectoryHandle(BACKUP_SUB,{create:true});const fh=await dir.getFileHandle(this.fileName(),{create:true});const w=await fh.createWritable();await w.write(snap);await w.close();localStorage.setItem('pai-lastbackup',new Date().toISOString());return'folder';}if(ask){this.download(snap);return'download';}return null;},
   download(snap){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([snap],{type:'application/json'}));a.download=this.fileName();a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);localStorage.setItem('pai-lastbackup',new Date().toISOString());},
   auto:debounce(async function(){try{await Backup.write(false);}catch(e){}},5000),
   async list(){const root=await this.getRoot();if(!root||!await this.perm(root,true))return null;const dir=await root.getDirectoryHandle(BACKUP_SUB,{create:true});const files=[];for await(const [n,h] of dir.entries()){if(h.kind==='file'&&n.endsWith('.json'))files.push({name:n,h});}files.sort((a,b)=>b.name.localeCompare(a.name));return files.slice(0,10);},
-  async restoreText(txt){const o=JSON.parse(txt);if(!['LUMIO','Paidagogos-AI'].includes(o.app)||!o.kv||!o.kv.meta)throw new Error('Το αρχείο δεν είναι αντίγραφο του LUMIO.');const keys=await IDB.keys();for(const k of keys)if(!['devkey','devkeyraw'].includes(k))await IDB.del(k);for(const k in o.kv)await IDB.set(k,o.kv[k]);}
+  async restoreText(txt){const o=JSON.parse(txt);if(!['LUMIO','Paidagogos-AI'].includes(o.app)||!o.kv||!o.kv.meta)throw new Error('Το αρχείο δεν είναι αντίγραφο του LUMIO.');try{clearTimeout(TMS._t);TMS.mem=null;TMS.uid=null;TMS.wipePlain();}catch(e){}const keys=await IDB.keys();for(const k of keys)if(!['devkey','devkeyraw'].includes(k))await IDB.del(k);for(const k in o.kv)await IDB.set(k,o.kv[k]);}
 };
 
 /* ---- αναβάθμιση ---- */
@@ -1481,6 +1481,31 @@ const recoveryLink=(u,code)=>location.origin+location.pathname+'#/forgot?u='+enc
 async function sendMail(params,cfg){cfg=cfg||mailCfg();if(!cfg)throw new Error('Η αποστολή email δεν έχει ρυθμιστεί.');const r=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({service_id:cfg.serviceId,template_id:cfg.templateId,user_id:cfg.publicKey,template_params:params})});if(!r.ok){const t=await r.text().catch(()=>'');throw new Error('Το email δεν στάλθηκε'+(t?': '+t.slice(0,140):'.'));}return true;}
 async function mailRecovery(u,code){if(!u.email)return'noemail';if(!mailCfg())return'nocfg';try{await sendMail({to_email:u.email,to_name:u.name,username:u.username,code,link:recoveryLink(u,code),app_name:'LUMIO'});u.recSentAt=new Date().toISOString();await saveMeta();return'sent';}catch(e){console.warn(e);return'fail';}}
 function mailtoRecovery(u,code){const body=`Κωδικός ανάκτησης LUMIO: ${code}\nΌνομα χρήστη: ${u.username}\n\nΑν ξεχάσεις τον κωδικό σου, άνοιξε αυτόν τον σύνδεσμο στη συσκευή όπου χρησιμοποιείς το LUMIO:\n${recoveryLink(u,code)}`;return'mailto:'+encodeURIComponent(u.email||'')+'?subject='+encodeURIComponent('LUMIO — ο κωδικός ανάκτησής σου')+'&body='+encodeURIComponent(body);}
+
+/* ===== Κρυπτογραφημένη αποθήκη του Ταμείου (2.30) =====
+   Τα δεδομένα του Ταμείου (lumio-tameio-*, lumio-work-*) δεν γράφονται ποτέ σε απλό κείμενο:
+   ζουν μόνο στη μνήμη όσο ο λογαριασμός είναι ανοιχτός και αποθηκεύονται κρυπτογραφημένα (AES-256)
+   με το κλειδί του λογαριασμού σε κάθε αλλαγή. Το πλαίσιο του Ταμείου τα διαβάζει μέσα από αυτή την αποθήκη. */
+var TMS=window.TMS={mem:null,uid:null,_t:0,
+  is(k){return/^lumio-(tameio|work)-/.test(k);},
+  async open(){this.mem={};this.uid=S.user.id;const uid=this.uid;
+    try{const b=await IDB.get('tm:'+uid);if(b)Object.assign(this.mem,await decJSON(S.dataKey,b));}catch(e){console.warn('tms',e);}
+    /* μετάβαση: ό,τι είχε μείνει σε απλό κείμενο από παλιότερες εκδόσεις μπαίνει στην κρυπτογραφημένη αποθήκη και σβήνεται */
+    let mv=0;try{const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(this.is(k)&&k.includes(uid))ks.push(k);}
+      for(const k of ks){if(this.mem[k]==null)this.mem[k]=localStorage.getItem(k);mv++;}
+      if(mv){await this.flush();ks.forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});}}catch(e){}},
+  get(k){return this.mem&&Object.prototype.hasOwnProperty.call(this.mem,k)?this.mem[k]:null;},
+  set(k,v){if(!this.mem)throw new Error('Το Ταμείο είναι κλειδωμένο.');this.mem[k]=String(v);this.soon();},
+  del(k){if(this.mem&&k in this.mem){delete this.mem[k];this.soon();}},
+  keys(){return this.mem?Object.keys(this.mem):[];},
+  all(){return this.mem?Object.assign({},this.mem):{};},
+  soon(){clearTimeout(this._t);this._t=setTimeout(()=>this.flush(),250);},
+  async flush(){clearTimeout(this._t);if(!this.mem||!S.dataKey||!this.uid)return;const key=S.dataKey,uid=this.uid,o=this.all();await IDB.set('tm:'+uid,await encJSON(key,o));},
+  /* στην αποσύνδεση: τελευταία κρυπτογραφημένη αποθήκευση και άδειασμα της μνήμης */
+  close(){clearTimeout(this._t);let p=null;if(this.mem&&S.dataKey&&this.uid){const key=S.dataKey,uid=this.uid,o=this.all();p=encJSON(key,o).then(b=>IDB.set('tm:'+uid,b)).catch(()=>{});}this.mem=null;this.uid=null;return p;},
+  /* καθαρισμός τυχόν απλού κειμένου για ΟΛΟΥΣ τους λογαριασμούς της συσκευής (π.χ. στη «Διαγραφή όλων») */
+  wipePlain(uid){try{const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(this.is(k)&&(!uid||k.includes(uid)))ks.push(k);}ks.forEach(k=>localStorage.removeItem(k));}catch(e){}}
+};
 
 /* ===== Μινιμαλιστικά εικονίδια γραμμής ===== */
 const ICONS={
@@ -2923,7 +2948,7 @@ const SET={
   +card('Τα δεδομένα σου',`<p class="small muted">Η εξαγωγή περιέχει όλα τα εκπαιδευτικά δεδομένα μη κρυπτογραφημένα — φύλαξέ τη με ασφάλεια. Για εξαγωγή ή διαγραφή ενός μαθητή, άνοιξε το προφίλ του → Μαθησιακή ταυτότητα.</p><div class="row"><button class="btn" id="ex">${ic('download',16)} Εξαγωγή όλων</button><button class="btn danger" id="wipe">${ic('trash',16)} Διαγραφή όλων των δεδομένων</button></div>`);
   $('#sn',el).onchange=e=>{S.data.settings.sendNotes=e.target.checked;save();toast('Αποθηκεύτηκε.','ok');};
   $('#ex',el).onclick=async()=>{if(!await confirmDlg('Η εξαγωγή περιέχει όλα τα δεδομένα <b>μη κρυπτογραφημένα</b>. Συνέχεια;',{ok:'Εξαγωγή'}))return;const d=JSON.parse(JSON.stringify(S.data));d.settings.aiKey=d.settings.aiKey?'(κρυφό)':'';downloadText(`lumio-dedomena-${todayISO()}.json`,JSON.stringify(d,null,2),'application/json');};
-  $('#wipe',el).onclick=async()=>{const p=await promptDlg('Για οριστική διαγραφή ΟΛΩΝ των δεδομένων αυτής της συσκευής, γράψε τον κωδικό σου',{type:'password',okText:'Διαγραφή όλων'});if(!p)return;try{await unwrapRaw(S.user.wrap,p);}catch(e){return toast('Λάθος κωδικός.','bad');}for(const k of await IDB.keys())await IDB.del(k);TM.lsKeys().forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});S.meta=null;logout('Όλα τα δεδομένα διαγράφηκαν.');location.hash='#/welcome';};},
+  $('#wipe',el).onclick=async()=>{const p=await promptDlg('Για οριστική διαγραφή ΟΛΩΝ των δεδομένων αυτής της συσκευής, γράψε τον κωδικό σου',{type:'password',okText:'Διαγραφή όλων'});if(!p)return;try{await unwrapRaw(S.user.wrap,p);}catch(e){return toast('Λάθος κωδικός.','bad');}for(const k of await IDB.keys())await IDB.del(k);TMS.mem=null;TMS.uid=null;TMS.wipePlain();S.meta=null;logout('Όλα τα δεδομένα διαγράφηκαν.');location.hash='#/welcome';};},
  async language(el){el.innerHTML=card('Γλώσσα εφαρμογής',`<div class="optrow"><button class="choice on"><b>Ελληνικά</b><span>Ενεργή</span></button><button class="choice" disabled style="opacity:.5;cursor:not-allowed"><b>Αγγλικά</b><span>Δεν είναι ακόμη διαθέσιμα</span></button></div><p class="tiny muted" style="margin:12px 0 0">Το περιεχόμενο που δημιουργεί η τεχνητή νοημοσύνη για ξένες γλώσσες (π.χ. Αγγλικά ως μάθημα) λειτουργεί κανονικά.</p>`);},
  async appearance(el){const t=lsGet('lumio-theme','system'),z=lsGet('lumio-size','normal'),pal=lsGet('lumio-pal','lavender'),tp=lsGet('lumio-tpal',TM_PAL_DEF),bg=lsGet('lumio-bg','icon'),op=+lsGet('lumio-bgop','0.1')||.1;
   const sw=c=>`<span class="swx">${c.map(x=>`<i style="background:${x}"></i>`).join('')}</span>`;
@@ -3085,7 +3110,7 @@ function staffDialog(id){const B=biz();const me=id==='me';const x=me?{name:S.use
 async function removeAccount(id,silent){const u=S.meta.users.find(x=>x.id===id);if(!u)return true;if(u.id===S.user.id)return toast('Δεν γίνεται να αφαιρέσεις τη δική σου σύνδεση.','bad'),false;
   if(!silent&&!await confirmDlg(`Αφαίρεση της σύνδεσης «${esc(u.username)}»; Οι μαθητές του/της περνούν σε εσένα και το Ταμείο του/της διαγράφεται. Το μέλος μένει στο προσωπικό.`,{danger:true,ok:'Αφαίρεση'}))return false;
   S.data.students.forEach(s=>{if(s.ownerId===u.id)s.ownerId=S.user.id;});(S.data.materials||[]).forEach(m=>{if(m.ownerId===u.id)m.ownerId=S.user.id;});S.meta.users=S.meta.users.filter(x=>x.id!==u.id);
-  try{await IDB.del('earn:'+u.id);}catch(e){}try{TM.lsKeys().forEach(k=>{if(k.includes(u.id))try{localStorage.removeItem(k);}catch(e){}});}catch(e){}await saveMeta();save();toast('Η σύνδεση αφαιρέθηκε.','ok');return true;}
+  try{await IDB.del('earn:'+u.id);}catch(e){}try{await IDB.del('tm:'+u.id);TMS.wipePlain(u.id);}catch(e){}await saveMeta();save();toast('Η σύνδεση αφαιρέθηκε.','ok');return true;}
 function greekToLatin(t){const M={α:'a',β:'v',γ:'g',δ:'d',ε:'e',ζ:'z',η:'i',θ:'th',ι:'i',κ:'k',λ:'l',μ:'m',ν:'n',ξ:'x',ο:'o',π:'p',ρ:'r',σ:'s',ς:'s',τ:'t',υ:'y',φ:'f',χ:'ch',ψ:'ps',ω:'o',ά:'a',έ:'e',ή:'i',ί:'i',ό:'o',ύ:'y',ώ:'o',ϊ:'i',ϋ:'y',ΐ:'i',ΰ:'y'};return[...String(t||'').toLowerCase()].map(c=>M[c]??c).join('').replace(/[^a-z0-9._-]/g,'');}
 
 /* ===== Φάκελος προσωπικού: πιστοποιητικά, διπλώματα, έγγραφα ===== */
@@ -3163,8 +3188,8 @@ const TM={
   frame(){return document.getElementById('tmf');},
   isOpen(){return!!this.frame();},
   syncWork(){if(!S.user||!S.earn)return;try{const L=(S.earn.sessions||[]).filter(s=>s.paid).map(s=>({id:'ls-'+s.id,date:(s.paidAt&&s.paidAt!==s.date?s.paidAt+'T12:00':s.date+'T'+(s.start||'12:00')),amount:+(s.paidAmount||s.amount)||0,dir:'in',kind:'payment',note:'Συνεδρία'}));
-    localStorage.setItem(this.workKey(),JSON.stringify({ledger:L,settings:{kinds:[]},meta:{appVersion:'LUMIO '+APP_VERSION}}));localStorage.setItem(this.workKey()+'-at',String(Date.now()));}catch(e){}},
-  seed(){try{if(localStorage.getItem(this.key())==null)localStorage.setItem(this.key(),JSON.stringify({settings:{defaultBook:'company',bookHidden:{extra:true,x2:true}},meta:{firstRun:Date.now(),changes:0,lastBackup:null}}));}catch(e){}},
+    TMS.set(this.workKey(),JSON.stringify({ledger:L,settings:{kinds:[]},meta:{appVersion:'LUMIO '+APP_VERSION}}));TMS.set(this.workKey()+'-at',String(Date.now()));}catch(e){}},
+  seed(){try{if(TMS.get(this.key())==null)TMS.set(this.key(),JSON.stringify({settings:{defaultBook:'company',bookHidden:{extra:true,x2:true}},meta:{firstRun:Date.now(),changes:0,lastBackup:null}}));}catch(e){}},
   /* χρώματα, γραμματοσειρά και φόντο του LUMIO μέσα στο Ταμείο */
   styleFrame(){const f=this.frame();if(!f)return;let d;try{d=f.contentDocument;}catch(e){return;}if(!d||!d.head)return;
     const cs=getComputedStyle(document.documentElement),v=n=>cs.getPropertyValue(n).trim();const tp=TM_PALS[lsGet('lumio-tpal',TM_PAL_DEF)]||TM_PALS[TM_PAL_DEF];const dark=isDarkMode();const P=tp.deep?{brand:tp.brand,onb:'#fff',tx:dark?tp.accent:tp.brand,ln:tp.ln,ink:dark?v('--ink'):tp.brand}:(dark?{brand:tp.on,onb:'#fff',tx:tp.brand,ln:tp.ln,ink:v('--ink')}:{brand:tp.brand,onb:tp.on,tx:tp.on,ln:tp.ln,ink:tp.on});
@@ -3182,7 +3207,7 @@ ${dark?`.sheet,.alertbox,.clockbox{background:${v('--paper')}!important;color:${
   mount(){const f=this.frame();if(!f)return;window.LUMIO_TM_U=S.user.id;
     const fit=()=>{const fr=this.frame();if(!fr)return;const bn=document.querySelector('.bottomnav');const bh=bn&&getComputedStyle(bn).display!=='none'?bn.getBoundingClientRect().height:0;const top=fr.getBoundingClientRect().top;fr.style.height=Math.max(380,innerHeight-top-bh-10)+'px';};
     fit();clearTimeout(this._ft);this._ft=setTimeout(fit,200);window.removeEventListener('resize',this._fit||(()=>{}));this._fit=fit;window.addEventListener('resize',fit);
-    f.addEventListener('load',()=>{this.styleFrame();try{const d=f.contentDocument;['pointerdown','keydown','touchstart'].forEach(ev=>d.addEventListener(ev,()=>{S.lastAct=Date.now();},{passive:true,capture:true}));
+    f.addEventListener('load',()=>{try{if(f.contentWindow.__tmsOK!==true){f.outerHTML='<div class="note">Το Ταμείο δεν μπορεί να ανοίξει με ασφάλεια σε αυτόν τον φυλλομετρητή (χρειάζεται κρυπτογραφημένη αποθήκη). Δοκίμασε με ενημερωμένο Chrome, Safari ή Firefox.</div>';return;}}catch(e){}this.styleFrame();try{const d=f.contentDocument;['pointerdown','keydown','touchstart'].forEach(ev=>d.addEventListener(ev,()=>{S.lastAct=Date.now();},{passive:true,capture:true}));
       /* όταν ανοίγει παράθυρο μέσα στο Ταμείο (νέα κίνηση, ιστορικό, ρυθμίσεις), το Ταμείο απλώνεται σε όλη την οθόνη ώστε να χωράει */
       const upd=()=>{const fr=this.frame();if(!fr)return;const open=!!d.querySelector('.modal.open,.modal[open],.modal.show');if(open!==fr.classList.contains('tmfull')){fr.classList.toggle('tmfull',open);document.body.classList.toggle('tm-full',open);if(!open)fit();}};
       new MutationObserver(upd).observe(d.body,{subtree:true,attributes:true,attributeFilter:['class','open'],childList:true});upd();}catch(e){}fit();});},
@@ -3192,7 +3217,7 @@ ${dark?`.sheet,.alertbox,.clockbox{background:${v('--paper')}!important;color:${
     addEventListener('message',e=>{if(e.origin!==location.origin||!e.data||e.data.tameia!==1||!TM.isOpen()||e.source!==TM.frame().contentWindow)return;const t=e.data.type;
       if(t==='backDone'){try{history.pushState({tm:1},'');}catch(x){}}else if(t==='close'){TM._skip=0;history.back();}});},
   settings(){try{this.frame().contentWindow.settingsSheet();}catch(e){toast('Το Ταμείο δεν έχει φορτώσει ακόμη.','bad');}},
-  lsKeys(){const a=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^lumio-(tameio|work)-/.test(k))a.push(k);}}catch(e){}return a;}
+  lsKeys(){return TMS.keys().filter(k=>TMS.is(k));}
 };
 
 function earnPinView(){const first=!Earn.hasPin();M().innerHTML=`<div class="genscreen card" style="max-width:420px"><div style="text-align:center"><span class="ricon y" style="width:60px;height:60px;border-radius:18px;margin:0 auto 12px">${ic('lock',28)}</span><h2>Ταμείο</h2><p class="small muted">Προστατευμένη περιοχή. Το Ταμείο και οι συνεδρίες ανοίγουν μόνο με το δικό σου PIN και δεν εμφανίζονται ποτέ σε μαθητές.</p></div>
@@ -4160,7 +4185,7 @@ const Sync={
   busy:false,timer:null,
   dev(){let d=localStorage.getItem('lumio-devname');if(!d){const u=navigator.userAgent;d=/iPhone/.test(u)?'iPhone':/iPad/.test(u)?'iPad':/Android/.test(u)?(/Mobile/.test(u)?'Κινητό Android':'Tablet Android'):/Mac/.test(u)?'Mac':/Windows/.test(u)?'Υπολογιστής Windows':'Συσκευή';try{localStorage.setItem('lumio-devname',d);}catch(e){}}return d;},
   async localPack(){const meta=await IDB.get('meta');const vault=await IDB.get('vault');const earn={};for(const k of await IDB.keys())if(k.startsWith('earn:'))earn[k]=await IDB.get(k);
-    let tm=null;try{if(S.user&&S.dataKey){const o={};TM.lsKeys().forEach(k=>{if(k.includes(S.user.id))o[k]=localStorage.getItem(k);});tm=o;}}catch(e){}return{meta,vault,earn,tm};},
+    let tm=null;try{if(S.user&&S.dataKey){const o={};TM.lsKeys().forEach(k=>{if(k.includes(S.user.id))o[k]=TMS.get(k);});tm=o;}}catch(e){}return{meta,vault,earn,tm};},
   /* κάνει όλη τη δουλειά· επιστρέφει κείμενο αποτελέσματος */
   async run(why){if(this.busy||!S.dataKey||!S.data||!this.on())return null;if(!GD.ok())return'noauth';this.busy=true;this.ui('busy');
     try{await saveNow();this.pendingEarn=false;const st={conflicts:0};const root=await GD.root();const rf=await GD.file('lumio-sync.json',root);const L=await this.localPack();
@@ -4184,7 +4209,7 @@ const Sync={
         /* Ταμείο εργασίας (τοπική αποθήκευση) */
         try{if(R.tm){const rt=rtm=await decJSON(S.dataKey,R.tm);const P=o=>{const x={};for(const k in o||{}){try{x[k]=JSON.parse(o[k]);}catch(e){x[k]=o[k];}}return x;};
           const mt=merge3(P(btm),P(L.tm),P(rt),st);const mine=k=>S.user&&k.includes(S.user.id);const oth={};for(const k in rt)if(!mine(k))oth[k]=rt[k];
-          const flat={};for(const k in mt)flat[k]=typeof mt[k]==='string'?mt[k]:JSON.stringify(mt[k]);for(const k in flat)if(mine(k)&&localStorage.getItem(k)!==flat[k]){localStorage.setItem(k,flat[k]);changedLocal=true;}
+          const flat={};for(const k in mt)flat[k]=typeof mt[k]==='string'?mt[k]:JSON.stringify(mt[k]);for(const k in flat)if(mine(k)&&TMS.get(k)!==flat[k]){TMS.set(k,flat[k]);changedLocal=true;}
           newBase.tm=Object.fromEntries(Object.entries(flat).filter(([k])=>mine(k)));out.tmOthers=oth;}}catch(e){}
         if(changedLocal)await saveNow();}
       else{for(const k in L.earn)newBase.earnH[k]=J(L.earn[k]);}
@@ -4216,7 +4241,7 @@ const Sync={
     if(R.tm)await IDB.set('tm-sync',R.tm);this.setCfg({on:true,remoteTime:null});return R;}
 };
 /* μετά τη σύνδεση: ξεκλείδωμα του Ταμείου εργασίας από το αντίγραφο του Drive */
-async function syncAfterOpen(){try{const b=await IDB.get('tm-sync');if(b&&S.dataKey){const o=await decJSON(S.dataKey,b);for(const k in o)if(S.user&&k.includes(S.user.id)&&!localStorage.getItem(k))localStorage.setItem(k,o[k]);}}catch(e){}
+async function syncAfterOpen(){try{const b=await IDB.get('tm-sync');if(b&&S.dataKey){const o=await decJSON(S.dataKey,b);for(const k in o)if(S.user&&k.includes(S.user.id)&&TMS.get(k)==null)TMS.set(k,o[k]);}}catch(e){}
   setTimeout(()=>Sync.auto('open-silent'),1200);}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.dataKey&&Sync.on()&&GD.ok()){const l=Sync.cfg().last;if(!l||Date.now()-new Date(l)>60000)Sync.run('focus');}});
 setInterval(()=>{if(S.dataKey&&Sync.on()&&GD.ok()&&document.visibilityState==='visible')Sync.run('tick');},5*60000);

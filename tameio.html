@@ -7,6 +7,10 @@
 -->
 <html lang="el">
 <head>
+<script>(function(){try{var P=window.parent;if(!P||P===window||!P.TMS)return;var re=/^lumio-(tameio|work)-/,R=window.localStorage;
+var st={getItem:function(k){k=String(k);return re.test(k)?P.TMS.get(k):R.getItem(k);},setItem:function(k,v){k=String(k);if(re.test(k))P.TMS.set(k,v);else R.setItem(k,String(v));},
+removeItem:function(k){k=String(k);if(re.test(k))P.TMS.del(k);else R.removeItem(k);},key:function(i){return R.key(i);},clear:function(){},get length(){return R.length;}};
+Object.defineProperty(window,'localStorage',{configurable:true,get:function(){return st;}});window.__tmsOK=(window.localStorage===st);}catch(e){window.__tmsOK=false;}})();</script>
 <meta charset="UTF-8">
 <meta name="app-version" content="1.1">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
