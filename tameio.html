@@ -12,6 +12,7 @@ var st={getItem:function(k){k=String(k);return re.test(k)?P.TMS.get(k):R.getItem
 removeItem:function(k){k=String(k);if(re.test(k))P.TMS.del(k);else R.removeItem(k);},key:function(i){return R.key(i);},clear:function(){},get length(){return R.length;}};
 Object.defineProperty(window,'localStorage',{configurable:true,get:function(){return st;}});window.__tmsOK=(window.localStorage===st);}catch(e){window.__tmsOK=false;}})();</script>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9YQXQai5wzhTc7h0lRKqX4rm6j6vHMV0H1A+PYHpk+I=' 'sha256-EiRRKkmLdwxubWzGRCfBcstPWCkV9idurYTU9MQZsfE=' 'sha256-iys2YQbj0517RClk3VCyaI2KJ26G1b9uwC0Rhdj+EVA=' 'sha256-ov8ogR+wNQp8cBHqmNh3GXX+ut6b4/UiEPz2N16M0Co=' 'sha256-qQgo1DtSjNMeuYudbhVKgz60fPcwGfBtGFvC1A5Xatk='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-src 'none'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="app-version" content="1.1">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#17324D">
