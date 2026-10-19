@@ -5,7 +5,7 @@
 <meta name="description" content="Εξατομικευμένα εκπαιδευτικά παιχνίδια, φύλλα εργασίας και προγράμματα για κάθε μαθητή.">
 <meta name="theme-color" content="#FBF7EF">
 <meta name="robots" content="noindex">
-<meta name="app-version" content="2.32.0">
+<meta name="app-version" content="2.33.0">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -1265,7 +1265,7 @@ ol.howto{display:block;padding-left:20px;margin:6px 0}ol.howto li{display:list-i
 <body>
 <script>'use strict';
 /* ===== Παιδαγωγός AI — πυρήνας ===== */
-const APP_VERSION='2.32.0';
+const APP_VERSION='2.33.0';
 const APP_NAME='LUMIO';
 const BACKUP_SUB='LUMIO';
 const $=(s,r=document)=>r.querySelector(s);
@@ -1359,7 +1359,16 @@ const S={meta:null,user:null,raw:null,dataKey:null,data:null,earn:null,earnKey:n
 const LEGAL_VER='2026-10b';
 function defaultData(){return{students:[],materials:[],uploads:[],results:[],assignments:[],programs:[],reports:[],inbox:[],profile:{title:'',email:'',phone:'',bio:''},settings:{aiKey:'',model:'auto',autoLockMin:15,sendNotes:false,sound:true,lastReportCheck:'',notify:{reports:true,assign:true,updates:true},v2:true}};}
 function migrate(d){const def=defaultData();for(const k in def)if(d[k]===undefined)d[k]=def[k];if(!d.settings.v2){d.settings.autoLockMin=15;d.settings.v2=true;}if(!d.settings.v3){if(!+d.settings.autoLockMin)d.settings.autoLockMin=15;d.settings.v3=true;}d.settings={...def.settings,...d.settings};d.settings.notify={...def.settings.notify,...(d.settings.notify||{})};d.profile={...def.profile,...d.profile};return d;}
-async function saveMeta(){await IDB.set('meta',S.meta);}
+/* 2.33: η λίστα χρηστών αποθηκεύεται κρυπτογραφημένη. Ανοιχτά μένουν μόνο όσα χρειάζεται η σύνδεση:
+   αναγνωριστικό, αποτύπωμα (SHA-256 με τυχαίο αλάτι) ονόματος χρήστη και email, και τα ήδη κρυπτογραφημένα κλειδιά. */
+async function metaHash(salt,s){return b64(new Uint8Array(await crypto.subtle.digest('SHA-256',TE.encode(salt+'|'+String(s||'').trim().toLowerCase()))));}
+async function metaSeal(full,key){key=key||S.dataKey;const salt=S.metaSalt||(S.metaSalt=b64(rand(16)));const users=[];for(const u of full.users||[])users.push({id:u.id,h:await metaHash(salt,u.username),eh:u.email?await metaHash(salt,u.email):null,wrap:u.wrap,recWrap:u.recWrap||null});
+  return{schema:3,salt,n:users.length,users,enc:await encJSON(key,full)};}
+async function metaOpen(st,key){if(!st||st.schema!==3||!st.enc)return st;S.metaSalt=st.salt;return decJSON(key||S.dataKey,st.enc);}
+async function metaLoad(){const m=await IDB.get('meta');if(!m)return null;if(m.schema===3){S.metaSalt=m.salt;return Object.assign({},m,{sealed:true});}return m;}
+async function metaUnlock(raw){const m=await IDB.get('meta');if(m&&m.schema===3){S.meta=await metaOpen(m,await importRaw(raw));}}
+async function metaFind(q,withEmail){q=String(q||'').trim().toLowerCase();const M=S.meta;if(!M)return null;if(M.sealed){const h=await metaHash(M.salt,q);return M.users.find(u=>u.h===h||(withEmail&&u.eh===h))||null;}return M.users.find(u=>u.username===q||(withEmail&&u.email&&u.email===q))||null;}
+async function saveMeta(){if(!S.meta||S.meta.sealed)return;if(!S.dataKey)throw new Error('meta locked');await IDB.set('meta',await metaSeal(S.meta));}
 const _saveData=debounce(async()=>{if(!S.dataKey||!S.data)return;await IDB.set('vault',await encJSON(S.dataKey,S.data));Backup.auto();try{Sync.soon();}catch(e){}},400);
 function save(){_saveData();}
 async function saveNow(){if(!S.dataKey||!S.data)return;await IDB.set('vault',await encJSON(S.dataKey,S.data));}
@@ -1367,10 +1376,10 @@ async function saveNow(){if(!S.dataKey||!S.data)return;await IDB.set('vault',awa
 /* ---- λογαριασμοί ---- */
 function genRecovery(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const r=rand(16);let c='';for(let i=0;i<16;i++){c+=A[r[i]%A.length];if(i%4===3&&i<15)c+='-';}return c;}
 const normCode=c=>String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/(.{4})(?=.)/g,'$1-');
-async function createAdmin({name,username,pass,org,email,remember=true}){const raw=rand(32);const code=genRecovery();S.meta={schema:2,org:org||'',created:new Date().toISOString(),users:[{id:uid(),name,email:(email||'').trim().toLowerCase(),username:username.trim().toLowerCase(),role:'admin',wrap:await wrapRaw(raw,pass),recWrap:await wrapRaw(raw,code),earnWrap:null,created:new Date().toISOString()}]};await saveMeta();S.raw=raw;S.dataKey=await importRaw(raw);S.data=defaultData();S.data.settings.termsOk=LEGAL_VER;S.user=S.meta.users[0];await TMS.open();await saveNow();if(remember)await Session.save();actMark(true);return code;}
-async function login(username,pass,remember=true){if(Date.now()<S.lockUntil)throw new Error('Πολλές αποτυχημένες προσπάθειες. Δοκίμασε ξανά σε λίγα δευτερόλεπτα.');const u=S.meta.users.find(x=>x.username===username.trim().toLowerCase());let raw;try{if(!u)throw 0;raw=await unwrapRaw(u.wrap,pass);}catch(e){S.fails++;if(S.fails>=5){S.lockUntil=Date.now()+30000;S.fails=0;}throw new Error('Λάθος όνομα χρήστη ή κωδικός.');}S.fails=0;await openVault(u,raw);actMark(true);try{kidFlag(null);}catch(e){}if(remember)await Session.save();else await Session.clear();}
-async function openVault(u,raw){S.raw=raw;S.dataKey=await importRaw(raw);const blob=await IDB.get('vault');S.data=migrate(blob?await decJSON(S.dataKey,blob):defaultData());S.user=u;S.lastAct=Date.now();await TMS.open();try{syncAfterOpen();}catch(e){}}
-async function resetWithRecovery(username,code,newPass){const q=username.trim().toLowerCase();const u=S.meta.users.find(x=>x.username===q||(x.email&&x.email===q));if(!u||!u.recWrap)throw new Error('Δεν βρέθηκε λογαριασμός με κωδικό ανάκτησης για αυτό το όνομα χρήστη.');let raw;try{raw=await unwrapRaw(u.recWrap,normCode(code));}catch(e){throw new Error('Ο κωδικός ανάκτησης δεν είναι σωστός.');}u.wrap=await wrapRaw(raw,newPass);await saveMeta();return u;}
+async function createAdmin({name,username,pass,org,email,remember=true}){const raw=rand(32);const code=genRecovery();S.meta={schema:2,org:org||'',created:new Date().toISOString(),users:[{id:uid(),name,email:(email||'').trim().toLowerCase(),username:username.trim().toLowerCase(),role:'admin',wrap:await wrapRaw(raw,pass),recWrap:await wrapRaw(raw,code),earnWrap:null,created:new Date().toISOString()}]};S.metaSalt=b64(rand(16));S.raw=raw;S.dataKey=await importRaw(raw);await saveMeta();S.data=defaultData();S.data.settings.termsOk=LEGAL_VER;S.user=S.meta.users[0];await TMS.open();await saveNow();if(remember)await Session.save();actMark(true);return code;}
+async function login(username,pass,remember=true){if(Date.now()<S.lockUntil)throw new Error('Πολλές αποτυχημένες προσπάθειες. Δοκίμασε ξανά σε λίγα δευτερόλεπτα.');const u=await metaFind(username);let raw;try{if(!u)throw 0;raw=await unwrapRaw(u.wrap,pass);}catch(e){S.fails++;if(S.fails>=5){S.lockUntil=Date.now()+30000;S.fails=0;}throw new Error('Λάθος όνομα χρήστη ή κωδικός.');}S.fails=0;await openVault(u,raw);actMark(true);try{kidFlag(null);}catch(e){}if(remember)await Session.save();else await Session.clear();}
+async function openVault(u,raw){await metaUnlock(raw);u=(S.meta.users||[]).find(x=>x.id===u.id)||u;S.raw=raw;S.dataKey=await importRaw(raw);try{const st=await IDB.get('meta');if(st&&st.schema!==3)await saveMeta();}catch(e){}const blob=await IDB.get('vault');S.data=migrate(blob?await decJSON(S.dataKey,blob):defaultData());S.user=u;S.lastAct=Date.now();await TMS.open();try{syncAfterOpen();}catch(e){}}
+async function resetWithRecovery(username,code,newPass){let u=await metaFind(username,true);if(!u||!u.recWrap)throw new Error('Δεν βρέθηκε λογαριασμός με κωδικό ανάκτησης για αυτό το όνομα χρήστη.');let raw;try{raw=await unwrapRaw(u.recWrap,normCode(code));}catch(e){throw new Error('Ο κωδικός ανάκτησης δεν είναι σωστός.');}await metaUnlock(raw);u=S.meta.users.find(x=>x.id===u.id);u.wrap=await wrapRaw(raw,newPass);const k0=S.dataKey;S.dataKey=await importRaw(raw);try{await saveMeta();}finally{S.dataKey=k0;}const full=u;S.meta=await metaLoad();return full;}
 async function newRecovery(userId){const u=S.meta.users.find(x=>x.id===userId);const code=genRecovery();u.recWrap=await wrapRaw(S.raw,code);await saveMeta();return code;}
 const Session={
   async devKey(){if(IDB.ls){let r=await IDB.get('devkeyraw');if(!r){r=b64(rand(32));await IDB.set('devkeyraw',r);}return importRaw(unb64(r));}let k=await IDB.get('devkey');if(!k){k=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);await IDB.set('devkey',k);}return k;},
@@ -1379,7 +1388,7 @@ const Session={
   async has(){try{return!!(await IDB.get('session'));}catch(e){return false;}},
   async clear(){try{await IDB.del('session');}catch(e){}}
 };
-function logout(msg){try{TMS.close();}catch(e){}Session.clear();S.stuOpen=false;S.raw=null;S.dataKey=null;S.data=null;S.user=null;S.earn=null;S.earnKey=null;S.studentMode=null;location.hash='#/welcome';render();if(msg)toast(msg);}
+function logout(msg){try{TMS.close();}catch(e){}metaLoad().then(m=>{if(!S.user)S.meta=m;}).catch(()=>{});Session.clear();S.stuOpen=false;S.raw=null;S.dataKey=null;S.data=null;S.user=null;S.earn=null;S.earnKey=null;S.studentMode=null;location.hash='#/welcome';render();if(msg)toast(msg);}
 async function addUser({name,username,pass,role,email}){username=username.trim().toLowerCase();if(S.meta.users.some(u=>u.username===username))throw new Error('Υπάρχει ήδη αυτό το όνομα χρήστη.');const code=genRecovery();const u={id:uid(),name,username,email:(email||'').trim().toLowerCase(),role,wrap:await wrapRaw(S.raw,pass),recWrap:await wrapRaw(S.raw,code),earnWrap:null,created:new Date().toISOString()};S.meta.users.push(u);await saveMeta();u._code=code;return u;}
 async function setUserPass(userId,pass){const u=S.meta.users.find(x=>x.id===userId);u.wrap=await wrapRaw(S.raw,pass);await saveMeta();}
 const isAdmin=()=>S.user&&S.user.role==='admin';
@@ -2380,7 +2389,7 @@ function viewLogin(){if(!S.meta){authShell(`<h1>Σύνδεση</h1><p class="lea
    <button class="btn pri lg block">Σύνδεση</button></form><p class="alt">Δεν έχεις λογαριασμό; <a href="#/signup">Δημιουργία λογαριασμού</a></p>`);
   ($('#u').value?$('#p'):$('#u')).focus();
   $('#f').onsubmit=async e=>{e.preventDefault();const o=fd(e.target);const b=$('button.pri',e.target);b.disabled=true;b.innerHTML='<span class="spinner"></span>';try{await login(o.u,o.p,!!o.rem);localStorage.setItem('pai-lastuser',o.u.trim().toLowerCase());monthlyAuto();const t=S.afterLogin;S.afterLogin=null;location.hash=t||'#/dashboard';render();}catch(err){toast(err.message,'bad');b.disabled=false;b.textContent='Σύνδεση';}};}
-function bindRestore(){const g=$('#gdr');if(g)g.onclick=async()=>{g.disabled=true;try{await Sync.restoreNew();S.meta=await IDB.get('meta');toast('Τα δεδομένα ήρθαν από το Google Drive. Συνδέσου με το όνομα χρήστη και τον κωδικό σου.','ok');go('login');render();}catch(err){toast(err.message,'bad');g.disabled=false;}};const rb=$('#rest');if(!rb)return;rb.onclick=()=>$('#rf').click();$('#rf').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await Backup.restoreText(await f.text());S.meta=await IDB.get('meta');toast('Η επαναφορά ολοκληρώθηκε. Συνδέσου με τον κωδικό σου.','ok');go('login');render();}catch(err){toast(err.message,'bad');}};}
+function bindRestore(){const g=$('#gdr');if(g)g.onclick=async()=>{g.disabled=true;try{await Sync.restoreNew();S.meta=await metaLoad();toast('Τα δεδομένα ήρθαν από το Google Drive. Συνδέσου με το όνομα χρήστη και τον κωδικό σου.','ok');go('login');render();}catch(err){toast(err.message,'bad');g.disabled=false;}};const rb=$('#rest');if(!rb)return;rb.onclick=()=>$('#rf').click();$('#rf').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await Backup.restoreText(await f.text());S.meta=await metaLoad();toast('Η επαναφορά ολοκληρώθηκε. Συνδέσου με τον κωδικό σου.','ok');go('login');render();}catch(err){toast(err.message,'bad');}};}
 function viewSignup(){if(S.meta){authShell(`<h1>Δημιουργία λογαριασμού</h1><p class="lead">Σε αυτή τη συσκευή υπάρχει ήδη ο χώρος εργασίας${S.meta.org?' «'+esc(S.meta.org)+'»':''} με ${S.meta.users.length} ${S.meta.users.length===1?'λογαριασμό':'λογαριασμούς'}.</p><div class="note l small field">Αν έχεις ήδη λογαριασμό, συνδέσου. Αν είσαι νέος παιδαγωγός στον ίδιο χώρο, ο διαχειριστής δημιουργεί τον λογαριασμό σου από <b>Ρυθμίσεις → Οργανισμός</b>.</div><a class="btn pri lg block" href="#/login">Σύνδεση</a><p class="alt"><a href="#/welcome">${ic('left',14)} Πίσω</a></p>`);return;}
   authShell(`<h1>Δημιουργία λογαριασμού</h1><p class="lead">Λίγα στοιχεία και ξεκινάς.</p>
    <form id="f"><div class="field"><label class="f" for="name">Ονοματεπώνυμο</label><input class="in" id="name" name="name" required autocomplete="name"></div>
@@ -2516,7 +2525,7 @@ function makeReport(s,month){let rep=S.data.reports.find(x=>x.studentId===s.id&&
 async function boot(){try{document.documentElement.style.setProperty('--bgscene',`url("${svgURL(SCENE)}")`);}catch(e){}applyAppearance();if('serviceWorker'in navigator&&location.protocol==='https:'&&!/claude\.ai|claudeusercontent/.test(location.host)){try{await navigator.serviceWorker.register('sw.js');}catch(e){}}
   if(!window.crypto||!crypto.subtle){document.body.innerHTML='<div class="auth-side"><div class="auth-card"><h2>Χρειάζεται ασφαλής σύνδεση (https)</h2><p>Άνοιξε την εφαρμογή από τη διεύθυνσή της.</p></div></div>';return;}
   document.body.innerHTML=`<div class="loading" style="min-height:100vh;justify-content:center"><div class="sun">${LOGO}</div></div>`;
-  await IDB.init();try{S.meta=await IDB.get('meta')||null;}catch(e){S.meta=null;}
+  await IDB.init();try{S.meta=await metaLoad();}catch(e){S.meta=null;}
   if(S.meta&&!location.hash.startsWith('#play=')){if(await Session.restore()){monthlyAuto();try{kidResume();}catch(e){}}else if(S.bootMsg)setTimeout(()=>{toast(S.bootMsg);S.bootMsg=null;},600);}
   addEventListener('hashchange',()=>{if(S.leave&&S.leave.dirty()&&location.hash!==S.leave.hash){const to=location.hash;history.pushState(null,'',S.leave.hash);leaveDialog(to);return;}if(location.hash.startsWith('#play='))StudentLink.payload=null;render();});
   addEventListener('beforeunload',e=>{if(S.leave&&S.leave.dirty()){e.preventDefault();e.returnValue='';}});
@@ -3013,8 +3022,8 @@ const SET={
   $('#bn',el).onclick=async()=>{try{const w=await Backup.write(true);toast(w==='folder'?'Αποθηκεύτηκε στον φάκελο.':'Το αντίγραφο κατέβηκε.','ok');render();}catch(e){toast(e.message,'bad');}};
   const bp=$('#bp',el);if(bp)bp.onclick=async()=>{try{await Backup.pick();await Backup.write(true);toast('Ο φάκελος ορίστηκε και αποθηκεύτηκε αντίγραφο.','ok');render();}catch(e){if(e.name!=='AbortError')toast('Δεν επιλέχθηκε φάκελος — θα γίνεται λήψη αρχείου.','bad');}};
   const bx=$('#bx',el);if(bx)bx.onclick=async()=>{await Backup.forgetRoot();toast('Ο φάκελος ξεχάστηκε (τα αρχεία δεν σβήστηκαν).');render();};
-  const br=$('#br',el);if(br)br.onclick=async()=>{const files=await Backup.list();if(!files)return toast('Δεν υπάρχει πρόσβαση στον φάκελο.','bad');if(!files.length)return toast('Δεν βρέθηκαν αντίγραφα.');const md=modal(`<h3>Επαναφορά</h3><p class="small muted">Τα 10 νεότερα αντίγραφα. Η επαναφορά αντικαθιστά τα τρέχοντα δεδομένα.</p><div class="list">${files.map((f,i)=>`<div class="rw static"><span class="grow"><b>${esc(f.name)}</b>${i===0?'<small>νεότερο</small>':''}</span><button class="btn sm" data-i="${i}">Επαναφορά</button></div>`).join('')}</div>`);md.el.onclick=async e=>{const b=e.target.closest('[data-i]');if(!b)return;if(!await confirmDlg('Αντικατάσταση όλων των τρεχόντων δεδομένων με αυτό το αντίγραφο;',{danger:true,ok:'Επαναφορά'}))return;try{const f=await files[+b.dataset.i].h.getFile();await Backup.restoreText(await f.text());S.meta=await IDB.get('meta');md.close();logout('Η επαναφορά ολοκληρώθηκε — συνδέσου ξανά.');}catch(err){toast(err.message,'bad');}};};
-  $('#bf',el).onclick=()=>$('#bfi',el).click();$('#bfi',el).onchange=async e=>{const f=e.target.files[0];if(!f)return;if(!await confirmDlg('Αντικατάσταση όλων των τρεχόντων δεδομένων με αυτό το αρχείο;',{danger:true,ok:'Επαναφορά'}))return;try{await Backup.restoreText(await f.text());S.meta=await IDB.get('meta');logout('Η επαναφορά ολοκληρώθηκε — συνδέσου ξανά.');}catch(err){toast(err.message,'bad');}};},
+  const br=$('#br',el);if(br)br.onclick=async()=>{const files=await Backup.list();if(!files)return toast('Δεν υπάρχει πρόσβαση στον φάκελο.','bad');if(!files.length)return toast('Δεν βρέθηκαν αντίγραφα.');const md=modal(`<h3>Επαναφορά</h3><p class="small muted">Τα 10 νεότερα αντίγραφα. Η επαναφορά αντικαθιστά τα τρέχοντα δεδομένα.</p><div class="list">${files.map((f,i)=>`<div class="rw static"><span class="grow"><b>${esc(f.name)}</b>${i===0?'<small>νεότερο</small>':''}</span><button class="btn sm" data-i="${i}">Επαναφορά</button></div>`).join('')}</div>`);md.el.onclick=async e=>{const b=e.target.closest('[data-i]');if(!b)return;if(!await confirmDlg('Αντικατάσταση όλων των τρεχόντων δεδομένων με αυτό το αντίγραφο;',{danger:true,ok:'Επαναφορά'}))return;try{const f=await files[+b.dataset.i].h.getFile();await Backup.restoreText(await f.text());S.meta=await metaLoad();md.close();logout('Η επαναφορά ολοκληρώθηκε — συνδέσου ξανά.');}catch(err){toast(err.message,'bad');}};};
+  $('#bf',el).onclick=()=>$('#bfi',el).click();$('#bfi',el).onchange=async e=>{const f=e.target.files[0];if(!f)return;if(!await confirmDlg('Αντικατάσταση όλων των τρεχόντων δεδομένων με αυτό το αρχείο;',{danger:true,ok:'Επαναφορά'}))return;try{await Backup.restoreText(await f.text());S.meta=await metaLoad();logout('Η επαναφορά ολοκληρώθηκε — συνδέσου ξανά.');}catch(err){toast(err.message,'bad');}};},
  async subscription(el){el.innerHTML=card('Πρόγραμμα',`<div class="row" style="flex-wrap:nowrap;align-items:flex-start"><span class="ricon y" style="width:48px;height:48px">${ic('star',22)}</span><div><b style="font-size:1.05rem">Δωρεάν</b><p class="small muted" style="margin:4px 0 0">Όλες οι λειτουργίες είναι ενεργές, χωρίς συνδρομή και χωρίς κάρτα. Η τεχνητή νοημοσύνη λειτουργεί με δωρεάν κλειδί που ορίζεις στις ρυθμίσεις Τεχνητής νοημοσύνης.</p></div></div>`)
   +card('Έκδοση',`<dl class="kv"><dt>Έκδοση</dt><dd><b>${APP_VERSION}</b></dd><dt>Αναβάθμιση</dt><dd>Αυτόματα κατά την εκκίνηση και κάθε 30 λεπτά</dd></dl><button class="btn" id="up" style="margin-top:14px">${ic('refresh',16)} Έλεγχος αναβάθμισης</button><p class="tiny muted" style="margin:14px 0 0">© Ανδρέας Μ. Γλεντζάκης</p>`);$('#up',el).onclick=()=>Update.check(true);},
  async email(el){if(!isAdmin())return;const c=mailCfg()||{};const tpl=`Θέμα: LUMIO — ο κωδικός ανάκτησής σου\n\nΓεια σου {{to_name}},\n\nΟ κωδικός ανάκτησης για τον λογαριασμό «{{username}}» στο LUMIO είναι:\n\n{{code}}\n\nΑν ξεχάσεις τον κωδικό σου, πάτα αυτόν τον σύνδεσμο στη συσκευή όπου χρησιμοποιείς το LUMIO για να ορίσεις νέο:\n{{link}}\n\nΚράτησε αυτό το email.`;
@@ -4189,7 +4198,7 @@ const Sync={
   on(){return!!this.cfg().on;},
   busy:false,timer:null,
   dev(){let d=localStorage.getItem('lumio-devname');if(!d){const u=navigator.userAgent;d=/iPhone/.test(u)?'iPhone':/iPad/.test(u)?'iPad':/Android/.test(u)?(/Mobile/.test(u)?'Κινητό Android':'Tablet Android'):/Mac/.test(u)?'Mac':/Windows/.test(u)?'Υπολογιστής Windows':'Συσκευή';try{localStorage.setItem('lumio-devname',d);}catch(e){}}return d;},
-  async localPack(){const meta=await IDB.get('meta');const vault=await IDB.get('vault');const earn={};for(const k of await IDB.keys())if(k.startsWith('earn:'))earn[k]=await IDB.get(k);
+  async localPack(){const meta=S.meta&&!S.meta.sealed?JSON.parse(JSON.stringify(S.meta)):null;const vault=await IDB.get('vault');const earn={};for(const k of await IDB.keys())if(k.startsWith('earn:'))earn[k]=await IDB.get(k);
     let tm=null;try{if(S.user&&S.dataKey){const o={};TM.lsKeys().forEach(k=>{if(k.includes(S.user.id))o[k]=TMS.get(k);});tm=o;}}catch(e){}return{meta,vault,earn,tm};},
   /* κάνει όλη τη δουλειά· επιστρέφει κείμενο αποτελέσματος */
   async run(why){if(this.busy||!S.dataKey||!S.data||!this.on())return null;if(!GD.ok())return'noauth';this.busy=true;this.ui('busy');
@@ -4197,12 +4206,12 @@ const Sync={
       const baseBlob=await IDB.get('syncbase');let base=null;try{base=baseBlob?await decJSON(S.dataKey,baseBlob):null;}catch(e){}
       const bmeta=base&&base.meta||null,bearn=base&&base.earnH||{},btm=base&&base.tm||null;
       let out={meta:L.meta,vault:L.vault,earn:Object.assign({},L.earn),tm:null},newBase={data:S.data,meta:L.meta,earnH:{},tm:L.tm};
-      let changedLocal=false,R=null,rdata=null,rtm=null;
+      let changedLocal=false,R=null,rdata=null,rtm=null,rmeta=null;
       if(rf&&rf.modifiedTime!==this.cfg().remoteTime||rf&&!base){R=JSON.parse(await GD.get(rf.id));if(R.app!=='LUMIO-sync')throw new Error('Το αρχείο συγχρονισμού δεν αναγνωρίζεται.');
         try{rdata=await decJSON(S.dataKey,R.vault);}catch(e){this.setCfg({foreign:true});throw new Error('FOREIGN');}
         const merged=merge3(base?base.data:{},S.data,rdata,st);if(J(merged)!==J(S.data)){S.data=migrate(merged);changedLocal=true;}newBase.data=S.data;
         /* χρήστες: ένωση ανά χρήστη, με τριμερή κανόνα */
-        const mm=merge3(bmeta||{},L.meta||{},R.meta||{},st);out.meta=mm;newBase.meta=mm;if(J(mm)!==J(L.meta)){await IDB.set('meta',mm);S.meta=mm;const me=mm.users.find(u=>u.id===S.user.id);if(me)S.user=me;}
+        rmeta=await metaOpen(R.meta);const mm=merge3(bmeta||{},L.meta||{},rmeta||{},st);out.meta=mm;newBase.meta=mm;if(J(mm)!==J(L.meta)){S.meta=mm;await saveMeta();const me=mm.users.find(u=>u.id===S.user.id);if(me)S.user=me;}
         /* Ταμείο: κρυπτογραφημένο με το PIN κάθε χρήστη */
         const keys=new Set([...Object.keys(L.earn),...Object.keys(R.earn||{})]);
         for(const k of keys){const lb=L.earn[k],rb=(R.earn||{})[k],bh=bearn[k],lh=lb?J(lb):'',rh=rb?J(rb):'';
@@ -4220,9 +4229,9 @@ const Sync={
       else{for(const k in L.earn)newBase.earnH[k]=J(L.earn[k]);}
       out.vault=await IDB.get('vault');
       const tmAll=Object.assign({},out.tmOthers||{},newBase.tm||L.tm||{});
-      const pack={app:'LUMIO-sync',v:1,version:APP_VERSION,updated:new Date().toISOString(),device:this.dev(),by:S.user.name,meta:out.meta,vault:out.vault,earn:out.earn,tm:await encJSON(S.dataKey,tmAll)};
+      const pack={app:'LUMIO-sync',v:1,version:APP_VERSION,updated:new Date().toISOString(),device:this.dev(),by:'',meta:await metaSeal(out.meta),vault:out.vault,earn:out.earn,tm:await encJSON(S.dataKey,tmAll)};
       const same=rf&&base&&!changedLocal&&J(base.data)===J(S.data)&&J(bmeta)===J(out.meta)&&rf.modifiedTime===this.cfg().remoteTime&&Object.keys(L.earn).every(k=>J(L.earn[k])===(bearn[k]||''))&&J(btm)===J(L.tm);
-      const sameRemote=R&&rdata&&J(S.data)===J(rdata)&&J(out.meta)===J(R.meta)&&J(out.earn)===J(R.earn||{})&&(!rtm||J(tmAll)===J(rtm));
+      const sameRemote=R&&rdata&&J(S.data)===J(rdata)&&J(out.meta)===J(rmeta)&&J(out.earn)===J(R.earn||{})&&(!rtm||J(tmAll)===J(rtm));
       let rt=rf&&rf.modifiedTime;if(!same&&!sameRemote){const w=await GD.put('lumio-sync.json',root,JSON.stringify(pack),rf&&rf.id);rt=w.modifiedTime;}
       await IDB.set('syncbase',await encJSON(S.dataKey,newBase));if(S.earn&&S.earnKey&&!this.pendingEarn)try{await IDB.set('syncbase-earn:'+S.user.id,await encJSON(S.earnKey,S.earn));}catch(e){}
       this.setCfg({remoteTime:rt,last:new Date().toISOString(),foreign:false,lastDev:this.dev()});
