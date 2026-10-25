@@ -1,5 +1,5 @@
-const CACHE='lumio-2.35.0';
-const SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./tameio.html','./tameio.js'];
+const CACHE='lumio-2.35.1';
+const SHELL=['./','./index.html','./plaisio.js','./manifest.webmanifest','./icon-192.png','./icon-512.png','./tameio.html','./tameio.js'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).catch(()=>{}));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
